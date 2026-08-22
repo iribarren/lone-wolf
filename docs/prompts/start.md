@@ -88,7 +88,3 @@ Phase 5: Frontend Scaffolding & GM UI Implementation
 - Generate the API client code based on the OpenAPI spec.
 - Build the Campaign Interface: Instead of a flat journal, build a structured UI that reacts to the Backend's Flow Engine (e.g., showing GM prompts like "Start Scene" or "Roll Encounter" based on current state).
 - Integrate the Dice Roller and Oracle tables floating widgets.
-
-
-
-claude --resume b856d340-996a-4859-abfa-0fcc0f486511
