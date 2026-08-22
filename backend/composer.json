@@ -68,6 +68,8 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "analyze": "phpstan analyse --memory-limit=512M --no-progress",
+        "test:unit": "phpunit --testsuite unit",
+        "test:integration": "phpunit --testsuite integration",
         "post-install-cmd": [
             "@auto-scripts"
         ],
