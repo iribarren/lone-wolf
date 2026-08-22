@@ -108,6 +108,7 @@ deptrac:
         RulesetsInfrastructure:
             - RulesetsApplication
             - RulesetsDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -120,6 +121,7 @@ deptrac:
         CampaignsInfrastructure:
             - CampaignsApplication
             - CampaignsDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -132,6 +134,7 @@ deptrac:
         JournalInfrastructure:
             - JournalApplication
             - JournalDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -144,6 +147,7 @@ deptrac:
         OraclesInfrastructure:
             - OraclesApplication
             - OraclesDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -156,6 +160,7 @@ deptrac:
         CharactersInfrastructure:
             - CharactersApplication
             - CharactersDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -168,6 +173,7 @@ deptrac:
         DiceInfrastructure:
             - DiceApplication
             - DiceDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -180,6 +186,7 @@ deptrac:
         IdentityInfrastructure:
             - IdentityApplication
             - IdentityDomain
+            - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 

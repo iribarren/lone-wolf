@@ -13,6 +13,9 @@
             "src/ApiResource/.gitignore"
         ]
     },
+    "deptrac/deptrac": {
+        "version": "4.7.1"
+    },
     "doctrine/deprecations": {
         "version": "1.1",
         "recipe": {
