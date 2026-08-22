@@ -11,84 +11,84 @@ deptrac:
         # ---- Shared kernel (bottom) ----
         - name: SharedKernelDomain
           collectors:
-              - { type: directory, value: src/Shared/Domain }
+              - { type: directory, value: src/Shared/Domain/.* }
         - name: SharedKernelApplication
           collectors:
-              - { type: directory, value: src/Shared/Application }
+              - { type: directory, value: src/Shared/Application/.* }
         - name: SharedKernelInfrastructure
           collectors:
-              - { type: directory, value: src/Shared/Infrastructure }
+              - { type: directory, value: src/Shared/Infrastructure/.* }
 
         # ---- Contexts ----
         - name: RulesetsDomain
           collectors:
-              - { type: directory, value: src/Rulesets/Domain }
+              - { type: directory, value: src/Rulesets/Domain/.* }
         - name: RulesetsApplication
           collectors:
-              - { type: directory, value: src/Rulesets/Application }
+              - { type: directory, value: src/Rulesets/Application/.* }
         - name: RulesetsInfrastructure
           collectors:
-              - { type: directory, value: src/Rulesets/Infrastructure }
+              - { type: directory, value: src/Rulesets/Infrastructure/.* }
 
         - name: CampaignsDomain
           collectors:
-              - { type: directory, value: src/Campaigns/Domain }
+              - { type: directory, value: src/Campaigns/Domain/.* }
         - name: CampaignsApplication
           collectors:
-              - { type: directory, value: src/Campaigns/Application }
+              - { type: directory, value: src/Campaigns/Application/.* }
         - name: CampaignsInfrastructure
           collectors:
-              - { type: directory, value: src/Campaigns/Infrastructure }
+              - { type: directory, value: src/Campaigns/Infrastructure/.* }
 
         - name: JournalDomain
           collectors:
-              - { type: directory, value: src/Journal/Domain }
+              - { type: directory, value: src/Journal/Domain/.* }
         - name: JournalApplication
           collectors:
-              - { type: directory, value: src/Journal/Application }
+              - { type: directory, value: src/Journal/Application/.* }
         - name: JournalInfrastructure
           collectors:
-              - { type: directory, value: src/Journal/Infrastructure }
+              - { type: directory, value: src/Journal/Infrastructure/.* }
 
         - name: OraclesDomain
           collectors:
-              - { type: directory, value: src/Oracles/Domain }
+              - { type: directory, value: src/Oracles/Domain/.* }
         - name: OraclesApplication
           collectors:
-              - { type: directory, value: src/Oracles/Application }
+              - { type: directory, value: src/Oracles/Application/.* }
         - name: OraclesInfrastructure
           collectors:
-              - { type: directory, value: src/Oracles/Infrastructure }
+              - { type: directory, value: src/Oracles/Infrastructure/.* }
 
         - name: CharactersDomain
           collectors:
-              - { type: directory, value: src/Characters/Domain }
+              - { type: directory, value: src/Characters/Domain/.* }
         - name: CharactersApplication
           collectors:
-              - { type: directory, value: src/Characters/Application }
+              - { type: directory, value: src/Characters/Application/.* }
         - name: CharactersInfrastructure
           collectors:
-              - { type: directory, value: src/Characters/Infrastructure }
+              - { type: directory, value: src/Characters/Infrastructure/.* }
 
         - name: DiceDomain
           collectors:
-              - { type: directory, value: src/Dice/Domain }
+              - { type: directory, value: src/Dice/Domain/.* }
         - name: DiceApplication
           collectors:
-              - { type: directory, value: src/Dice/Application }
+              - { type: directory, value: src/Dice/Application/.* }
         - name: DiceInfrastructure
           collectors:
-              - { type: directory, value: src/Dice/Infrastructure }
+              - { type: directory, value: src/Dice/Infrastructure/.* }
 
         - name: IdentityDomain
           collectors:
-              - { type: directory, value: src/Identity/Domain }
+              - { type: directory, value: src/Identity/Domain/.* }
         - name: IdentityApplication
           collectors:
-              - { type: directory, value: src/Identity/Application }
+              - { type: directory, value: src/Identity/Application/.* }
         - name: IdentityInfrastructure
           collectors:
-              - { type: directory, value: src/Identity/Infrastructure }
+              - { type: directory, value: src/Identity/Infrastructure/.* }
 
     ruleset:
         SharedKernelDomain: []
