@@ -74,6 +74,11 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "analyze": "phpstan analyse --memory-limit=512M --no-progress",
+        "layers": "deptrac analyse --no-progress",
+        "lint": [
+            "@analyze",
+            "@layers"
+        ],
         "test:unit": "phpunit --testsuite unit",
         "test:integration": "phpunit --testsuite integration",
         "post-install-cmd": [
@@ -94,6 +99,7 @@
     },
     "require-dev": {
         "behat/behat": "^3.0",
+        "deptrac/deptrac": "^4.7",
         "friends-of-behat/symfony-extension": "^2.0",
         "phpstan/phpstan": "^2.2",
         "phpstan/phpstan-strict-rules": "^2.0",
