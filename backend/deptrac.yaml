@@ -96,6 +96,7 @@ deptrac:
             - SharedKernelDomain
         SharedKernelInfrastructure:
             - SharedKernelApplication
+            - SharedKernelDomain
 
         # Every context follows the same inward-only shape and may use the shared kernel.
         RulesetsDomain:
@@ -106,6 +107,7 @@ deptrac:
             - SharedKernelApplication
         RulesetsInfrastructure:
             - RulesetsApplication
+            - RulesetsDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -117,6 +119,7 @@ deptrac:
             - SharedKernelApplication
         CampaignsInfrastructure:
             - CampaignsApplication
+            - CampaignsDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -128,6 +131,7 @@ deptrac:
             - SharedKernelApplication
         JournalInfrastructure:
             - JournalApplication
+            - JournalDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -139,6 +143,7 @@ deptrac:
             - SharedKernelApplication
         OraclesInfrastructure:
             - OraclesApplication
+            - OraclesDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -150,6 +155,7 @@ deptrac:
             - SharedKernelApplication
         CharactersInfrastructure:
             - CharactersApplication
+            - CharactersDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -161,6 +167,7 @@ deptrac:
             - SharedKernelApplication
         DiceInfrastructure:
             - DiceApplication
+            - DiceDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
@@ -172,6 +179,7 @@ deptrac:
             - SharedKernelApplication
         IdentityInfrastructure:
             - IdentityApplication
+            - IdentityDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
