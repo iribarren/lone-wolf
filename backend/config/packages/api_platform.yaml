@@ -1,7 +1,17 @@
 api_platform:
-    title: Hello API Platform
+    title: Lone Wolf API
     version: 1.0.0
+    description: |
+      Contract-first REST API between the Next.js frontend and this backend
+      (Constitution Principle V). Errors use RFC 7807 problem+json.
     defaults:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+    # Serve machine-readable OpenAPI JSON at /api/docs.json as required by
+    # specs/001-solo-ttrpg-assistant/contracts/openapi.yaml tooling.
+    docs_formats:
+        jsonld: ['application/ld+json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
+        json: ['application/json']

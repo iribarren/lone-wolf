@@ -1,5 +1,6 @@
 {
     "name": "lone-wolf/backend",
+    "description": "Lone Wolf — Solo TTRPG assistant backend (Symfony hexagonal DDD by bounded context)",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -10,8 +11,9 @@
         "ext-iconv": "*",
         "api-platform/doctrine-orm": "^4.3",
         "api-platform/symfony": "^4.3",
-        "doctrine/doctrine-bundle": "^3.3",
-        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/doctrine-bundle": "^2.18",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
+        "doctrine/instantiator": "^2.0",
         "doctrine/orm": "^3.6",
         "easycorp/easyadmin-bundle": "^5.5",
         "lexik/jwt-authentication-bundle": "^3.2",
@@ -30,6 +32,7 @@
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
+        "symfony/ux-twig-component": "^2.32",
         "symfony/validator": "7.4.*",
         "symfony/yaml": "7.4.*"
     },
@@ -40,6 +43,9 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
+        "platform": {
+            "php": "8.3.21"
+        },
         "sort-packages": true
     },
     "autoload": {

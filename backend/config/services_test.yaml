@@ -1,0 +1,10 @@
+# Behat contexts are resolved FROM the Symfony test container by
+# FriendsOfBehat\SymfonyExtension (constructor injection works).
+services:
+    App\Tests\Acceptance\Context\:
+        resource: '../tests/Acceptance/Context/'
+        public: true
+        autowire: true
+        autoconfigure: false
+
+    Symfony\Bundle\FrameworkBundle\KernelBrowser: '@test.client'

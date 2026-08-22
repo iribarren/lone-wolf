@@ -13,13 +13,44 @@ doctrine:
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
+        # One mapping root per bounded context (Constitution II) — no global Entity/ folder.
         mappings:
-            App:
+            Rulesets:
                 type: attribute
                 is_bundle: false
-                dir: '%kernel.project_dir%/src/Entity'
-                prefix: 'App\Entity'
-                alias: App
+                dir: '%kernel.project_dir%/src/Rulesets/Infrastructure/Persistence'
+                prefix: 'App\Rulesets\Infrastructure\Persistence'
+                alias: Rulesets
+            Campaigns:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Campaigns/Infrastructure/Persistence'
+                prefix: 'App\Campaigns\Infrastructure\Persistence'
+                alias: Campaigns
+            Journal:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Journal/Infrastructure/Persistence'
+                prefix: 'App\Journal\Infrastructure\Persistence'
+                alias: Journal
+            Oracles:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Oracles/Infrastructure/Persistence'
+                prefix: 'App\Oracles\Infrastructure\Persistence'
+                alias: Oracles
+            Characters:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Characters/Infrastructure/Persistence'
+                prefix: 'App\Characters\Infrastructure\Persistence'
+                alias: Characters
+            Identity:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Identity/Infrastructure/Persistence'
+                prefix: 'App\Identity\Infrastructure\Persistence'
+                alias: Identity
 
 when@test:
     doctrine:
