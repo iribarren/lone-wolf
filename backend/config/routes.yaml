@@ -9,3 +9,9 @@
 
 controllers:
     resource: routing.controllers
+
+# Firewall-intercepted login endpoint: the json_login authenticator handles
+# POST /api/auth/login before any controller is resolved (T020).
+api_auth_login:
+    path: /api/auth/login
+    methods: [POST]

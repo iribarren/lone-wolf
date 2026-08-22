@@ -1,7 +1,9 @@
 # Backend runtime: PHP 8.3-FPM + Composer + required extensions (plan.md Phase 1).
 FROM php:8.3-fpm-alpine AS base
 
-RUN apk add --no-cache --virtual .build-deps \
+# Runtime libs must survive the build-deps cleanup (libpq for pdo_pgsql).
+RUN apk add --no-cache libpq icu-libs libzip \
+    && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS icu-dev libzip-dev postgresql-dev \
     && docker-php-ext-install -j"$(nproc)" pdo_pgsql intl zip opcache \
     && apk del .build-deps
