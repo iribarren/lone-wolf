@@ -6,8 +6,16 @@ api_platform:
       (Constitution Principle V). Errors use RFC 7807 problem+json.
     defaults:
         stateless: true
+        pagination:
+            page_parameter_name: page
+            items_per_page: 25
+            maximum_items_per_page: 100
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+    # RFC 7807 problem+json for API errors (contract requirement).
+    error_formats:
+        jsonproblem: ['application/problem+json']
+        jsonld: ['application/ld+json']
     # Serve machine-readable OpenAPI JSON at /api/docs.json as required by
     # specs/001-solo-ttrpg-assistant/contracts/openapi.yaml tooling.
     docs_formats:
