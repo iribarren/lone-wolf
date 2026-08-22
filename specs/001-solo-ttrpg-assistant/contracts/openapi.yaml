@@ -1,0 +1,604 @@
+openapi: 3.0.3
+info:
+  title: Lone Wolf API
+  version: 1.0.0
+  description: |
+    Canonical REST contract between the Next.js frontend and the Symfony backend
+    (Constitution Principle V — contract-first, decoupled).
+
+    - Backend exposes this shape via API Platform; the runtime-generated OpenAPI
+      document must be verified against this contract in CI.
+    - Frontend consumes only the client generated from this document.
+    - Errors use RFC 7807 `application/problem+json`.
+    - Breaking changes require a versioned migration path.
+servers:
+  - url: /api
+tags:
+  - name: Auth
+  - name: Systems
+  - name: Campaigns
+  - name: Journal
+  - name: Oracles
+  - name: Characters
+  - name: Dice
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Register a player account (default ROLE_PLAYER)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthToken' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Obtain JWT bearer token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthToken' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /systems:
+    get:
+      tags: [Systems]
+      security: [{ bearerAuth: [] }]
+      summary: List game systems available for new campaigns (active only)
+      responses:
+        '200':
+          description: Active systems with flow summary for campaign creation UX
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SystemSummary' }
+
+  /campaigns:
+    get:
+      tags: [Campaigns]
+      summary: List the authenticated player's campaigns (FR-019)
+      responses:
+        '200':
+          description: Owned campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CampaignSummary' }
+    post:
+      tags: [Campaigns]
+      summary: Create a campaign bound to an active system; starts on the designated stage (FR-012/013)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [gameSystemId]
+              properties:
+                gameSystemId: { type: string, format: uuid }
+      responses:
+        '201':
+          description: Campaign created at starting stage, guidance included
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignState' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /campaigns/{campaignId}:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      tags: [Campaigns]
+      summary: Full play state — current stage, guidance, suggested next actions (FR-014)
+      responses:
+        '200':
+          description: Current engine state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignState' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Campaigns]
+      summary: Permanently delete campaign (requires explicit confirmation, FR-020)
+      parameters:
+        - in: query
+          name: confirm
+          required: true
+          schema: { type: boolean, enum: [true] }
+      responses:
+        '204': { description: Deleted irreversibly }
+        '400': { description: Missing confirmation flag }
+
+  /campaigns/{campaignId}/advance:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    post:
+      tags: [Campaigns]
+      summary: Attempt stage advance along a legal transition (FR-016)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toStageId]
+              properties:
+                toStageId: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Advanced; new state + guidance returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CampaignState' }
+        '422':
+          description: Illegal move refused; explanation lists legal alternatives (FR-016)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/IllegalTransitionProblem' }
+
+  /campaigns/{campaignId}/journal:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      tags: [Journal]
+      summary: Chronological journal, groupable by stage (FR-017)
+      parameters:
+        - in: query
+          name: stageId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: cursor
+          schema: { type: string }
+          description: Keyset pagination cursor
+      responses:
+        '200':
+          description: Paged entries newest-first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items: { $ref: '#/components/schemas/JournalEntry' }
+                  nextCursor: { type: string, nullable: true }
+    post:
+      tags: [Journal]
+      summary: Append a narrative entry against the CURRENT stage (FR-015)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [narrative]
+              properties:
+                narrative: { type: string, maxLength: 10000 }
+      responses:
+        '201':
+          description: Entry stored with stage context
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JournalEntry' }
+
+  /campaigns/{campaignId}/oracles:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      tags: [Oracles]
+      summary: Oracles visible to this campaign — system's own + global (FR-009)
+      responses:
+        '200':
+          description: Scoped oracle list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/OracleSummary' }
+
+  /campaigns/{campaignId}/oracles/{oracleId}/consult:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+      - in: path
+        name: oracleId
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [Oracles]
+      summary: Consult an oracle — exactly one weighted-random result (FR-010) or friendly empty-table notice (FR-011)
+      responses:
+        '200':
+          description: Single selected entry, or empty/unavailable notice payload
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsultationOutcome' }
+
+  /campaigns/{campaignId}/characters:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    get:
+      tags: [Characters]
+      summary: List characters of the campaign (PCs + NPCs), each rendered per system sheet structure
+      responses:
+        '200':
+          description: Characters incl. review flags
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CharacterView' }
+    post:
+      tags: [Characters]
+      summary: Create PC/NPC validated against system sheet structure (FR-022..024)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CharacterWrite' }
+      responses:
+        '201':
+          description: Created character
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CharacterView' }
+        '422':
+          description: Field-level attribute violations (FR-023)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/SheetValidationProblem' }
+
+  /characters/{characterId}:
+    parameters:
+      - in: path
+        name: characterId
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Characters]
+      summary: Update attributes/name; revalidated against current structure; drift flagged not discarded (FR-025)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CharacterWrite' }
+      responses:
+        '200':
+          description: Updated character view
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CharacterView' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /dice/roll:
+    post:
+      tags: [Dice]
+      summary: Roll standard notation NdM±K without logging (FR-026..028)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RollRequest' }
+      responses:
+        '200':
+          description: Individual dice + modified total
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DiceRollResult' }
+        '422':
+          description: Invalid notation refused pre-roll with specific reason (FR-027)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/DiceNotationProblem' }
+
+  /campaigns/{campaignId}/rolls:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+    post:
+      tags: [Dice]
+      summary: Roll AND log into journal as a dice_roll record (FR-029)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RollRequest' }
+      responses:
+        '201':
+          description: Roll result plus created journal entry reference
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roll: { $ref: '#/components/schemas/DiceRollResult' }
+                  journalEntry: { $ref: '#/components/schemas/JournalEntry' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CampaignId:
+      in: path
+      name: campaignId
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    ValidationError:
+      description: Semantic validation failure
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/BaseProblem' }
+    Unauthorized:
+      description: Missing/invalid credentials
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/BaseProblem' }
+    NotFound:
+      description: Resource absent or owned by another player (never disclosed)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/BaseProblem' }
+
+  schemas:
+    AuthToken:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string }
+        roles:
+          type: array
+          items: { type: string }
+
+    SystemSummary:
+      type: object
+      required: [id, name, description, startingStage]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, maxLength: 120 }
+        description: { type: string }
+        startingStage:
+          type: object
+          required: [id, name]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        openingGuidance: { type: string }
+
+    CampaignSummary:
+      type: object
+      required: [id, gameSystemId, gameSystemName, currentStageName, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        gameSystemId: { type: string, format: uuid }
+        gameSystemName: { type: string }
+        currentStageName: { type: string }
+        updatedAt: { type: string, format: date-time }
+
+    SuggestedAction:
+      type: object
+      required: [kind, label]
+      properties:
+        kind:
+          type: string
+          enum: [advance, conclude]
+        toStageId: { type: string, format: uuid }
+        toStageName: { type: string }
+        prompt: { type: string, description: e.g. "Start Scene", "Run Sequel", "Close Act" }
+
+    StageView:
+      type: object
+      required: [id, name, guidance, suggestedActions]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        guidance:
+          type: string
+          description: Engine-derived pacing text; terminal stages explain how to conclude instead of offering advance actions
+        suggestedActions:
+          type: array
+          items: { $ref: '#/components/schemas/SuggestedAction' }
+
+    CampaignState:
+      type: object
+      required: [id, gameSystemId, currentStage]
+      properties:
+        id: { type: string, format: uuid }
+        gameSystemId: { type: string, format: uuid }
+        currentStage: { $ref: '#/components/schemas/StageView' }
+
+    IllegalTransitionProblem:
+      allOf:
+        - $ref: '#/components/schemas/BaseProblem'
+        - type: object
+          properties:
+            legalAlternatives:
+              type: array
+              items: { $ref: '#/components/schemas/SuggestedAction' }
+
+    JournalEntry:
+      type: object
+      required: [id, stageId, stageName, kind, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        stageId: { type: string, format: uuid }
+        stageName: { type: string, description: Denormalized snapshot; survives later renames }
+        kind:
+          type: string
+          enum: [narrative, oracle_result, dice_roll]
+        narrative: { type: string, nullable: true }
+        oracleSnapshot:
+          type: object
+          nullable: true
+          properties:
+            oracleTitle: { type: string }
+            resultText: { type: string }
+        rollSnapshot:
+          type: object
+          nullable: true
+          properties:
+            notation: { type: string }
+            diceValues: { type: array, items: { type: integer } }
+            modifier: { type: integer }
+            total: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    OracleSummary:
+      type: object
+      required: [id, title, scopeType, entryCount]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        scopeType:
+          type: string
+          enum: [system, global]
+        entryCount: { type: integer }
+
+    ConsultationOutcome:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [selected, empty_table, unavailable]
+        entry:
+          type: object
+          nullable: true
+          properties:
+            entryId: { type: string, format: uuid }
+            text: { type: string }
+
+    FieldDefinition:
+      type: object
+      required: [key, label, type, requiredForPc, requiredForNpc]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        type: { type: string, enum: [text, number, boolean, select] }
+        options: { type: array, items: { type: string }, nullable: true }
+        requiredForPc: { type: boolean }
+        requiredForNpc: { type: boolean }
+
+    SheetStructure:
+      type: object
+      required: [version, fields]
+      properties:
+        version: { type: integer }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/FieldDefinition' }
+
+    CharacterWrite:
+      type: object
+      required: [kind, name, attributes]
+      properties:
+        kind: { type: string, enum: [pc, npc] }
+        name: { type: string, maxLength: 120 }
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Keyed by FieldDefinition.key; values typed per field definition
+
+    CharacterView:
+      allOf:
+        - $ref: '#/components/schemas/CharacterWrite'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            reviewStatus:
+              type: string
+              enum: [clean, flagged_for_review]
+            driftIssues:
+              type: array
+              items: { type: string }
+
+    SheetValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/BaseProblem'
+        - type: object
+          properties:
+            violations:
+              type: array
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field: { type: string, description: Attribute key }
+                  message: { type: string }
+
+    RollRequest:
+      type: object
+      required: [notation]
+      properties:
+        notation:
+          type: string
+          description: >-
+            NdM±K notation. Bounds (data-model.md): N ∈ [1,50], M ∈ [2,1000],
+            K ∈ [-10000,+10000]. Out-of-bounds input returns a DiceNotationProblem
+            with reason=out_of_bounds.
+          pattern: '^(50|[1-4][0-9]|[1-9])d(1000|[2-9][0-9]{0,2})(\s*[+-]\s*(10000|[0-9]{1,4}))?$'
+          example: "1d20+5"
+
+    DiceRollResult:
+      type: object
+      required: [notation, diceValues, modifier, total]
+      properties:
+        notation: { type: string }
+        diceValues: { type: array, items: { type: integer, minimum: 1 } }
+        modifier: { type: integer }
+        total: { type: integer }
+
+    DiceNotationProblem:
+      allOf:
+        - $ref: '#/components/schemas/BaseProblem'
+        - type: object
+          properties:
+            reason:
+              type: string
+              enum: [malformed, invalid_count, invalid_faces, out_of_bounds]
+
+    BaseProblem:
+      type: object
+      required: [title, status]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
