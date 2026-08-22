@@ -24,13 +24,13 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 **Purpose**: Bootable two-stack monorepo matching plan.md Phase-1 outline
 
-- [ ] T001 Create monorepo layout with `/backend` and `/frontend` directories and root `README.md` documenting the two-stack split and contract-first (OpenAPI-only) communication rule
-- [ ] T002 Author `docker-compose.yml` at repo root with services `php`, `nginx`, `postgres`, `frontend` plus root `.env.dist` templates (no secrets committed)
-- [ ] T003 [P] Write `backend/Dockerfile`: php:8.3-fpm + Composer + pdo_pgsql/intl/zip/opcache extensions
-- [ ] T004 [P] Write `docker/nginx/default.conf`: FastCGI proxy to php service serving `backend/public`
-- [ ] T005 [P] Write `frontend/Dockerfile`: node:22 image running Next.js dev server
-- [ ] T006 [P] Add root `Makefile` with targets up/down/logs/test/lint/console/npm wrapping compose commands
-- [ ] T007 Verify `docker compose up --build` yields reachable nginx vhost and frontend placeholder; record expected output in `README.md`
+- [x] T001 Create monorepo layout with `/backend` and `/frontend` directories and root `README.md` documenting the two-stack split and contract-first (OpenAPI-only) communication rule
+- [x] T002 Author `docker-compose.yml` at repo root with services `php`, `nginx`, `postgres`, `frontend` plus root `.env.dist` templates (no secrets committed)
+- [x] T003 [P] Write `backend/Dockerfile`: php:8.3-fpm + Composer + pdo_pgsql/intl/zip/opcache extensions
+- [x] T004 [P] Write `docker/nginx/default.conf`: FastCGI proxy to php service serving `backend/public`
+- [x] T005 [P] Write `frontend/Dockerfile`: node:22 image running Next.js dev server
+- [x] T006 [P] Add root `Makefile` with targets up/down/logs/test/lint/console/npm wrapping compose commands
+- [x] T007 Verify `docker compose up --build` yields reachable nginx vhost and frontend placeholder; record expected output in `README.md`
 
 **Checkpoint**: One-command stack boots; nothing implemented yet.
 
@@ -44,23 +44,23 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Backend core (Symfony + Hexagon + Gates)
 
-- [ ] T010 Install Symfony 7.4 LTS skeleton into `backend/` (composer.json, bin/console, public/index.php, .env) wired to compose PostgreSQL
-- [ ] T011 [P] Create hexagonal bounded-context skeletons `backend/src/{Shared,Rulesets,Campaigns,Journal,Oracles,Characters,Dice,Identity}/{Domain,Application,Infrastructure}` each with a `README.md` stating its ubiquitous language and inward-only dependency rule
-- [ ] T012 Configure PHPStan level-max + phpstan/phpstan-strict-rules (enforces declare(strict_types=1), full typing) in `backend/phpstan.neon`; add `composer analyze` script
-- [ ] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
-- [ ] T014 [P] Install Behat + FriendsOfBehat/SymfonyExtension with API HTTP-client contexts; `backend/behat.yml`; empty smoke feature `backend/features/smoke.feature`
-- [ ] T015 [P] Install deptrac with layer rules per context (Domain ← Application ← Infrastructure; Domain may import nothing outward) in `backend/deptrac.yaml`; wire into `composer lint` chain
-- [ ] T016 Implement shared-kernel ports + prod adapters `ClockInterface`/`SystemClock`, `RandomSourceInterface`/`ProductionRandomSource` in `backend/src/Shared/Domain/` and `backend/src/Shared/Infrastructure/Time|Rng/` (Constitution IV: injectable time/randomness)
-- [ ] T017 Implement typed identifier VOs `GameSystemId`, `StageId`, `CampaignId`, `OracleId`, `CharacterId`, `JournalEntryId`, `UserId` in `backend/src/Shared/Domain/Identifier/` (data-model.md shared kernel)
-- [ ] T018 Configure Doctrine ORM connection + migration framework with `jsonb` DBAL type override registered in `backend/config/packages/doctrine.yaml` + `backend/src/Shared/Infrastructure/Persistence/Types/`; generate initial empty migration
-- [ ] T019 Implement Identity context: `User` aggregate (email, passwordHash, roles array), `UserRepositoryInterface` port + Doctrine adapter in `backend/src/Identity/{Domain,Application,Infrastructure}`
-- [ ] T020 Install lexik/jwt-authentication-bundle; wire JWT firewalls for `/api` and `/admin` (ROLE_ADMIN backoffice vs ROLE_PLAYER, FR-030); expose `POST /api/auth/register` + `POST /api/auth/login` controllers in `backend/src/Identity/Infrastructure/Api/` per contracts/openapi.yaml Auth paths
-- [ ] T021 Install API Platform; enable OpenAPI docs endpoint `/api/docs.json`, RFC 7807 error format, pagination defaults; add health route `GET /api/health` returning `{"status":"ok"}` in `backend/src/Shared/Infrastructure/Api/HealthController.php`
-- [ ] T022 Create bootstrap admin seeder `backend/src/Identity/Infrastructure/Console/CreateAdminCommand.php` (command `app:create-admin`) writing a ROLE_ADMIN account from env vars
+- [x] T010 Install Symfony 7.4 LTS skeleton into `backend/` (composer.json, bin/console, public/index.php, .env) wired to compose PostgreSQL
+- [x] T011 [P] Create hexagonal bounded-context skeletons `backend/src/{Shared,Rulesets,Campaigns,Journal,Oracles,Characters,Dice,Identity}/{Domain,Application,Infrastructure}` each with a `README.md` stating its ubiquitous language and inward-only dependency rule
+- [x] T012 Configure PHPStan level-max + phpstan/phpstan-strict-rules (enforces declare(strict_types=1), full typing) in `backend/phpstan.neon`; add `composer analyze` script
+- [x] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
+- [x] T014 [P] Install Behat + FriendsOfBehat/SymfonyExtension with API HTTP-client contexts; `backend/behat.yml`; empty smoke feature `backend/features/smoke.feature`
+- [x] T015 [P] Install deptrac with layer rules per context (Domain ← Application ← Infrastructure; Domain may import nothing outward) in `backend/deptrac.yaml`; wire into `composer lint` chain
+- [x] T016 Implement shared-kernel ports + prod adapters `ClockInterface`/`SystemClock`, `RandomSourceInterface`/`ProductionRandomSource` in `backend/src/Shared/Domain/` and `backend/src/Shared/Infrastructure/Time|Rng/` (Constitution IV: injectable time/randomness)
+- [x] T017 Implement typed identifier VOs `GameSystemId`, `StageId`, `CampaignId`, `OracleId`, `CharacterId`, `JournalEntryId`, `UserId` in `backend/src/Shared/Domain/Identifier/` (data-model.md shared kernel)
+- [x] T018 Configure Doctrine ORM connection + migration framework with `jsonb` DBAL type override registered in `backend/config/packages/doctrine.yaml` + `backend/src/Shared/Infrastructure/Persistence/Types/`; generate initial empty migration
+- [x] T019 Implement Identity context: `User` aggregate (email, passwordHash, roles array), `UserRepositoryInterface` port + Doctrine adapter in `backend/src/Identity/{Domain,Application,Infrastructure}`
+- [x] T020 Install lexik/jwt-authentication-bundle; wire JWT firewalls for `/api` and `/admin` (ROLE_ADMIN backoffice vs ROLE_PLAYER, FR-030); expose `POST /api/auth/register` + `POST /api/auth/login` controllers in `backend/src/Identity/Infrastructure/Api/` per contracts/openapi.yaml Auth paths
+- [x] T021 Install API Platform; enable OpenAPI docs endpoint `/api/docs.json`, RFC 7807 error format, pagination defaults; add health route `GET /api/health` returning `{"status":"ok"}` in `backend/src/Shared/Infrastructure/Api/HealthController.php`
+- [x] T022 Create bootstrap admin seeder `backend/src/Identity/Infrastructure/Console/CreateAdminCommand.php` (command `app:create-admin`) writing a ROLE_ADMIN account from env vars
 
 ### Frontend core (Next.js + contract-first client)
 
-- [ ] T023 Scaffold Next.js App Router project with TypeScript `strict` mode, ESLint, base layout in `frontend/` (package.json/tsconfig/next.config.ts) running inside its container
+- [x] T023 Scaffold Next.js App Router project with TypeScript `strict` mode, ESLint, base layout in `frontend/` (package.json/tsconfig/next.config.ts) running inside its container
 - [ ] T024 Build contract-first client pipeline: `frontend/scripts/generate-api-client.sh` downloads backend `/api/docs.json` → `openapi-typescript` emits `frontend/src/lib/api/schema.gen.ts`; hand-written typed fetch wrapper `frontend/src/lib/api/client.ts` (raw URLs prohibited anywhere else, Constitution V)
 - [ ] T025 [P] Wire TanStack Query provider, JWT bearer attach + token storage helpers in `frontend/src/lib/auth.ts` and `frontend/src/lib/hooks/useApiClient.ts`
 
