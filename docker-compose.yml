@@ -1,0 +1,61 @@
+# Lone Wolf — full-stack composition (research.md R9)
+# One command boots the contract-first loop: php-fpm + nginx, postgres, next dev.
+name: lone-wolf
+
+services:
+  php:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lone_wolf}:${POSTGRES_PASSWORD:-change_me_local}@postgres:5432/${POSTGRES_DB:-lone_wolf}?serverVersion=17&charset=utf8
+    volumes:
+      - ./backend:/var/www/backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend/public:/var/www/backend/public:ro
+    depends_on:
+      - php
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lone_wolf}
+      POSTGRES_USER: ${POSTGRES_USER:-lone_wolf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_local}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lone_wolf} -d ${POSTGRES_DB:-lone_wolf}"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - nginx
+
+volumes:
+  pgdata:
+  frontend_node_modules:
