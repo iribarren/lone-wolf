@@ -43,6 +43,22 @@ docker compose exec php bin/console doctrine:migrations:migrate -n
 Expected: backend health responds at <http://localhost:8080/api/health> with
 `{"status":"ok"}`; frontend placeholder renders at <http://localhost:3000>.
 
+Verified boot state (Phase-1 checkpoint):
+
+```text
+$ docker compose ps
+SERVICE    STATUS
+frontend   Up
+nginx      Up
+php        Up
+postgres   Up (healthy)
+
+$ curl -s localhost:8080/api/health
+{"status":"ok"}
+$ curl -o /dev/null -w "%{http_code}" localhost:3000
+200
+```
+
 ## Common commands
 
 ```bash
