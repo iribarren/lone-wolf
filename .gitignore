@@ -63,4 +63,6 @@ backend/.deptrac.cache
 
 # === phpunit cache ===
 backend/.phpunit.cache
-backend/.phpunit.cache/*
+backend/.phpunit.cache/test-results
+backend/.phpunit.cache/
+
