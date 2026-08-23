@@ -15,3 +15,12 @@ controllers:
 api_auth_login:
     path: /api/auth/login
     methods: [POST]
+
+# JWT "logout" is client-side token disposal; this route only exists so
+# EasyAdmin's layout can generate a logout link (T034).
+app_logout:
+    path: /admin/logout
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /
+        permanent: false

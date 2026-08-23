@@ -39,6 +39,10 @@ security:
             stateless: true
             provider: app_user_provider
             jwt: true
+            # EasyAdmin's layout renders a logout link; JWT sessions are
+            # dropped client-side, this just satisfies the URL generator.
+            logout:
+                path: app_logout
 
     # Note: Only the *first* matching rule is applied
     access_control:
