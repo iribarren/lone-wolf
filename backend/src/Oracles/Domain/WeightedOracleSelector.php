@@ -4,43 +4,47 @@ declare(strict_types=1);
 
 namespace App\Oracles\Domain;
 
-use App\Oracles\Domain\ConsultationOutcome;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
 
 /**
- * Selects a weighted-random entry from an oracle table (FR-010, SC-004).
- *
- * Uses cumulative-weight selection via an injected RandomSource for
- * deterministic reproducibility and testability. Entry weights must be
- * strictly positive (enforced by OracleEntry).
+ * Selects one entry from an oracle table proportionally to the entries'
+ * strictly positive weights (FR-010), verified statistically over seeded
+ * runs (SC-004). A seed makes any single consultation reproducible.
  */
 final class WeightedOracleSelector
 {
     /** @var list<OracleEntry> */
     private array $entries;
 
+    /**
+     * @param list<OracleEntry> $entries
+     */
     public function __construct(array $entries = [])
     {
         $this->entries = $entries;
     }
 
+    /**
+     * @param list<OracleEntry> $entries
+     */
     public function withEntries(array $entries): self
     {
         return new self($entries);
     }
 
     /**
-     * Select one entry by cumulative-weight algorithm.
+     * Cumulative-weight pick: a uniform draw over [1..totalWeight] falls in
+     * exactly one entry's weight span, so P(entry) = weight / total.
      *
-     * @param list<OracleEntry>|null $entries Optional entries override; defaults to those set on the selector
-     * @param int|null $seed Optional seed for deterministic reproducibility
-     * @return ConsultationOutcome
+     * @param list<OracleEntry>|null $entries optional override; defaults to the configured set
+     * @param int|null               $seed    fixed seed for reproducible consultations
      */
     public function select(?array $entries = null, ?int $seed = null): ConsultationOutcome
     {
-        $entries = $entries ?? $this->entries;
+        $entries ??= $this->entries;
 
+        // An empty table is the friendly notice path, not a failure (FR-011).
         if (\count($entries) === 0) {
             return ConsultationOutcome::emptyTable();
         }
@@ -53,15 +57,7 @@ final class WeightedOracleSelector
             $cumulativeWeights[] = $runningTotal;
         }
 
-        $totalWeight = $runningTotal;
-        $randomizer = new Randomizer();
-
-        if (null !== $seed) {
-            $engine = new Mt19937((int) $seed);
-            $randomizer = new Randomizer($engine);
-        }
-
-        $randomValue = $randomizer->getInt(1, $totalWeight);
+        $randomValue = new Randomizer($seed === null ? null : new Mt19937($seed))->getInt(1, $runningTotal);
 
         $selectedIndex = 0;
         foreach ($cumulativeWeights as $index => $cumulativeWeight) {
@@ -71,28 +67,21 @@ final class WeightedOracleSelector
             }
         }
 
-        $selected = $entries[$selectedIndex];
-
-        return new ConsultationOutcome(ConsultationOutcome::SELECTED, $selected);
+        return ConsultationOutcome::forSelection($entries[$selectedIndex]);
     }
 
     /**
-     * Alias for select() for consultation-style API.
+     * Alias of select() for consultation-style call sites.
      *
-     * @param list<OracleEntry>|null $entries Optional entries override
-     * @param int|null $seed Optional seed for deterministic reproducibility
-     * @return ConsultationOutcome
+     * @param list<OracleEntry>|null $entries optional override
+     * @param int|null               $seed    fixed seed for reproducible consultations
      */
     public function consult(?array $entries = null, ?int $seed = null): ConsultationOutcome
     {
         return $this->select($entries, $seed);
     }
 
-    /**
-     * Get entries currently configured on the selector.
-     *
-     * @return list<OracleEntry>
-     */
+    /** @return list<OracleEntry> */
     public function entries(): array
     {
         return $this->entries;
