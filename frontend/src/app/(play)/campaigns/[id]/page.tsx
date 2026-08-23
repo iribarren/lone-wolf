@@ -11,6 +11,7 @@ import { useState } from 'react';
 import AdvanceActions, { type RefusalFeedback } from '@/components/campaign/AdvanceActions';
 import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
+import CharacterPanel, { type CharacterPanelCharacter } from '@/components/characters/CharacterPanel';
 import EntryComposer from '@/components/journal/EntryComposer';
 import JournalTimeline from '@/components/journal/JournalTimeline';
 import OracleDrawer, {
@@ -104,6 +105,13 @@ export default function CampaignConsolePage() {
             (await api.json(apiPath(`/api/campaigns/${campaignId}/oracles`))) as OracleSummaryView[],
     });
 
+    const characters = useQuery({
+        queryKey: ['campaign', campaignId, 'characters'],
+        enabled: campaignId !== '',
+        queryFn: async (): Promise<CharacterPanelCharacter[]> =>
+            (await api.json(apiPath(`/api/campaigns/${campaignId}/characters`))) as CharacterPanelCharacter[],
+    });
+
     async function consult(oracleId: string): Promise<void> {
         setConsultingOracleId(oracleId);
         setConsulted(null);
@@ -180,6 +188,12 @@ export default function CampaignConsolePage() {
             />
 
             <JournalTimeline entries={journal.data?.entries ?? []} loading={journal.isLoading} />
+
+            <CharacterPanel
+                characters={characters.data ?? []}
+                loading={characters.isLoading}
+                violations={[]}
+            />
 
             <EntryComposer
                 stageName={stage?.name}
