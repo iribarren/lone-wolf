@@ -69,9 +69,4 @@ final class ApiPlumbingContext implements Context
         }
     }
 
-    #[When('the admin authors an :arg1 system with stages :arg2 starting at :arg3')]
-    public function theAdminAuthorsAnSystemWithStagesStartingAt($arg1, $arg2, $arg3): void
-    {
-        throw new PendingException();
-    }
 }
