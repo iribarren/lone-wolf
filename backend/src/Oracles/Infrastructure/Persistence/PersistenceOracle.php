@@ -39,10 +39,19 @@ class PersistenceOracle
     private array $entries = [];
 
     /**
+     * All arguments are optional so EasyAdmin can bind forms onto a blank
+     * instance (`new PersistenceOracle()`); the repository always supplies
+     * the full snapshot, and admin writes go through the application handlers.
+     *
      * @param list<OracleEntryPayload> $entries
      */
-    public function __construct(string $id, string $title, string $scopeType, ?string $scopeSystemId, array $entries)
-    {
+    public function __construct(
+        string $id = '',
+        string $title = '',
+        string $scopeType = 'global',
+        ?string $scopeSystemId = null,
+        array $entries = [],
+    ) {
         $this->id = $id;
         $this->replace($title, $scopeType, $scopeSystemId, $entries);
     }
