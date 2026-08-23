@@ -33,7 +33,7 @@ final class GameSystemStatusTest extends TestCase
 
     public function testDeactivationKeepsFlowAndSheetIntactSoExistingCampaignsStayPlayable(): void
     {
-        $system = $this->system()->replaceSheetStructure(SheetStructureStub::structure());
+        $system = $this->system()->withSheetStructure(SheetStructureStub::structure());
         $deactivated = $system->deactivate();
 
         // FR-006: deactivation removes the system from *new-campaign* selection

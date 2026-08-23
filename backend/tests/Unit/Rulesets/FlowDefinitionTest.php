@@ -50,7 +50,7 @@ final class FlowDefinitionTest extends TestCase
     public function testRefusesUnknownStartingStage(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('starting');
+        $this->expectExceptionMessage('Starting stage');
 
         FlowDefinition::create(['Scene', 'Sequel'], 'Nonsense', []);
     }

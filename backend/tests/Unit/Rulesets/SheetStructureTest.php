@@ -43,7 +43,7 @@ final class SheetStructureTest extends TestCase
     public function testTextFieldRejectsOptions(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('only select');
+        $this->expectExceptionMessage('select fields only');
 
         FieldDefinition::text('note', 'Note', options: ['a']);
     }
