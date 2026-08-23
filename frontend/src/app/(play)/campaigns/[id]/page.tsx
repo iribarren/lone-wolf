@@ -11,10 +11,18 @@ import { useState } from 'react';
 import AdvanceActions, { type RefusalFeedback } from '@/components/campaign/AdvanceActions';
 import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
+import EntryComposer from '@/components/journal/EntryComposer';
+import JournalTimeline from '@/components/journal/JournalTimeline';
 import { ApiError, apiPath, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 
 type CampaignState = ApiSchemas['CampaignState'];
+type JournalEntry = ApiSchemas['JournalEntry'];
+
+interface JournalPage {
+    entries: JournalEntry[];
+    nextCursor?: string | null;
+}
 
 export default function CampaignConsolePage() {
     const api = useApiClient();
@@ -49,6 +57,22 @@ export default function CampaignConsolePage() {
                 setRefusal({ detail: err.detail ?? err.title, legalAlternatives: alternatives });
             }
         },
+    });
+
+    const journal = useQuery({
+        queryKey: ['campaign', campaignId, 'journal'],
+        enabled: campaignId !== '',
+        queryFn: async (): Promise<JournalPage> =>
+            (await api.json(apiPath(`/api/campaigns/${campaignId}/journal`))) as JournalPage,
+    });
+
+    const append = useMutation({
+        mutationFn: async (narrative: string): Promise<JournalEntry> =>
+            (await api.json(apiPath(`/api/campaigns/${campaignId}/journal`), {
+                method: 'POST',
+                body: { narrative },
+            })) as JournalEntry,
+        onSuccess: () => void journal.refetch(),
     });
 
     const remove = useMutation({
@@ -107,6 +131,16 @@ export default function CampaignConsolePage() {
                         advance.mutate(conclude.toStageId);
                     }
                 }}
+            />
+
+            <JournalTimeline entries={journal.data?.entries ?? []} loading={journal.isLoading} />
+
+            <EntryComposer
+                stageName={stage?.name}
+                disabled={append.isPending || advance.isPending || remove.isPending}
+                pending={append.isPending}
+                error={append.error instanceof ApiError ? append.error.message : null}
+                onSubmit={(narrative) => append.mutate(narrative)}
             />
 
             <CampaignSettings
