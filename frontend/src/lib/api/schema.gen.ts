@@ -136,6 +136,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/campaigns/{campaignId}/oracles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a OracleSummary resource.
+         * @description Retrieves a OracleSummary resource.
+         */
+        get: operations["api_campaigns_campaignIdoracles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}/oracles/{oracleId}/consult": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a OracleSummary resource.
+         * @description Creates a OracleSummary resource.
+         */
+        post: operations["api_campaigns_campaignIdoracles_oracleIdconsult_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}/oracles/{oracleId}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a OracleSummary resource.
+         * @description Creates a OracleSummary resource.
+         */
+        post: operations["api_campaigns_campaignIdoracles_oracleIdsave_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/systems": {
         parameters: {
             query?: never;
@@ -428,6 +488,53 @@ export interface components {
                 [key: string]: number | number[] | string;
             } | null;
             createdAt?: string;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
+        OracleSummary: {
+            oracleId?: string;
+            title?: string;
+            scopeType?: string;
+            entryCount?: number;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
+        "OracleSummary.ConsultOracleInput": {
+            save?: boolean;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
+        "OracleSummary.SaveConsultationInput": {
+            text?: string;
+            interpretation?: string;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
+        "OracleSummary.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            oracleId?: string;
+            title?: string;
+            scopeType?: string;
+            entryCount?: number;
         };
         StageActionResource: {
             kind?: string;
@@ -925,6 +1032,182 @@ export interface operations {
                     "application/json": {
                         readonly token: string;
                     };
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdoracles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description OracleSummary identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OracleSummary resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["OracleSummary.jsonld"];
+                    "application/json": components["schemas"]["OracleSummary"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdoracles_oracleIdconsult_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description OracleSummary identifier */
+                campaignId: string;
+                /** @description OracleSummary identifier */
+                oracleId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new OracleSummary resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["OracleSummary.ConsultOracleInput"];
+                "application/json": components["schemas"]["OracleSummary.ConsultOracleInput"];
+            };
+        };
+        responses: {
+            /** @description OracleSummary resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["OracleSummary.jsonld"];
+                    "application/json": components["schemas"]["OracleSummary"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdoracles_oracleIdsave_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description OracleSummary identifier */
+                campaignId: string;
+                /** @description OracleSummary identifier */
+                oracleId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new OracleSummary resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["OracleSummary.SaveConsultationInput"];
+                "application/json": components["schemas"]["OracleSummary.SaveConsultationInput"];
+            };
+        };
+        responses: {
+            /** @description OracleSummary resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["OracleSummary.jsonld"];
+                    "application/json": components["schemas"]["OracleSummary"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };
