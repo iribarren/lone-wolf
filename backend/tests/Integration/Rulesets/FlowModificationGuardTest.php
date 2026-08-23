@@ -4,24 +4,36 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Rulesets;
 
+use App\Campaigns\Application\Command\StartCampaignCommand;
+use App\Campaigns\Application\StartCampaignHandler;
+use App\Identity\Application\UserRepositoryInterface;
+use App\Identity\Domain\User;
 use App\Rulesets\Application\Command\CreateGameSystemCommand;
 use App\Rulesets\Application\Command\UpdateFlowDefinitionCommand;
 use App\Rulesets\Application\CreateGameSystemHandler;
 use App\Rulesets\Application\Port\RulesetRepositoryInterface;
-use App\Rulesets\Application\Port\StageOccupancyCheckerInterface;
+use App\Rulesets\Application\UpdateFlowDefinitionHandler;
 use App\Shared\Domain\Identifier\GameSystemId;
+use App\Shared\Domain\Identifier\UserId;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * FR-005: flow modifications leaving an occupied stage orphaned are refused;
- * concurrent supersede conflicts surface as optimistic-lock failures.
+ * FR-005: flow modifications leaving an occupied stage orphaned are refused
+ * — occupancy comes from REAL campaigns started through the application
+ * handlers; concurrent supersede conflicts surface as optimistic-lock
+ * failures.
  */
 final class FlowModificationGuardTest extends KernelTestCase
 {
     private CreateGameSystemHandler $createHandler;
+
     private \App\Rulesets\Application\UpdateFlowDefinitionHandler $updateHandler;
+
     private RulesetRepositoryInterface $systems;
-    private \App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker $checker;
+
+    private StartCampaignHandler $startCampaign;
+
+    private UserRepositoryInterface $users;
 
     protected function setUp(): void
     {
@@ -29,26 +41,28 @@ final class FlowModificationGuardTest extends KernelTestCase
         $container = static::getContainer();
 
         $createHandler = $container->get(CreateGameSystemHandler::class);
-        $updateHandler = $container->get(\App\Rulesets\Application\UpdateFlowDefinitionHandler::class);
+        $updateHandler = $container->get(UpdateFlowDefinitionHandler::class);
         $systems = $container->get(RulesetRepositoryInterface::class);
-        $checker = $container->get(StageOccupancyCheckerInterface::class);
+        $startCampaign = $container->get(StartCampaignHandler::class);
+        $users = $container->get(UserRepositoryInterface::class);
 
         \assert($createHandler instanceof CreateGameSystemHandler);
-        \assert($updateHandler instanceof \App\Rulesets\Application\UpdateFlowDefinitionHandler);
+        \assert($updateHandler instanceof UpdateFlowDefinitionHandler);
         \assert($systems instanceof RulesetRepositoryInterface);
-        \assert($checker instanceof \App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker);
+        \assert($startCampaign instanceof StartCampaignHandler);
+        \assert($users instanceof UserRepositoryInterface);
 
         $this->createHandler = $createHandler;
         $this->updateHandler = $updateHandler;
         $this->systems = $systems;
-        $this->checker = $checker;
+        $this->startCampaign = $startCampaign;
+        $this->users = $users;
     }
 
     public function testRemovingAnOccupiedStageIsRefused(): void
     {
         $id = $this->createSystem('guard-'.uniqid());
-
-        $this->checker->markOccupied($id, 'Scene');
+        $this->occupyOpeningStage($id);
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('occupied');
@@ -64,7 +78,7 @@ final class FlowModificationGuardTest extends KernelTestCase
     public function testModificationKeepingAllStagesIsAccepted(): void
     {
         $id = $this->createSystem('keep-'.uniqid());
-        $this->checker->markOccupied($id, 'Scene');
+        $this->occupyOpeningStage($id);
 
         $this->updateHandler->handle(new UpdateFlowDefinitionCommand(
             $id,
@@ -77,7 +91,7 @@ final class FlowModificationGuardTest extends KernelTestCase
         self::assertNotNull($reloaded);
         self::assertSame(
             ['Scene', 'Sequel'],
-            array_map(static fn ($s) => $s->name(), $reloaded->flowDefinition()->stages()),
+            array_map(static fn ($s): string => $s->name(), $reloaded->flowDefinition()->stages()),
         );
         self::assertSame(['Sequel'], $reloaded->flowDefinition()->legalNextStages('Scene'));
     }
@@ -100,6 +114,18 @@ final class FlowModificationGuardTest extends KernelTestCase
 
         $this->expectException(\Doctrine\ORM\OptimisticLockException::class);
         $this->systems->save($stale);
+    }
+
+    /**
+     * Occupies the system's opening stage the way players actually do: by
+     * starting a campaign on it (FR-005 ground truth).
+     */
+    private function occupyOpeningStage(GameSystemId $systemId): void
+    {
+        $player = User::register(UserId::generate(), sprintf('guard-%s@example.com', bin2hex(random_bytes(4))), 'hash');
+        $this->users->save($player);
+
+        $this->startCampaign->handle(new StartCampaignCommand($player->id(), $systemId));
     }
 
     private function createSystem(string $name): GameSystemId

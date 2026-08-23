@@ -143,12 +143,9 @@ final class PersistenceResumeTest extends KernelTestCase
         $started = $this->startCampaign->handle(new StartCampaignCommand($owner, $systemId));
         $campaignId = \App\Shared\Domain\Identifier\CampaignId::fromString($started->campaignId);
 
-        try {
-            $this->campaignState->state($campaignId, $intruder);
-            self::fail('Reading a foreign campaign must be refused.');
-        } catch (CampaignAccessDeniedException) {
-            // Expected — never disclose existence (FR-019).
-        }
+        // Expected — never disclose existence (FR-019).
+        $this->expectException(CampaignAccessDeniedException::class);
+        $this->campaignState->state($campaignId, $intruder);
     }
 
     public function testConfirmedDeleteIsIrreversibleAndCascadesJournalEntries(): void

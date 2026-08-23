@@ -29,7 +29,12 @@ services:
     # Identity port binding (Constitution I).
     App\Identity\Application\UserRepositoryInterface: '@App\Identity\Infrastructure\Persistence\UserRepository'
     App\Rulesets\Application\Port\RulesetRepositoryInterface: '@App\Rulesets\Infrastructure\Persistence\PersistenceRulesetRepository'
-    App\Rulesets\Application\Port\StageOccupancyCheckerInterface: '@App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker'
+    App\Rulesets\Application\Port\StageOccupancyCheckerInterface: '@App\Rulesets\Infrastructure\Persistence\DoctrineStageOccupancyChecker'
+
+    # Campaigns/Journal port bindings (US2, Constitution I).
+    App\Campaigns\Application\Port\CampaignRepositoryInterface: '@App\Campaigns\Infrastructure\Persistence\PersistenceCampaignRepository'
+    App\Campaigns\Application\Port\FlowDefinitionProviderInterface: '@App\Campaigns\Infrastructure\Persistence\DoctrineFlowDefinitionProvider'
+    App\Journal\Application\Port\JournalEntryRepositoryInterface: '@App\Journal\Infrastructure\Persistence\PersistenceJournalEntryRepository'
 
 when@test:
     imports:

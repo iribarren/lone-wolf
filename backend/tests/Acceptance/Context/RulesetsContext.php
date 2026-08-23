@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Tests\Acceptance\Context;
 
+use App\Campaigns\Application\AdvanceStageHandler;
+use App\Campaigns\Application\Command\AdvanceStageCommand;
+use App\Campaigns\Application\Command\StartCampaignCommand;
+use App\Campaigns\Application\Query\SuggestedActionView;
+use App\Campaigns\Application\StartCampaignHandler;
 use App\Rulesets\Application\Command\CreateGameSystemCommand;
 use App\Rulesets\Application\Command\UpdateFlowDefinitionCommand;
-use App\Rulesets\Application\CreateGameSystemHandler;
-use App\Rulesets\Application\Port\RulesetRepositoryInterface;
-use App\Rulesets\Application\Query\ListAvailableSystemsQuery;
-use App\Rulesets\Application\UpdateFlowDefinitionHandler;
-use App\Rulesets\Domain\GameSystem;
-use App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker;
+use App\Identity\Application\UserRepositoryInterface;
+use App\Identity\Domain\User;
+use App\Shared\Domain\Identifier\UserId;
 use Behat\Behat\Context\Context;
-use Behat\Gherkin\Node\PyStringNode;
 use PHPUnit\Framework\AssertionFailedError;
 
 final class RulesetsContext implements Context
@@ -21,11 +22,13 @@ final class RulesetsContext implements Context
     private ?string $refusalMessage = null;
 
     public function __construct(
-        private readonly CreateGameSystemHandler $createHandler,
-        private readonly UpdateFlowDefinitionHandler $updateHandler,
-        private readonly RulesetRepositoryInterface $systems,
-        private readonly ListAvailableSystemsQuery $listAvailable,
-        private readonly InMemoryStageOccupancyChecker $occupancy,
+        private readonly \App\Rulesets\Application\CreateGameSystemHandler $createHandler,
+        private readonly \App\Rulesets\Application\UpdateFlowDefinitionHandler $updateHandler,
+        private readonly \App\Rulesets\Application\Port\RulesetRepositoryInterface $systems,
+        private readonly \App\Rulesets\Application\Query\ListAvailableSystemsQuery $listAvailable,
+        private readonly AdvanceStageHandler $advanceStage,
+        private readonly StartCampaignHandler $startCampaign,
+        private readonly UserRepositoryInterface $users,
     ) {
     }
 
@@ -65,7 +68,7 @@ final class RulesetsContext implements Context
      */
     public function listContains(string $first, string $second): void
     {
-        $names = array_map(static fn ($summary) => $summary->name, $this->listAvailable->execute());
+        $names = array_map(static fn ($summary): string => $summary->name, $this->listAvailable->execute());
 
         foreach ([$first, $second] as $expected) {
             if (!in_array($expected, $names, true) && !str_contains(implode('|', $names), $expected)) {
@@ -80,9 +83,40 @@ final class RulesetsContext implements Context
     public function markStageOccupied(string $stage, string $prefix): void
     {
         $system = $this->findByPrefix($prefix);
-        \assert($system instanceof GameSystem);
 
-        $this->occupancy->markOccupied($system->id(), $stage);
+        if (!$system instanceof \App\Rulesets\Domain\GameSystem) {
+            throw new AssertionFailedError(sprintf('No system named like "%s" exists.', $prefix));
+        }
+
+        // Occupancy ground truth (FR-005): a real player campaign parked on
+        // the named stage.
+        $player = User::register(UserId::generate(), sprintf('%s@example.com', bin2hex(random_bytes(5))), 'hash');
+        $this->users->save($player);
+
+        $state = $this->startCampaign->handle(new StartCampaignCommand($player->id(), $system->id()));
+
+        $attempts = 0;
+        while ($state->currentStage->stageName !== $stage && $attempts < 10) {
+            $next = null;
+            foreach ($state->currentStage->suggestedActions as $action) {
+                if ($action instanceof SuggestedActionView && $action->kind === 'advance') {
+                    $next = $action->toStageName;
+
+                    break;
+                }
+            }
+
+            if ($next === null) {
+                break;
+            }
+
+            $state = $this->advanceStage->handle(new AdvanceStageCommand($player->id(), \App\Shared\Domain\Identifier\CampaignId::fromString($state->campaignId), $next));
+            ++$attempts;
+        }
+
+        if ($state->currentStage->stageName !== $stage) {
+            throw new AssertionFailedError(sprintf('Could not park a campaign on stage "%s".', $stage));
+        }
     }
 
     /**
@@ -91,7 +125,10 @@ final class RulesetsContext implements Context
     public function tryFlowEdit(string $prefix, string $stages, string $start): void
     {
         $system = $this->findByPrefix($prefix);
-        \assert($system instanceof GameSystem);
+
+        if (!$system instanceof \App\Rulesets\Domain\GameSystem) {
+            throw new AssertionFailedError(sprintf('No system named like "%s" exists.', $prefix));
+        }
 
         try {
             $this->updateHandler->handle(new UpdateFlowDefinitionCommand(
@@ -115,7 +152,7 @@ final class RulesetsContext implements Context
         }
     }
 
-    private function findByPrefix(string $prefix): ?GameSystem
+    private function findByPrefix(string $prefix): ?\App\Rulesets\Domain\GameSystem
     {
         foreach ($this->systems->all() as $system) {
             if (str_starts_with($system->name(), $prefix.'-')) {
