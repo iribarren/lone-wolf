@@ -8,6 +8,7 @@ use App\Oracles\Domain\GlobalScope;
 use App\Oracles\Domain\OracleScope;
 use App\Oracles\Domain\SystemScope;
 use App\Shared\Domain\Identifier\GameSystemId;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -35,9 +36,7 @@ final class OracleScopeTest extends TestCase
         yield 'system scope refuses a foreign system' => [new SystemScope($systemA), $systemB, false];
     }
 
-    /**
-     * @dataProvider scopeVisibilityProvider
-     */
+    #[DataProvider('scopeVisibilityProvider')]
     public function testVisibilityPredicateMatrix(OracleScope $scope, GameSystemId $campaignSystem, bool $expected): void
     {
         self::assertSame($expected, $scope->isAvailableTo($campaignSystem));
