@@ -6,6 +6,7 @@ default:
             contexts:
                 - App\Tests\Acceptance\Context\ApiPlumbingContext
                 - App\Tests\Acceptance\Context\RulesetsContext
+                - App\Tests\Acceptance\Context\CampaignsContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
