@@ -24,6 +24,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of CampaignSummary resources.
+         * @description Retrieves the collection of CampaignSummary resources.
+         */
+        get: operations["api_campaigns_get_collection"];
+        put?: never;
+        /**
+         * Creates a CampaignState resource.
+         * @description Creates a CampaignState resource.
+         */
+        post: operations["api_campaigns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a CampaignState resource.
+         * @description Retrieves a CampaignState resource.
+         */
+        get: operations["api_campaigns_campaignId_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the CampaignState resource.
+         * @description Removes the CampaignState resource.
+         */
+        delete: operations["api_campaigns_campaignId_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}/advance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a CampaignState resource.
+         * @description Creates a CampaignState resource.
+         */
+        post: operations["api_campaigns_campaignIdadvance_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}/journal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a JournalEntry resource.
+         * @description Retrieves a JournalEntry resource.
+         */
+        get: operations["api_campaigns_campaignIdjournal_get"];
+        put?: never;
+        /**
+         * Creates a JournalEntry resource.
+         * @description Creates a JournalEntry resource.
+         */
+        post: operations["api_campaigns_campaignIdjournal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     api_auth_login: {
         parameters: {
             query?: never;
@@ -38,6 +130,26 @@ export interface paths {
          * @description Creates a user token.
          */
         post: operations["login_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/systems": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of System resources.
+         * @description Retrieves the collection of System resources.
+         */
+        get: operations["api_systems_get_collection"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -74,6 +186,66 @@ export interface components {
         "AuthRegister.RegisterOutput.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             token?: string;
             roles?: string[];
+        };
+        /**
+         * @description Full play state projection (contract CampaignState/StageView, FR-014).
+         *
+         *     Stage identity is the stage NAME (US1 decision): the contract's
+         *     `currentStage.id` and `toStageId` fields carry the stage-name value, with
+         *     `name` as denormalized display copy.
+         */
+        CampaignState: {
+            id?: string;
+            gameSystemId?: string;
+            currentStage?: components["schemas"]["StageResource"] | null;
+        };
+        /**
+         * @description Full play state projection (contract CampaignState/StageView, FR-014).
+         *
+         *     Stage identity is the stage NAME (US1 decision): the contract's
+         *     `currentStage.id` and `toStageId` fields carry the stage-name value, with
+         *     `name` as denormalized display copy.
+         */
+        "CampaignState.AdvanceStageInput": {
+            toStageId?: string;
+        };
+        /**
+         * @description Full play state projection (contract CampaignState/StageView, FR-014).
+         *
+         *     Stage identity is the stage NAME (US1 decision): the contract's
+         *     `currentStage.id` and `toStageId` fields carry the stage-name value, with
+         *     `name` as denormalized display copy.
+         */
+        "CampaignState.StartCampaignInput": {
+            gameSystemId?: string;
+        };
+        /**
+         * @description Full play state projection (contract CampaignState/StageView, FR-014).
+         *
+         *     Stage identity is the stage NAME (US1 decision): the contract's
+         *     `currentStage.id` and `toStageId` fields carry the stage-name value, with
+         *     `name` as denormalized display copy.
+         */
+        "CampaignState.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            gameSystemId?: string;
+            currentStage?: components["schemas"]["StageResource.jsonld"] | null;
+        };
+        /** @description Owned-campaign list row (contract CampaignSummary, FR-019). */
+        CampaignSummary: {
+            id?: string;
+            gameSystemId?: string;
+            gameSystemName?: string;
+            currentStageName?: string;
+            updatedAt?: string;
+        };
+        /** @description Owned-campaign list row (contract CampaignSummary, FR-019). */
+        "CampaignSummary.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            gameSystemId?: string;
+            gameSystemName?: string;
+            currentStageName?: string;
+            updatedAt?: string;
         };
         /** @description Unprocessable entity */
         ConstraintViolation: {
@@ -155,6 +327,45 @@ export interface components {
             readonly type?: string;
             readonly description?: string | null;
         };
+        HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+            /**
+             * @example {
+             *       "@id": "string",
+             *       "@type": "string",
+             *       "first": "string",
+             *       "last": "string",
+             *       "previous": "string",
+             *       "next": "string"
+             *     }
+             */
+            view?: {
+                /** Format: iri-reference */
+                "@id"?: string;
+                "@type"?: string;
+                /** Format: iri-reference */
+                first?: string | null;
+                /** Format: iri-reference */
+                last?: string | null;
+                /** Format: iri-reference */
+                previous?: string | null;
+                /** Format: iri-reference */
+                next?: string | null;
+            };
+        };
+        HydraCollectionBaseSchemaNoPagination: {
+            totalItems?: number;
+            search?: {
+                "@type"?: string;
+                template?: string;
+                variableRepresentation?: string;
+                mapping?: {
+                    "@type"?: string;
+                    variable?: string;
+                    property?: string | null;
+                    required?: boolean;
+                }[];
+            };
+        };
         HydraItemBaseSchema: {
             "@context"?: string | ({
                 "@vocab": string;
@@ -165,6 +376,104 @@ export interface components {
             });
             "@id": string;
             "@type": string;
+        };
+        /**
+         * @description Append-only journal projection (contract JournalEntry, FR-015/017).
+         *
+         *     Lives on the Campaigns API surface because the play loop owns it: stage
+         *     ownership (FR-019) is enforced upstream in the same boundary. `stageId`
+         *     carries the name-keyed identity decision (see CampaignStateResource).
+         */
+        JournalEntry: {
+            id?: string;
+            stageId?: string;
+            stageName?: string;
+            kind?: string;
+            narrative?: string | null;
+            oracleSnapshot?: {
+                [key: string]: string;
+            } | null;
+            rollSnapshot?: {
+                [key: string]: number | number[] | string;
+            } | null;
+            createdAt?: string;
+        };
+        /**
+         * @description Append-only journal projection (contract JournalEntry, FR-015/017).
+         *
+         *     Lives on the Campaigns API surface because the play loop owns it: stage
+         *     ownership (FR-019) is enforced upstream in the same boundary. `stageId`
+         *     carries the name-keyed identity decision (see CampaignStateResource).
+         */
+        "JournalEntry.AppendNarrativeInput": {
+            narrative?: string;
+        };
+        /**
+         * @description Append-only journal projection (contract JournalEntry, FR-015/017).
+         *
+         *     Lives on the Campaigns API surface because the play loop owns it: stage
+         *     ownership (FR-019) is enforced upstream in the same boundary. `stageId`
+         *     carries the name-keyed identity decision (see CampaignStateResource).
+         */
+        "JournalEntry.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            stageId?: string;
+            stageName?: string;
+            kind?: string;
+            narrative?: string | null;
+            oracleSnapshot?: {
+                [key: string]: string;
+            } | null;
+            rollSnapshot?: {
+                [key: string]: number | number[] | string;
+            } | null;
+            createdAt?: string;
+        };
+        StageActionResource: {
+            kind?: string;
+            toStageId?: string | null;
+            toStageName?: string | null;
+            prompt?: string;
+        };
+        "StageActionResource.jsonld": {
+            kind?: string;
+            toStageId?: string | null;
+            toStageName?: string | null;
+            prompt?: string;
+        };
+        StageResource: {
+            id?: string;
+            name?: string;
+            guidance?: string;
+            suggestedActions?: components["schemas"]["StageActionResource"][];
+        };
+        "StageResource.jsonld": {
+            id?: string;
+            name?: string;
+            guidance?: string;
+            suggestedActions?: components["schemas"]["StageActionResource.jsonld"][];
+        };
+        /**
+         * @description Active-only system summaries shown to players (contract SystemSummary,
+         *     FR-006). Read-only projection of the Rulesets Application read query.
+         */
+        System: {
+            systemId?: string;
+            name?: string;
+            description?: string;
+            startingStage?: string;
+            openingGuidance?: string;
+        };
+        /**
+         * @description Active-only system summaries shown to players (contract SystemSummary,
+         *     FR-006). Read-only projection of the Rulesets Application read query.
+         */
+        "System.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            systemId?: string;
+            name?: string;
+            description?: string;
+            startingStage?: string;
+            openingGuidance?: string;
         };
     };
     responses: never;
@@ -235,6 +544,361 @@ export interface operations {
             };
         };
     };
+    api_campaigns_get_collection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CampaignSummary collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["CampaignSummary.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["CampaignSummary"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new CampaignState resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["CampaignState.StartCampaignInput"];
+                "application/json": components["schemas"]["CampaignState.StartCampaignInput"];
+            };
+        };
+        responses: {
+            /** @description CampaignState resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["CampaignState.jsonld"];
+                    "application/json": components["schemas"]["CampaignState"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignId_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description CampaignState identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CampaignState resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["CampaignState.jsonld"];
+                    "application/json": components["schemas"]["CampaignState"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignId_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description CampaignState identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CampaignState resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdadvance_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description CampaignState identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new CampaignState resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["CampaignState.AdvanceStageInput"];
+                "application/json": components["schemas"]["CampaignState.AdvanceStageInput"];
+            };
+        };
+        responses: {
+            /** @description CampaignState resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["CampaignState.jsonld"];
+                    "application/json": components["schemas"]["CampaignState"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdjournal_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description JournalEntry identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JournalEntry resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["JournalEntry.jsonld"];
+                    "application/json": components["schemas"]["JournalEntry"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdjournal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description JournalEntry identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new JournalEntry resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["JournalEntry.AppendNarrativeInput"];
+                "application/json": components["schemas"]["JournalEntry.AppendNarrativeInput"];
+            };
+        };
+        responses: {
+            /** @description JournalEntry resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["JournalEntry.jsonld"];
+                    "application/json": components["schemas"]["JournalEntry"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     login_check_post: {
         parameters: {
             query?: never;
@@ -261,6 +925,29 @@ export interface operations {
                     "application/json": {
                         readonly token: string;
                     };
+                };
+            };
+        };
+    };
+    api_systems_get_collection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description System collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["System.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["System"][];
                 };
             };
         };
