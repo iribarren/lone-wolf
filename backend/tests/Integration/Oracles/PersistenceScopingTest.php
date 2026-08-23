@@ -46,24 +46,28 @@ final class PersistenceScopingTest extends KernelTestCase
 
     public function testScopedListingReturnsGlobalUnionOwnSystemRows(): void
     {
+        $weather = $this->uniqueTitle('Weather');
+        $encountersA = $this->uniqueTitle('A Encounters');
+        $encountersB = $this->uniqueTitle('B Encounters');
+
         $systemA = $this->createSystemNamed('listing-a');
         $systemB = $this->createSystemNamed('listing-b');
 
-        $this->oracles->save($this->globalOracle('Weather'));
-        $this->oracles->save($this->scopedOracle('A Encounters', $systemA));
-        $this->oracles->save($this->scopedOracle('B Encounters', $systemB));
+        $this->oracles->save($this->globalOracle($weather));
+        $this->oracles->save($this->scopedOracle($encountersA, $systemA));
+        $this->oracles->save($this->scopedOracle($encountersB, $systemB));
 
         $seenByA = $this->titlesVisibleTo($systemA);
         $seenByB = $this->titlesVisibleTo($systemB);
 
         // FR-009 predicate: global ∪ own-system, nothing else.
-        self::assertSame(['Weather'], array_values(array_intersect($seenByA, ['Weather'])));
-        self::assertContains('A Encounters', $seenByA);
-        self::assertNotContains('B Encounters', $seenByA);
+        self::assertContains($weather, $seenByA);
+        self::assertContains($encountersA, $seenByA);
+        self::assertNotContains($encountersB, $seenByA);
 
-        self::assertContains('Weather', $seenByB);
-        self::assertContains('B Encounters', $seenByB);
-        self::assertNotContains('A Encounters', $seenByB);
+        self::assertContains($weather, $seenByB);
+        self::assertContains($encountersB, $seenByB);
+        self::assertNotContains($encountersA, $seenByB);
     }
 
     public function testPartialUniqueIndexEnforcesSystemScopeIntegrity(): void
@@ -81,7 +85,7 @@ final class PersistenceScopingTest extends KernelTestCase
     {
         $system = $this->createSystemNamed('round-trip');
 
-        $oracle = $this->scopedOracle('Encounters', $system)
+        $oracle = $this->scopedOracle($this->uniqueTitle('Encounters'), $system)
             ->addEntry('Ambush.', 4)
             ->addEntry('Quiet trail.', 1);
 
@@ -90,7 +94,7 @@ final class PersistenceScopingTest extends KernelTestCase
         $reloaded = $this->oracles->get($oracle->id());
 
         self::assertNotNull($reloaded);
-        self::assertSame('Encounters', $reloaded->title());
+        self::assertSame('Encounters', substr($reloaded->title(), 0, 10));
         self::assertTrue($reloaded->scope() instanceof SystemScope);
         self::assertTrue($reloaded->scope()->isAvailableTo($system));
         self::assertFalse($reloaded->scope()->isAvailableTo(GameSystemId::generate()));
@@ -117,6 +121,15 @@ final class PersistenceScopingTest extends KernelTestCase
     private function globalOracle(string $title): Oracle
     {
         return Oracle::start(OracleId::generate(), $title, new GlobalScope());
+    }
+
+    /**
+     * Integration storage persists across runs — unique suffixes keep
+     * fixtures collision-free.
+     */
+    private function uniqueTitle(string $base): string
+    {
+        return sprintf('%s-%s', $base, bin2hex(random_bytes(3)));
     }
 
     private function scopedOracle(string $title, GameSystemId $systemId): Oracle
