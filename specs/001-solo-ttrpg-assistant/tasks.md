@@ -61,8 +61,8 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 ### Frontend core (Next.js + contract-first client)
 
 - [x] T023 Scaffold Next.js App Router project with TypeScript `strict` mode, ESLint, base layout in `frontend/` (package.json/tsconfig/next.config.ts) running inside its container
-- [ ] T024 Build contract-first client pipeline: `frontend/scripts/generate-api-client.sh` downloads backend `/api/docs.json` → `openapi-typescript` emits `frontend/src/lib/api/schema.gen.ts`; hand-written typed fetch wrapper `frontend/src/lib/api/client.ts` (raw URLs prohibited anywhere else, Constitution V)
-- [ ] T025 [P] Wire TanStack Query provider, JWT bearer attach + token storage helpers in `frontend/src/lib/auth.ts` and `frontend/src/lib/hooks/useApiClient.ts`
+- [x] T024 Build contract-first client pipeline: `frontend/scripts/generate-api-client.sh` downloads backend `/api/docs.json` → `openapi-typescript` emits `frontend/src/lib/api/schema.gen.ts`; hand-written typed fetch wrapper `frontend/src/lib/api/client.ts` (raw URLs prohibited anywhere else, Constitution V)
+- [x] T025 [P] Wire TanStack Query provider, JWT bearer attach + token storage helpers in `frontend/src/lib/auth.ts` and `frontend/src/lib/hooks/useApiClient.ts`
 
 **Checkpoint**: Foundation ready — user stories can start (and US1/US2 may proceed in parallel afterwards).
 

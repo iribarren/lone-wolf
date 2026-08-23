@@ -20,6 +20,27 @@ export class ApiError extends Error {
         super(detail ? `${title}: ${detail}` : title);
         this.name = 'ApiError';
     }
+
+    /** Parses an RFC 7807 problem document (or any error body) into ApiError. */
+    public static async fromResponse(response: Response): Promise<ApiError> {
+        let payload: Record<string, unknown> = {};
+        try {
+            payload = (await response.json()) as Record<string, unknown>;
+        } catch {
+            // non-JSON error body
+        }
+
+        const violations = Array.isArray(payload['violations'])
+            ? (payload['violations'] as { property: string; message: string }[])
+            : undefined;
+
+        return new ApiError(
+            response.status,
+            typeof payload['title'] === 'string' ? payload['title'] : `HTTP ${response.status}`,
+            typeof payload['detail'] === 'string' ? payload['detail'] : undefined,
+            violations,
+        );
+    }
 }
 
 export interface ApiClientOptions {
