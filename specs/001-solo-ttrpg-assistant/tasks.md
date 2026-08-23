@@ -188,18 +188,18 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 5 (write FIRST, ensure they FAIL)
 
-- [ ] T075 [P] [US5] Unit tests for `AttributeValidator`: PC vs NPC required-set enforcement (FR-024), type/select-option violations produce per-field messages (FR-023), unknown-key rejection in `backend/tests/Unit/Characters/AttributeValidatorTest.php`
-- [ ] T076 [P] [US5] Integration test: JSONB attributes round-trip + `DriftDetector` flags characters when stored data fails bumped structure version, leaving data untouched/readable (FR-025) in `backend/tests/Integration/Characters/DriftFlaggingTest.php`
+- [x] T075 [P] [US5] Unit tests for `AttributeValidator`: PC vs NPC required-set enforcement (FR-024), type/select-option violations produce per-field messages (FR-023), unknown-key rejection in `backend/tests/Unit/Characters/AttributeValidatorTest.php`
+- [x] T076 [P] [US5] Integration test: JSONB attributes round-trip + `DriftDetector` flags characters when stored data fails bumped structure version, leaving data untouched/readable (FR-025) in `backend/tests/Integration/Characters/DriftFlaggingTest.php`
 
 ### Implementation for User Story 5
 
-- [ ] T078 [US5] Implement Characters Domain: `Character` aggregate (kind pc|npc, name, `AttributesMap` JSONB VO, validatedStructureVersion, reviewStatus + driftIssues), `AttributeValidator`, `DriftDetector` in `backend/src/Characters/Domain/`
-- [ ] T079 [US5] Define `CharacterRepositoryInterface` port + handlers `CreateCharacter`, `UpdateCharacter` (revalidates against CURRENT structure), `ListCharacters` (returns structure metadata for rendering) in `backend/src/Characters/Application/`
-- [ ] T080 [US5] Doctrine persistence: `jsonb` attributes column, FK to campaign with cascade, migration
-- [ ] T081 [US5] Expose endpoints `GET/POST /api/campaigns/{id}/characters` and `PATCH /api/characters/{characterId}` emitting `SheetValidationProblem` (violations[{field,message}]) per contract in `backend/src/Characters/Infrastructure/Api/`
-- [ ] T082 [US5] Frontend dynamic character panel rendering sheets from returned structure metadata (no hardcoded fields), violation feedback inline, flagged-for-review badge in `frontend/src/components/characters/CharacterPanel.tsx`
-- [ ] T083 [P] [US5] Vitest component test for CharacterPanel render-per-shape + violation display in `frontend/tests/components/characters/CharacterPanel.test.tsx`
-- [ ] T084 [US5] Behat feature: two systems/different shapes — conforming accepted, missing/wrong-typed rejected field-level, NPC lighter set passes where PC fails (US5 scenarios 1–3) in `backend/features/characters/sheets.feature`
+- [x] T078 [US5] Implement Characters Domain: `Character` aggregate (kind pc|npc, name, `AttributesMap` JSONB VO, validatedStructureVersion, reviewStatus + driftIssues), `AttributeValidator`, `DriftDetector` in `backend/src/Characters/Domain/`
+- [x] T079 [US5] Define `CharacterRepositoryInterface` port + handlers `CreateCharacter`, `UpdateCharacter` (revalidates against CURRENT structure), `ListCharacters` (returns structure metadata for rendering) in `backend/src/Characters/Application/`
+- [x] T080 [US5] Doctrine persistence: `jsonb` attributes column, FK to campaign with cascade, migration
+- [x] T081 [US5] Expose endpoints `GET/POST /api/campaigns/{id}/characters` and `PATCH /api/characters/{characterId}` emitting `SheetValidationProblem` (violations[{field,message}]) per contract in `backend/src/Characters/Infrastructure/Api/`
+- [x] T082 [US5] Frontend dynamic character panel rendering sheets from returned structure metadata (no hardcoded fields), violation feedback inline, flagged-for-review badge in `frontend/src/components/characters/CharacterPanel.tsx`
+- [x] T083 [P] [US5] Vitest component test for CharacterPanel render-per-shape + violation display in `frontend/tests/components/characters/CharacterPanel.test.tsx`
+- [x] T084 [US5] Behat feature: two systems/different shapes — conforming accepted, missing/wrong-typed rejected field-level, NPC lighter set passes where PC fails (US5 scenarios 1–3) in `backend/features/characters/sheets.feature`
 
 **Checkpoint**: Mechanical truth lives beside narrative; multi-system claim credible.
 

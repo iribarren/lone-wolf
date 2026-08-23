@@ -174,15 +174,21 @@ deptrac:
             - SharedKernelApplication
             - SharedKernelInfrastructure
 
+        # Explicit cross-context edges (US5): character writes resolve the
+        # owned campaign through the Campaigns application fetcher — the
+        # sheet itself crosses as Characters-owned mirrors, never Rulesets
+        # types.
         CharactersDomain:
             - SharedKernelDomain
         CharactersApplication:
             - CharactersDomain
+            - CampaignsApplication
             - SharedKernelDomain
             - SharedKernelApplication
         CharactersInfrastructure:
             - CharactersApplication
             - CharactersDomain
+            - CampaignsApplication
             - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
