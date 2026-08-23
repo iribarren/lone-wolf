@@ -76,21 +76,21 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 1 (write FIRST, ensure they FAIL)
 
-- [ ] T026 [P] [US1] Unit tests for `FlowDefinition` invariants (≥2 stages, unique names, exactly-one starting stage, transitions reference existing stages) in `backend/tests/Unit/Rulesets/FlowDefinitionTest.php`
-- [ ] T027 [P] [US1] Unit tests for `SheetStructure`/`FieldDefinition` VOs (unique keys, select-options required, PC/NPC requirement flags, version stamp) in `backend/tests/Unit/Rulesets/SheetStructureTest.php`
-- [ ] T028 [P] [US1] Unit tests for `GameSystem` activate/deactivate semantics (deactivation never mutates playable campaigns, FR-006) in `backend/tests/Unit/Rulesets/GameSystemStatusTest.php`
-- [ ] T029 [P] [US1] Integration test: flow modification blocked while `StageOccupancyChecker` reports occupation (FR-005) and optimistic-lock supersede conflict surfaces in `backend/tests/Integration/Rulesets/FlowModificationGuardTest.php`
+- [x] T026 [P] [US1] Unit tests for `FlowDefinition` invariants (≥2 stages, unique names, exactly-one starting stage, transitions reference existing stages) in `backend/tests/Unit/Rulesets/FlowDefinitionTest.php`
+- [x] T027 [P] [US1] Unit tests for `SheetStructure`/`FieldDefinition` VOs (unique keys, select-options required, PC/NPC requirement flags, version stamp) in `backend/tests/Unit/Rulesets/SheetStructureTest.php`
+- [x] T028 [P] [US1] Unit tests for `GameSystem` activate/deactivate semantics (deactivation never mutates playable campaigns, FR-006) in `backend/tests/Unit/Rulesets/GameSystemStatusTest.php`
+- [x] T029 [P] [US1] Integration test: flow modification blocked while `StageOccupancyChecker` reports occupation (FR-005) and optimistic-lock supersede conflict surfaces in `backend/tests/Integration/Rulesets/FlowModificationGuardTest.php`
 
 ### Implementation for User Story 1
 
-- [ ] T030 [US1] Implement Rulesets Domain model: `FlowStage`, `FlowTransition`, `FlowDefinition`, `FieldDefinition`, `SheetStructure`, `GameSystem` aggregate (name/description/status/activate()/deactivate(), owns FlowDefinition + SheetStructure) in `backend/src/Rulesets/Domain/` — pure PHP, native types only
-- [ ] T031 [US1] Define Application ports `RulesetRepositoryInterface`, `StageOccupancyCheckerInterface` and read query `ListAvailableSystems` in `backend/src/Rulesets/Application/`
-- [ ] T032 [US1] Implement handlers `CreateGameSystem`, `UpdateFlowDefinition` (runs occupancy guard, refuses with explanation), `UpdateSheetStructure` (bumps version), `SetSystemStatus` in `backend/src/Rulesets/Application/`
-- [ ] T033 [US1] Doctrine persistence for Rulesets: XML/attribute mappings, repositories implementing ports, `jsonb` columns for flow_definition + sheet_structure, optimistic-lock `version` column; migration in `backend/migrations/`
-- [ ] T034 [US1] EasyAdmin backoffice CRUD for systems incl. stage/transition editor enforcing FR-002..FR-005 messages and sheet-structure field editor in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`. Configure the optimistic-lock version field and catch `OptimisticLockException` to render a "your changes were superseded — review the current version" flash message (Edge Case §8)
-- [ ] T035 [US1] Expose API Platform resource `GET /api/systems` (active-only summaries with startingStage + openingGuidance, per contracts SystemSummary) in `backend/src/Rulesets/Infrastructure/Api/SystemResource.php`
-- [ ] T036 [US1] Bind Rulesets' `StageOccupancyCheckerInterface` to an in-memory null checker in `backend/src/Rulesets/Infrastructure/Persistence/InMemoryStageOccupancyChecker.php` (zero campaigns can exist before US2; the real Doctrine adapter replaces this stub in T047)
-- [ ] T037 [US1] Behat feature: admin authors Scene-Sequel + Act Ladder systems, both appear in player-facing list; occupied-stage edit refused (quickstart V1/V2) in `backend/features/rulesets/author_system_flow.feature`
+- [x] T030 [US1] Implement Rulesets Domain model: `FlowStage`, `FlowTransition`, `FlowDefinition`, `FieldDefinition`, `SheetStructure`, `GameSystem` aggregate (name/description/status/activate()/deactivate(), owns FlowDefinition + SheetStructure) in `backend/src/Rulesets/Domain/` — pure PHP, native types only
+- [x] T031 [US1] Define Application ports `RulesetRepositoryInterface`, `StageOccupancyCheckerInterface` and read query `ListAvailableSystems` in `backend/src/Rulesets/Application/`
+- [x] T032 [US1] Implement handlers `CreateGameSystem`, `UpdateFlowDefinition` (runs occupancy guard, refuses with explanation), `UpdateSheetStructure` (bumps version), `SetSystemStatus` in `backend/src/Rulesets/Application/`
+- [x] T033 [US1] Doctrine persistence for Rulesets: XML/attribute mappings, repositories implementing ports, `jsonb` columns for flow_definition + sheet_structure, optimistic-lock `version` column; migration in `backend/migrations/`
+- [x] T034 [US1] EasyAdmin backoffice CRUD for systems incl. stage/transition editor enforcing FR-002..FR-005 messages and sheet-structure field editor in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`. Configure the optimistic-lock version field and catch `OptimisticLockException` to render a "your changes were superseded — review the current version" flash message (Edge Case §8)
+- [x] T035 [US1] Expose API Platform resource `GET /api/systems` (active-only summaries with startingStage + openingGuidance, per contracts SystemSummary) in `backend/src/Rulesets/Infrastructure/Api/SystemResource.php`
+- [x] T036 [US1] Bind Rulesets' `StageOccupancyCheckerInterface` to an in-memory null checker in `backend/src/Rulesets/Infrastructure/Persistence/InMemoryStageOccupancyChecker.php` (zero campaigns can exist before US2; the real Doctrine adapter replaces this stub in T047)
+- [x] T037 [US1] Behat feature: admin authors Scene-Sequel + Act Ladder systems, both appear in player-facing list; occupied-stage edit refused (quickstart V1/V2) in `backend/features/rulesets/author_system_flow.feature`
 
 **Checkpoint**: US1 independently functional — admin content pipeline works end-to-end.
 
