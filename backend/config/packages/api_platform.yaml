@@ -6,6 +6,10 @@ api_platform:
       (Constitution Principle V). Errors use RFC 7807 problem+json.
     defaults:
         stateless: true
+        # Plain JSON is a first-class format for the Next.js client.
+        formats:
+            jsonld: ['application/ld+json']
+            json: ['application/json']
         pagination:
             page_parameter_name: page
             items_per_page: 25
