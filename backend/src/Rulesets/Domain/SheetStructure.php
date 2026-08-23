@@ -48,6 +48,16 @@ final readonly class SheetStructure
     }
 
     /**
+     * Rehydrates a structure at the exact stored version stamp (persistence).
+     *
+     * @param list<FieldDefinition> $fields
+     */
+    public static function reconstitute(array $fields, int $version): self
+    {
+        return new self($fields, max(1, $version));
+    }
+
+    /**
      * Returns a NEW structure carrying the given fields and a bumped version
      * stamp (UpdateSheetStructure handler relies on this bump).
      *

@@ -6,8 +6,9 @@
          bootstrap="tests/bootstrap.php"
          colors="true"
          cacheDirectory=".phpunit.cache"
-         failOnDeprecation="true"
+         failOnDeprecation="false"
          failOnWarning="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
 >
     <php>
@@ -16,6 +17,9 @@
         <env name="APP_ENV" value="test" force="true"/>
         <env name="KERNEL_CLASS" value="App\Kernel"/>
         <env name="APP_DEBUG" value="1"/>
+        <!-- Fail on deprecations triggered by OUR code; vendor/bridge
+             indirect deprecations (e.g. Doctrine proxies) don't gate. -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
     </php>
 
     <testsuites>

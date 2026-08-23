@@ -8,3 +8,11 @@ services:
         autoconfigure: false
 
     Symfony\Bundle\FrameworkBundle\KernelBrowser: '@test.client'
+
+    # Integration tests pull these handlers straight from the test container.
+    App\Rulesets\Application\CreateGameSystemHandler:
+        public: true
+        autowire: true
+    App\Rulesets\Application\UpdateFlowDefinitionHandler:
+        public: true
+        autowire: true

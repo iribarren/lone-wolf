@@ -90,7 +90,10 @@ final class FlowModificationGuardTest extends KernelTestCase
         $first = $this->systems->get($id);
 
         // Simulate another admin committing a change behind our back.
-        $connection = static::getContainer()->get('doctrine')->getConnection();
+        $registry = static::getContainer()->get('doctrine');
+        \assert($registry instanceof \Doctrine\Persistence\ManagerRegistry);
+        $connection = $registry->getConnection();
+        \assert($connection instanceof \Doctrine\DBAL\Connection);
         $connection->executeStatement('UPDATE game_systems SET version = version + 1');
 
         $stale = $first->deactivate();

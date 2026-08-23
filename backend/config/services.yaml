@@ -28,6 +28,8 @@ services:
 
     # Identity port binding (Constitution I).
     App\Identity\Application\UserRepositoryInterface: '@App\Identity\Infrastructure\Persistence\UserRepository'
+    App\Rulesets\Application\Port\RulesetRepositoryInterface: '@App\Rulesets\Infrastructure\Persistence\PersistenceRulesetRepository'
+    App\Rulesets\Application\Port\StageOccupancyCheckerInterface: '@App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker'
 
 when@test:
     imports:

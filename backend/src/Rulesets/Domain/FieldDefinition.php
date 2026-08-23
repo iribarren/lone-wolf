@@ -56,29 +56,25 @@ final readonly class FieldDefinition
         return new self($key, $label, self::TYPE_SELECT, $requiredForPc, $requiredForNpc, array_values($options));
     }
 
-    /** @param array{key:string,label:string,type:string,required_for_pc:bool,required_for_npc:bool,options:list<string>} $payload */
+    /**
+     * @param array{key:string,label:string,type:string,required_for_pc:bool,required_for_npc:bool,options:list<string>}|array<string, mixed> $payload
+     */
     public static function fromArray(array $payload): self
     {
-        return match ((string) ($payload['type'] ?? '')) {
-            self::TYPE_SELECT => self::select(
-                (string) $payload['key'],
-                (string) $payload['label'],
-                (array) ($payload['options'] ?? []),
-                (bool) ($payload['required_for_pc'] ?? false),
-                (bool) ($payload['required_for_npc'] ?? false),
-            ),
-            self::TYPE_NUMBER => self::number(
-                (string) $payload['key'],
-                (string) $payload['label'],
-                (bool) ($payload['required_for_pc'] ?? false),
-                (bool) ($payload['required_for_npc'] ?? false),
-            ),
-            default => self::text(
-                (string) $payload['key'],
-                (string) $payload['label'],
-                (bool) ($payload['required_for_pc'] ?? false),
-                (bool) ($payload['required_for_npc'] ?? false),
-            ),
+        $key = is_string($payload['key'] ?? null) ? $payload['key'] : '';
+        $label = is_string($payload['label'] ?? null) ? $payload['label'] : '';
+        $type = is_string($payload['type'] ?? null) ? $payload['type'] : '';
+        $pc = is_bool($payload['required_for_pc'] ?? null) && $payload['required_for_pc'];
+        $npc = is_bool($payload['required_for_npc'] ?? null) && $payload['required_for_npc'];
+        $options = array_values(array_filter(
+            is_array($payload['options'] ?? null) ? $payload['options'] : [],
+            static fn (mixed $option): bool => is_string($option),
+        ));
+
+        return match ($type) {
+            self::TYPE_SELECT => self::select($key, $label, $options, $pc, $npc),
+            self::TYPE_NUMBER => self::number($key, $label, $pc, $npc),
+            default => self::text($key, $label, $pc, $npc),
         };
     }
 
