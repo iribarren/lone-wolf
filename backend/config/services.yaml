@@ -36,6 +36,9 @@ services:
     App\Campaigns\Application\Port\FlowDefinitionProviderInterface: '@App\Campaigns\Infrastructure\Persistence\DoctrineFlowDefinitionProvider'
     App\Journal\Application\Port\JournalEntryRepositoryInterface: '@App\Journal\Infrastructure\Persistence\PersistenceJournalEntryRepository'
 
+    # Shared-kernel current-player port, implemented by Identity's security bridge.
+    App\Shared\Application\CurrentUserProviderInterface: '@App\Identity\Infrastructure\Security\CurrentPlayerProvider'
+
 when@test:
     imports:
         - { resource: services_test.yaml }

@@ -138,9 +138,14 @@ deptrac:
             - JournalDomain
             - SharedKernelDomain
             - SharedKernelApplication
+        # Explicit cross-context edge: the journal HTTP surface (GET/POST on
+        # /campaigns/{id}/journal) delegates ownership enforcement upstream to
+        # the Campaigns play-loop handlers/fetcher (FR-019) — the Journal
+        # context never judges players itself.
         JournalInfrastructure:
             - JournalApplication
             - JournalDomain
+            - CampaignsApplication
             - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
