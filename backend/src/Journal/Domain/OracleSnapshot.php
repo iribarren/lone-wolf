@@ -26,9 +26,18 @@ final readonly class OracleSnapshot
         return ['oracleTitle' => $this->oracleTitle, 'resultText' => $this->resultText];
     }
 
-    /** @param array{oracleTitle?: mixed, resultText?: mixed} $payload */
+    /**
+     * @param array{oracleTitle?: mixed, resultText?: mixed} $payload
+     */
     public static function fromArray(array $payload): self
     {
-        return new self((string) ($payload['oracleTitle'] ?? ''), (string) ($payload['resultText'] ?? ''));
+        $title = $payload['oracleTitle'] ?? '';
+        $text = $payload['resultText'] ?? '';
+
+        if (!is_string($title) || !is_string($text)) {
+            throw new \InvalidArgumentException('An oracle snapshot payload must contain string fields.');
+        }
+
+        return new self($title, $text);
     }
 }

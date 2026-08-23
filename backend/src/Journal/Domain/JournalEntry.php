@@ -37,7 +37,7 @@ final readonly class JournalEntry
         $this->assertPayloadMatchesKind();
     }
 
-    public static function narrative(
+    public static function writeNarrative(
         CampaignId $campaignId,
         string $stageName,
         string $text,
@@ -55,7 +55,7 @@ final readonly class JournalEntry
         );
     }
 
-    public static function oracleResult(
+    public static function recordOracleResult(
         CampaignId $campaignId,
         string $stageName,
         OracleSnapshot $snapshot,
@@ -73,7 +73,7 @@ final readonly class JournalEntry
         );
     }
 
-    public static function diceRoll(
+    public static function recordDiceRoll(
         CampaignId $campaignId,
         string $stageName,
         RollSnapshot $snapshot,
@@ -183,13 +183,14 @@ final readonly class JournalEntry
 
     private function assertPayloadMatchesKind(): void
     {
-        match ($this->kind) {
-            JournalEntryKind::Narrative => $this->narrative !== null && $this->oracleSnapshot === null && $this->rollSnapshot === null
-                ?: throw new \InvalidArgumentException('Narrative entries carry text and no snapshots.'),
-            JournalEntryKind::OracleResult => $this->narrative === null && $this->oracleSnapshot instanceof OracleSnapshot && $this->rollSnapshot === null
-                ?: throw new \InvalidArgumentException('Oracle-result entries carry an oracle snapshot only.'),
-            JournalEntryKind::DiceRoll => $this->narrative === null && $this->oracleSnapshot === null && $this->rollSnapshot instanceof RollSnapshot
-                ?: throw new \InvalidArgumentException('Dice-roll entries carry a roll snapshot only.'),
+        $valid = match ($this->kind) {
+            JournalEntryKind::Narrative => $this->narrative !== null && $this->oracleSnapshot === null && $this->rollSnapshot === null,
+            JournalEntryKind::OracleResult => $this->narrative === null && $this->oracleSnapshot instanceof OracleSnapshot && $this->rollSnapshot === null,
+            JournalEntryKind::DiceRoll => $this->narrative === null && $this->oracleSnapshot === null && $this->rollSnapshot instanceof RollSnapshot,
         };
+
+        if (!$valid) {
+            throw new \InvalidArgumentException(sprintf('The "%s" entry payload does not match its kind.', $this->kind->value));
+        }
     }
 }

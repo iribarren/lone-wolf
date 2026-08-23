@@ -56,7 +56,7 @@ final class HandlersTest extends TestCase
     public function testStartCampaignRefusesAnInactiveSystem(): void
     {
         $harness = $this->harness();
-        $harness->active = false;
+        $harness->flowProvider->active = false;
 
         $this->expectException(SystemNotPlayableException::class);
         $this->expectExceptionMessage('inactive');

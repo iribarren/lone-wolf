@@ -39,14 +39,29 @@ final readonly class RollSnapshot
         ];
     }
 
-    /** @param array{notation?: mixed, diceValues?: mixed, modifier?: mixed, total?: mixed} $payload */
+    /**
+     * @param array{notation?: mixed, diceValues?: mixed, modifier?: mixed, total?: mixed} $payload
+     */
     public static function fromArray(array $payload): self
     {
-        return new self(
-            (string) ($payload['notation'] ?? ''),
-            array_map(intval(...), (array) ($payload['diceValues'] ?? [])),
-            (int) ($payload['modifier'] ?? 0),
-            (int) ($payload['total'] ?? 0),
-        );
+        $notation = $payload['notation'] ?? '';
+        $modifier = $payload['modifier'] ?? 0;
+        $total = $payload['total'] ?? 0;
+        $rawDice = $payload['diceValues'] ?? [];
+
+        if (!is_string($notation) || !is_int($modifier) || !is_int($total) || !is_array($rawDice)) {
+            throw new \InvalidArgumentException('A roll snapshot payload is malformed.');
+        }
+
+        $diceValues = [];
+        foreach ($rawDice as $value) {
+            if (!is_int($value)) {
+                throw new \InvalidArgumentException('Roll snapshot die values must be integers.');
+            }
+
+            $diceValues[] = $value;
+        }
+
+        return new self($notation, $diceValues, $modifier, $total);
     }
 }

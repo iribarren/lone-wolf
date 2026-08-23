@@ -22,6 +22,9 @@ interface CampaignRepositoryInterface
     /** Hard delete — irreversible (FR-020). */
     public function delete(CampaignId $id): void;
 
-    /** FR-019 — reads are always scoped to the owning player. @return list<Campaign> */
+    /** FR-019 — reads are always scoped to the owning player.
+     *
+     * @return list<Campaign>
+     */
     public function ownedBy(UserId $playerId): array;
 }

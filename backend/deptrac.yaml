@@ -114,12 +114,15 @@ deptrac:
 
         CampaignsDomain:
             - SharedKernelDomain
-        # Explicit cross-context edge (see comment above): the guided-play
-        # loop appends journal entries and cascades confirmed deletes through
-        # the Journal context's application ports.
+        # Explicit cross-context edges (see comment above): the guided-play
+        # loop is orchestrated by Campaigns — its application handlers append
+        # journal entries (and cascade confirmed deletes) through the Journal
+        # context's repository port, passing the Journal aggregate through as
+        # a value. Oracles repeats this pattern for saved consultations (US4).
         CampaignsApplication:
             - CampaignsDomain
             - JournalApplication
+            - JournalDomain
             - SharedKernelDomain
             - SharedKernelApplication
         CampaignsInfrastructure:
