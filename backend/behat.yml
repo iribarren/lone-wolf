@@ -3,10 +3,11 @@ default:
         default:
             paths:
                 - features
-            contexts:
-                - App\Tests\Acceptance\Context\ApiPlumbingContext
-                - App\Tests\Acceptance\Context\RulesetsContext
-                - App\Tests\Acceptance\Context\CampaignsContext
+contexts:
+    - App\Tests\Acceptance\Context\ApiPlumbingContext
+    - App\Tests\Acceptance\Context\RulesetsContext
+    - App\Tests\Acceptance\Context\CampaignsContext
+    - App\Tests\Acceptance\Context\OraclesContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
