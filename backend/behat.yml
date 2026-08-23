@@ -1,0 +1,17 @@
+default:
+    suites:
+        default:
+            paths:
+                - features
+            contexts:
+                - App\Tests\Acceptance\Context\ApiPlumbingContext
+                - App\Tests\Acceptance\Context\RulesetsContext
+                - App\Tests\Acceptance\Context\CampaignsContext
+
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: tests/behat-bootstrap.php
+            kernel:
+                class: App\Kernel
+                environment: test
+                debug: true

@@ -24,13 +24,13 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 **Purpose**: Bootable two-stack monorepo matching plan.md Phase-1 outline
 
-- [ ] T001 Create monorepo layout with `/backend` and `/frontend` directories and root `README.md` documenting the two-stack split and contract-first (OpenAPI-only) communication rule
-- [ ] T002 Author `docker-compose.yml` at repo root with services `php`, `nginx`, `postgres`, `frontend` plus root `.env.dist` templates (no secrets committed)
-- [ ] T003 [P] Write `backend/Dockerfile`: php:8.3-fpm + Composer + pdo_pgsql/intl/zip/opcache extensions
-- [ ] T004 [P] Write `docker/nginx/default.conf`: FastCGI proxy to php service serving `backend/public`
-- [ ] T005 [P] Write `frontend/Dockerfile`: node:22 image running Next.js dev server
-- [ ] T006 [P] Add root `Makefile` with targets up/down/logs/test/lint/console/npm wrapping compose commands
-- [ ] T007 Verify `docker compose up --build` yields reachable nginx vhost and frontend placeholder; record expected output in `README.md`
+- [x] T001 Create monorepo layout with `/backend` and `/frontend` directories and root `README.md` documenting the two-stack split and contract-first (OpenAPI-only) communication rule
+- [x] T002 Author `docker-compose.yml` at repo root with services `php`, `nginx`, `postgres`, `frontend` plus root `.env.dist` templates (no secrets committed)
+- [x] T003 [P] Write `backend/Dockerfile`: php:8.3-fpm + Composer + pdo_pgsql/intl/zip/opcache extensions
+- [x] T004 [P] Write `docker/nginx/default.conf`: FastCGI proxy to php service serving `backend/public`
+- [x] T005 [P] Write `frontend/Dockerfile`: node:22 image running Next.js dev server
+- [x] T006 [P] Add root `Makefile` with targets up/down/logs/test/lint/console/npm wrapping compose commands
+- [x] T007 Verify `docker compose up --build` yields reachable nginx vhost and frontend placeholder; record expected output in `README.md`
 
 **Checkpoint**: One-command stack boots; nothing implemented yet.
 
@@ -44,25 +44,25 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Backend core (Symfony + Hexagon + Gates)
 
-- [ ] T010 Install Symfony 7.4 LTS skeleton into `backend/` (composer.json, bin/console, public/index.php, .env) wired to compose PostgreSQL
-- [ ] T011 [P] Create hexagonal bounded-context skeletons `backend/src/{Shared,Rulesets,Campaigns,Journal,Oracles,Characters,Dice,Identity}/{Domain,Application,Infrastructure}` each with a `README.md` stating its ubiquitous language and inward-only dependency rule
-- [ ] T012 Configure PHPStan level-max + phpstan/phpstan-strict-rules (enforces declare(strict_types=1), full typing) in `backend/phpstan.neon`; add `composer analyze` script
-- [ ] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
-- [ ] T014 [P] Install Behat + FriendsOfBehat/SymfonyExtension with API HTTP-client contexts; `backend/behat.yml`; empty smoke feature `backend/features/smoke.feature`
-- [ ] T015 [P] Install deptrac with layer rules per context (Domain ← Application ← Infrastructure; Domain may import nothing outward) in `backend/deptrac.yaml`; wire into `composer lint` chain
-- [ ] T016 Implement shared-kernel ports + prod adapters `ClockInterface`/`SystemClock`, `RandomSourceInterface`/`ProductionRandomSource` in `backend/src/Shared/Domain/` and `backend/src/Shared/Infrastructure/Time|Rng/` (Constitution IV: injectable time/randomness)
-- [ ] T017 Implement typed identifier VOs `GameSystemId`, `StageId`, `CampaignId`, `OracleId`, `CharacterId`, `JournalEntryId`, `UserId` in `backend/src/Shared/Domain/Identifier/` (data-model.md shared kernel)
-- [ ] T018 Configure Doctrine ORM connection + migration framework with `jsonb` DBAL type override registered in `backend/config/packages/doctrine.yaml` + `backend/src/Shared/Infrastructure/Persistence/Types/`; generate initial empty migration
-- [ ] T019 Implement Identity context: `User` aggregate (email, passwordHash, roles array), `UserRepositoryInterface` port + Doctrine adapter in `backend/src/Identity/{Domain,Application,Infrastructure}`
-- [ ] T020 Install lexik/jwt-authentication-bundle; wire JWT firewalls for `/api` and `/admin` (ROLE_ADMIN backoffice vs ROLE_PLAYER, FR-030); expose `POST /api/auth/register` + `POST /api/auth/login` controllers in `backend/src/Identity/Infrastructure/Api/` per contracts/openapi.yaml Auth paths
-- [ ] T021 Install API Platform; enable OpenAPI docs endpoint `/api/docs.json`, RFC 7807 error format, pagination defaults; add health route `GET /api/health` returning `{"status":"ok"}` in `backend/src/Shared/Infrastructure/Api/HealthController.php`
-- [ ] T022 Create bootstrap admin seeder `backend/src/Identity/Infrastructure/Console/CreateAdminCommand.php` (command `app:create-admin`) writing a ROLE_ADMIN account from env vars
+- [x] T010 Install Symfony 7.4 LTS skeleton into `backend/` (composer.json, bin/console, public/index.php, .env) wired to compose PostgreSQL
+- [x] T011 [P] Create hexagonal bounded-context skeletons `backend/src/{Shared,Rulesets,Campaigns,Journal,Oracles,Characters,Dice,Identity}/{Domain,Application,Infrastructure}` each with a `README.md` stating its ubiquitous language and inward-only dependency rule
+- [x] T012 Configure PHPStan level-max + phpstan/phpstan-strict-rules (enforces declare(strict_types=1), full typing) in `backend/phpstan.neon`; add `composer analyze` script
+- [x] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
+- [x] T014 [P] Install Behat + FriendsOfBehat/SymfonyExtension with API HTTP-client contexts; `backend/behat.yml`; empty smoke feature `backend/features/smoke.feature`
+- [x] T015 [P] Install deptrac with layer rules per context (Domain ← Application ← Infrastructure; Domain may import nothing outward) in `backend/deptrac.yaml`; wire into `composer lint` chain
+- [x] T016 Implement shared-kernel ports + prod adapters `ClockInterface`/`SystemClock`, `RandomSourceInterface`/`ProductionRandomSource` in `backend/src/Shared/Domain/` and `backend/src/Shared/Infrastructure/Time|Rng/` (Constitution IV: injectable time/randomness)
+- [x] T017 Implement typed identifier VOs `GameSystemId`, `StageId`, `CampaignId`, `OracleId`, `CharacterId`, `JournalEntryId`, `UserId` in `backend/src/Shared/Domain/Identifier/` (data-model.md shared kernel)
+- [x] T018 Configure Doctrine ORM connection + migration framework with `jsonb` DBAL type override registered in `backend/config/packages/doctrine.yaml` + `backend/src/Shared/Infrastructure/Persistence/Types/`; generate initial empty migration
+- [x] T019 Implement Identity context: `User` aggregate (email, passwordHash, roles array), `UserRepositoryInterface` port + Doctrine adapter in `backend/src/Identity/{Domain,Application,Infrastructure}`
+- [x] T020 Install lexik/jwt-authentication-bundle; wire JWT firewalls for `/api` and `/admin` (ROLE_ADMIN backoffice vs ROLE_PLAYER, FR-030); expose `POST /api/auth/register` + `POST /api/auth/login` controllers in `backend/src/Identity/Infrastructure/Api/` per contracts/openapi.yaml Auth paths
+- [x] T021 Install API Platform; enable OpenAPI docs endpoint `/api/docs.json`, RFC 7807 error format, pagination defaults; add health route `GET /api/health` returning `{"status":"ok"}` in `backend/src/Shared/Infrastructure/Api/HealthController.php`
+- [x] T022 Create bootstrap admin seeder `backend/src/Identity/Infrastructure/Console/CreateAdminCommand.php` (command `app:create-admin`) writing a ROLE_ADMIN account from env vars
 
 ### Frontend core (Next.js + contract-first client)
 
-- [ ] T023 Scaffold Next.js App Router project with TypeScript `strict` mode, ESLint, base layout in `frontend/` (package.json/tsconfig/next.config.ts) running inside its container
-- [ ] T024 Build contract-first client pipeline: `frontend/scripts/generate-api-client.sh` downloads backend `/api/docs.json` → `openapi-typescript` emits `frontend/src/lib/api/schema.gen.ts`; hand-written typed fetch wrapper `frontend/src/lib/api/client.ts` (raw URLs prohibited anywhere else, Constitution V)
-- [ ] T025 [P] Wire TanStack Query provider, JWT bearer attach + token storage helpers in `frontend/src/lib/auth.ts` and `frontend/src/lib/hooks/useApiClient.ts`
+- [x] T023 Scaffold Next.js App Router project with TypeScript `strict` mode, ESLint, base layout in `frontend/` (package.json/tsconfig/next.config.ts) running inside its container
+- [x] T024 Build contract-first client pipeline: `frontend/scripts/generate-api-client.sh` downloads backend `/api/docs.json` → `openapi-typescript` emits `frontend/src/lib/api/schema.gen.ts`; hand-written typed fetch wrapper `frontend/src/lib/api/client.ts` (raw URLs prohibited anywhere else, Constitution V)
+- [x] T025 [P] Wire TanStack Query provider, JWT bearer attach + token storage helpers in `frontend/src/lib/auth.ts` and `frontend/src/lib/hooks/useApiClient.ts`
 
 **Checkpoint**: Foundation ready — user stories can start (and US1/US2 may proceed in parallel afterwards).
 
@@ -76,21 +76,21 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 1 (write FIRST, ensure they FAIL)
 
-- [ ] T026 [P] [US1] Unit tests for `FlowDefinition` invariants (≥2 stages, unique names, exactly-one starting stage, transitions reference existing stages) in `backend/tests/Unit/Rulesets/FlowDefinitionTest.php`
-- [ ] T027 [P] [US1] Unit tests for `SheetStructure`/`FieldDefinition` VOs (unique keys, select-options required, PC/NPC requirement flags, version stamp) in `backend/tests/Unit/Rulesets/SheetStructureTest.php`
-- [ ] T028 [P] [US1] Unit tests for `GameSystem` activate/deactivate semantics (deactivation never mutates playable campaigns, FR-006) in `backend/tests/Unit/Rulesets/GameSystemStatusTest.php`
-- [ ] T029 [P] [US1] Integration test: flow modification blocked while `StageOccupancyChecker` reports occupation (FR-005) and optimistic-lock supersede conflict surfaces in `backend/tests/Integration/Rulesets/FlowModificationGuardTest.php`
+- [x] T026 [P] [US1] Unit tests for `FlowDefinition` invariants (≥2 stages, unique names, exactly-one starting stage, transitions reference existing stages) in `backend/tests/Unit/Rulesets/FlowDefinitionTest.php`
+- [x] T027 [P] [US1] Unit tests for `SheetStructure`/`FieldDefinition` VOs (unique keys, select-options required, PC/NPC requirement flags, version stamp) in `backend/tests/Unit/Rulesets/SheetStructureTest.php`
+- [x] T028 [P] [US1] Unit tests for `GameSystem` activate/deactivate semantics (deactivation never mutates playable campaigns, FR-006) in `backend/tests/Unit/Rulesets/GameSystemStatusTest.php`
+- [x] T029 [P] [US1] Integration test: flow modification blocked while `StageOccupancyChecker` reports occupation (FR-005) and optimistic-lock supersede conflict surfaces in `backend/tests/Integration/Rulesets/FlowModificationGuardTest.php`
 
 ### Implementation for User Story 1
 
-- [ ] T030 [US1] Implement Rulesets Domain model: `FlowStage`, `FlowTransition`, `FlowDefinition`, `FieldDefinition`, `SheetStructure`, `GameSystem` aggregate (name/description/status/activate()/deactivate(), owns FlowDefinition + SheetStructure) in `backend/src/Rulesets/Domain/` — pure PHP, native types only
-- [ ] T031 [US1] Define Application ports `RulesetRepositoryInterface`, `StageOccupancyCheckerInterface` and read query `ListAvailableSystems` in `backend/src/Rulesets/Application/`
-- [ ] T032 [US1] Implement handlers `CreateGameSystem`, `UpdateFlowDefinition` (runs occupancy guard, refuses with explanation), `UpdateSheetStructure` (bumps version), `SetSystemStatus` in `backend/src/Rulesets/Application/`
-- [ ] T033 [US1] Doctrine persistence for Rulesets: XML/attribute mappings, repositories implementing ports, `jsonb` columns for flow_definition + sheet_structure, optimistic-lock `version` column; migration in `backend/migrations/`
-- [ ] T034 [US1] EasyAdmin backoffice CRUD for systems incl. stage/transition editor enforcing FR-002..FR-005 messages and sheet-structure field editor in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`. Configure the optimistic-lock version field and catch `OptimisticLockException` to render a "your changes were superseded — review the current version" flash message (Edge Case §8)
-- [ ] T035 [US1] Expose API Platform resource `GET /api/systems` (active-only summaries with startingStage + openingGuidance, per contracts SystemSummary) in `backend/src/Rulesets/Infrastructure/Api/SystemResource.php`
-- [ ] T036 [US1] Bind Rulesets' `StageOccupancyCheckerInterface` to an in-memory null checker in `backend/src/Rulesets/Infrastructure/Persistence/InMemoryStageOccupancyChecker.php` (zero campaigns can exist before US2; the real Doctrine adapter replaces this stub in T047)
-- [ ] T037 [US1] Behat feature: admin authors Scene-Sequel + Act Ladder systems, both appear in player-facing list; occupied-stage edit refused (quickstart V1/V2) in `backend/features/rulesets/author_system_flow.feature`
+- [x] T030 [US1] Implement Rulesets Domain model: `FlowStage`, `FlowTransition`, `FlowDefinition`, `FieldDefinition`, `SheetStructure`, `GameSystem` aggregate (name/description/status/activate()/deactivate(), owns FlowDefinition + SheetStructure) in `backend/src/Rulesets/Domain/` — pure PHP, native types only
+- [x] T031 [US1] Define Application ports `RulesetRepositoryInterface`, `StageOccupancyCheckerInterface` and read query `ListAvailableSystems` in `backend/src/Rulesets/Application/`
+- [x] T032 [US1] Implement handlers `CreateGameSystem`, `UpdateFlowDefinition` (runs occupancy guard, refuses with explanation), `UpdateSheetStructure` (bumps version), `SetSystemStatus` in `backend/src/Rulesets/Application/`
+- [x] T033 [US1] Doctrine persistence for Rulesets: XML/attribute mappings, repositories implementing ports, `jsonb` columns for flow_definition + sheet_structure, optimistic-lock `version` column; migration in `backend/migrations/`
+- [x] T034 [US1] EasyAdmin backoffice CRUD for systems incl. stage/transition editor enforcing FR-002..FR-005 messages and sheet-structure field editor in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`. Configure the optimistic-lock version field and catch `OptimisticLockException` to render a "your changes were superseded — review the current version" flash message (Edge Case §8)
+- [x] T035 [US1] Expose API Platform resource `GET /api/systems` (active-only summaries with startingStage + openingGuidance, per contracts SystemSummary) in `backend/src/Rulesets/Infrastructure/Api/SystemResource.php`
+- [x] T036 [US1] Bind Rulesets' `StageOccupancyCheckerInterface` to an in-memory null checker in `backend/src/Rulesets/Infrastructure/Persistence/InMemoryStageOccupancyChecker.php` (zero campaigns can exist before US2; the real Doctrine adapter replaces this stub in T047)
+- [x] T037 [US1] Behat feature: admin authors Scene-Sequel + Act Ladder systems, both appear in player-facing list; occupied-stage edit refused (quickstart V1/V2) in `backend/features/rulesets/author_system_flow.feature`
 
 **Checkpoint**: US1 independently functional — admin content pipeline works end-to-end.
 
@@ -104,24 +104,24 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 2 (write FIRST, ensure they FAIL)
 
-- [ ] T039 [P] [US2] Unit tests for `FlowEngine` state machine: `legalNextStages()`, `assertCanAdvance()` throwing exception carrying legal alternatives (FR-016), terminal-stage conclude-guidance (US2-5) in `backend/tests/Unit/Campaigns/FlowEngineTest.php`
-- [ ] T040 [P] [US2] Unit tests for handlers: StartCampaign positions on designated starting stage (FR-013) and refuses inactive systems (FR-012), AdvanceStage refusal payload shape, AppendNarrativeEntry stamps current stage (FR-015) in `backend/tests/Unit/Campaigns/HandlersTest.php`
-- [ ] T041 [P] [US2] Integration test: campaign + journal persistence round-trip proving resume-exactly (FR-018), owner-scoped reads (FR-019), irreversible delete cascades in `backend/tests/Integration/Campaigns/PersistenceResumeTest.php`
+- [x] T039 [P] [US2] Unit tests for `FlowEngine` state machine: `legalNextStages()`, `assertCanAdvance()` throwing exception carrying legal alternatives (FR-016), terminal-stage conclude-guidance (US2-5) in `backend/tests/Unit/Campaigns/FlowEngineTest.php`
+- [x] T040 [P] [US2] Unit tests for handlers: StartCampaign positions on designated starting stage (FR-013) and refuses inactive systems (FR-012), AdvanceStage refusal payload shape, AppendNarrativeEntry stamps current stage (FR-015) in `backend/tests/Unit/Campaigns/HandlersTest.php`
+- [x] T041 [P] [US2] Integration test: campaign + journal persistence round-trip proving resume-exactly (FR-018), owner-scoped reads (FR-019), irreversible delete cascades in `backend/tests/Integration/Campaigns/PersistenceResumeTest.php`
 
 ### Implementation for User Story 2
 
-- [ ] T043 [US2] Implement Campaigns Domain: `Campaign` aggregate (playerId, gameSystemId immutable, StagePosition), `Guidance`, `IllegalStageTransitionException`, graph-driven `FlowEngine` service in `backend/src/Campaigns/Domain/`
-- [ ] T044 [US2] Implement Journal Domain: `JournalEntry` aggregate (kind narrative|oracle_result|dice_roll, stageId + denormalized stageName snapshot, nullable snapshots) in `backend/src/Journal/Domain/`
-- [ ] T045 [US2] Define ports `CampaignRepositoryInterface`, `JournalEntryRepositoryInterface`, `FlowDefinitionProviderInterface` in `backend/src/Campaigns/Application/` and `backend/src/Journal/Application/`
-- [ ] T046 [US2] Implement handlers: `StartCampaign` (validates the bound system is active, refusing otherwise — FR-012), `AdvanceStage` (422 refusal listing legal alternatives), `AppendNarrativeEntry`, `GetCampaignState` (guidance + suggestedActions), `ListJournalEntries` (keyset-paginated, stage-groupable), `DeleteCampaign` (requires confirm flag, hard delete) in `backend/src/Campaigns/Application/` + `backend/src/Journal/Application/`
-- [ ] T047 [US2] Doctrine persistence for Campaigns + Journal: mappings, repositories, FK cascades, covering index `(campaign_id, created_at DESC)` (SC-008); migration. Includes `DoctrineStageOccupancyChecker` answering Rulesets' FR-005 port, replacing the T036 stub
-- [ ] T048 [US2] Expose API Platform endpoints per contract: `GET/POST /api/campaigns`, `GET /api/campaigns/{id}`, `POST /api/campaigns/{id}/advance`, `GET/POST /api/campaigns/{id}/journal`, `DELETE /api/campaigns/{id}?confirm=true` in `backend/src/Campaigns/Infrastructure/Api/` + `backend/src/Journal/Infrastructure/Api/`
-- [ ] T049 [US2] Enforce per-player ownership security voters/query filters on every campaign/journal operation (FR-019/FR-030) in `backend/src/Campaigns/Infrastructure/Security/CampaignOwnershipVoter.php`
-- [ ] T050 [US2] Frontend system-picker + campaign creation flow posting to generated client in `frontend/src/app/(play)/campaigns/new/page.tsx`
-- [ ] T051 [US2] Frontend GM console (structure-aware, not flat journal): current-stage guidance card, suggested-action buttons derived from legalTransitions, refusal feedback banner showing legal options, exact-resume on open in `frontend/src/components/campaign/StagePanel.tsx`, `AdvanceActions.tsx` + `frontend/src/app/(play)/campaigns/[id]/page.tsx`. Include a CampaignSettings section with a delete control requiring typed confirmation and an irreversibility notice, calling `DELETE /api/campaigns/{id}?confirm=true` (FR-020)
-- [ ] T052 [US2] Frontend stage-grouped chronological journal timeline + narrative composer keyed to current stage in `frontend/src/components/journal/JournalTimeline.tsx`, `EntryComposer.tsx`
-- [ ] T053 [P] [US2] Vitest component tests for StagePanel/AdvanceActions states (guidance render, advance enabled set, refusal feedback, terminal conclude) in `frontend/tests/components/campaign/StagePanel.test.tsx`
-- [ ] T054 [US2] Behat guided-play feature executing quickstart V3 incl. illegal-move refusal body + resume assertions in `backend/features/campaigns/guided_play.feature`
+- [x] T043 [US2] Implement Campaigns Domain: `Campaign` aggregate (playerId, gameSystemId immutable, StagePosition), `Guidance`, `IllegalStageTransitionException`, graph-driven `FlowEngine` service in `backend/src/Campaigns/Domain/`
+- [x] T044 [US2] Implement Journal Domain: `JournalEntry` aggregate (kind narrative|oracle_result|dice_roll, stageId + denormalized stageName snapshot, nullable snapshots) in `backend/src/Journal/Domain/`
+- [x] T045 [US2] Define ports `CampaignRepositoryInterface`, `JournalEntryRepositoryInterface`, `FlowDefinitionProviderInterface` in `backend/src/Campaigns/Application/` and `backend/src/Journal/Application/`
+- [x] T046 [US2] Implement handlers: `StartCampaign` (validates the bound system is active, refusing otherwise — FR-012), `AdvanceStage` (422 refusal listing legal alternatives), `AppendNarrativeEntry`, `GetCampaignState` (guidance + suggestedActions), `ListJournalEntries` (keyset-paginated, stage-groupable), `DeleteCampaign` (requires confirm flag, hard delete) in `backend/src/Campaigns/Application/` + `backend/src/Journal/Application/`
+- [x] T047 [US2] Doctrine persistence for Campaigns + Journal: mappings, repositories, FK cascades, covering index `(campaign_id, created_at DESC)` (SC-008); migration. Includes `DoctrineStageOccupancyChecker` answering Rulesets' FR-005 port, replacing the T036 stub
+- [x] T048 [US2] Expose API Platform endpoints per contract: `GET/POST /api/campaigns`, `GET /api/campaigns/{id}`, `POST /api/campaigns/{id}/advance`, `GET/POST /api/campaigns/{id}/journal`, `DELETE /api/campaigns/{id}?confirm=true` in `backend/src/Campaigns/Infrastructure/Api/` + `backend/src/Journal/Infrastructure/Api/`
+- [x] T049 [US2] Enforce per-player ownership security voters/query filters on every campaign/journal operation (FR-019/FR-030) in `backend/src/Campaigns/Infrastructure/Security/CampaignOwnershipVoter.php`
+- [x] T050 [US2] Frontend system-picker + campaign creation flow posting to generated client in `frontend/src/app/(play)/campaigns/new/page.tsx`
+- [x] T051 [US2] Frontend GM console (structure-aware, not flat journal): current-stage guidance card, suggested-action buttons derived from legalTransitions, refusal feedback banner showing legal options, exact-resume on open in `frontend/src/components/campaign/StagePanel.tsx`, `AdvanceActions.tsx` + `frontend/src/app/(play)/campaigns/[id]/page.tsx`. Include a CampaignSettings section with a delete control requiring typed confirmation and an irreversibility notice, calling `DELETE /api/campaigns/{id}?confirm=true` (FR-020)
+- [x] T052 [US2] Frontend stage-grouped chronological journal timeline + narrative composer keyed to current stage in `frontend/src/components/journal/JournalTimeline.tsx`, `EntryComposer.tsx`
+- [x] T053 [P] [US2] Vitest component tests for StagePanel/AdvanceActions states (guidance render, advance enabled set, refusal feedback, terminal conclude) in `frontend/tests/components/campaign/StagePanel.test.tsx`
+- [x] T054 [US2] Behat guided-play feature executing quickstart V3 incl. illegal-move refusal body + resume assertions in `backend/features/campaigns/guided_play.feature`
 
 **Checkpoint**: US1 + US2 = playable MVP loop (create system → play guided campaign → journal).
 

@@ -1,0 +1,29 @@
+api_platform:
+    title: Lone Wolf API
+    version: 1.0.0
+    description: |
+      Contract-first REST API between the Next.js frontend and this backend
+      (Constitution Principle V). Errors use RFC 7807 problem+json.
+    defaults:
+        stateless: true
+        # Plain JSON is a first-class format for the Next.js client.
+        formats:
+            jsonld: ['application/ld+json']
+            json: ['application/json']
+        pagination:
+            page_parameter_name: page
+            items_per_page: 25
+            maximum_items_per_page: 100
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    # RFC 7807 problem+json for API errors (contract requirement).
+    error_formats:
+        jsonproblem: ['application/problem+json']
+        jsonld: ['application/ld+json']
+    # Serve machine-readable OpenAPI JSON at /api/docs.json as required by
+    # specs/001-solo-ttrpg-assistant/contracts/openapi.yaml tooling.
+    docs_formats:
+        jsonld: ['application/ld+json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
+        json: ['application/json']

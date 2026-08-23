@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- https://phpunit.readthedocs.io/en/11.0/configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         failOnDeprecation="false"
+         failOnWarning="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+>
+    <php>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+        <env name="APP_ENV" value="test" force="true"/>
+        <env name="KERNEL_CLASS" value="App\Kernel"/>
+        <env name="APP_DEBUG" value="1"/>
+        <!-- Fail on deprecations triggered by OUR code; vendor/bridge
+             indirect deprecations (e.g. Doctrine proxies) don't gate. -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
+    </php>
+
+    <testsuites>
+        <!-- Pure Domain/Application tests. MUST NOT boot the Symfony kernel,
+             Doctrine or any container (Constitution IV). -->
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+
+        <!-- Infrastructure adapter tests (Doctrine round-trips incl. JSONB).
+             These DO boot the kernel against the configured PostgreSQL. -->
+        <testsuite name="integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <source ignoreSuppressionOfDeprecations="true"
+            restrictNotices="true"
+            restrictWarnings="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+</phpunit>

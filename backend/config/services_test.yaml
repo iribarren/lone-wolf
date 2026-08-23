@@ -1,0 +1,48 @@
+# Behat contexts are resolved FROM the Symfony test container by
+# FriendsOfBehat\SymfonyExtension (constructor injection works).
+services:
+    App\Tests\Acceptance\Context\:
+        resource: '../tests/Acceptance/Context/'
+        public: true
+        autowire: true
+        autoconfigure: false
+
+    Symfony\Bundle\FrameworkBundle\KernelBrowser: '@test.client'
+
+    # Integration tests pull these handlers straight from the test container.
+    App\Rulesets\Application\CreateGameSystemHandler:
+        public: true
+        autowire: true
+    App\Rulesets\Application\UpdateFlowDefinitionHandler:
+        public: true
+        autowire: true
+
+    # US2 handlers/repos exercised against the real PostgreSQL adapters.
+    App\Campaigns\Application\StartCampaignHandler:
+        public: true
+        autowire: true
+    App\Campaigns\Application\AdvanceStageHandler:
+        public: true
+        autowire: true
+    App\Campaigns\Application\AppendNarrativeEntryHandler:
+        public: true
+        autowire: true
+    App\Campaigns\Application\GetCampaignStateHandler:
+        public: true
+        autowire: true
+    App\Campaigns\Application\ListCampaignsHandler:
+        public: true
+        autowire: true
+    App\Campaigns\Application\DeleteCampaignHandler:
+        public: true
+        autowire: true
+    App\Journal\Application\ListJournalEntriesHandler:
+        public: true
+        autowire: true
+
+    App\Campaigns\Application\Port\CampaignRepositoryInterface:
+        alias: App\Campaigns\Infrastructure\Persistence\PersistenceCampaignRepository
+        public: true
+    App\Journal\Application\Port\JournalEntryRepositoryInterface:
+        alias: App\Journal\Infrastructure\Persistence\PersistenceJournalEntryRepository
+        public: true

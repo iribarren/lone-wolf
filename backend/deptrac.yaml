@@ -1,0 +1,209 @@
+# deptrac — layer rules per bounded context (Constitution I–II).
+# Within every context: Infrastructure → Application → Domain, dependencies point inward only.
+# The Shared kernel may be imported by any context; it imports none of them.
+deptrac:
+    paths:
+        - src
+    exclude_files:
+        - '#.*test.*#'
+        - '#src/Kernel\.php#'
+    layers:
+        # ---- Shared kernel (bottom) ----
+        - name: SharedKernelDomain
+          collectors:
+              - { type: directory, value: src/Shared/Domain/.* }
+        - name: SharedKernelApplication
+          collectors:
+              - { type: directory, value: src/Shared/Application/.* }
+        - name: SharedKernelInfrastructure
+          collectors:
+              - { type: directory, value: src/Shared/Infrastructure/.* }
+
+        # ---- Contexts ----
+        - name: RulesetsDomain
+          collectors:
+              - { type: directory, value: src/Rulesets/Domain/.* }
+        - name: RulesetsApplication
+          collectors:
+              - { type: directory, value: src/Rulesets/Application/.* }
+        - name: RulesetsInfrastructure
+          collectors:
+              - { type: directory, value: src/Rulesets/Infrastructure/.* }
+
+        - name: CampaignsDomain
+          collectors:
+              - { type: directory, value: src/Campaigns/Domain/.* }
+        - name: CampaignsApplication
+          collectors:
+              - { type: directory, value: src/Campaigns/Application/.* }
+        - name: CampaignsInfrastructure
+          collectors:
+              - { type: directory, value: src/Campaigns/Infrastructure/.* }
+
+        - name: JournalDomain
+          collectors:
+              - { type: directory, value: src/Journal/Domain/.* }
+        - name: JournalApplication
+          collectors:
+              - { type: directory, value: src/Journal/Application/.* }
+        - name: JournalInfrastructure
+          collectors:
+              - { type: directory, value: src/Journal/Infrastructure/.* }
+
+        - name: OraclesDomain
+          collectors:
+              - { type: directory, value: src/Oracles/Domain/.* }
+        - name: OraclesApplication
+          collectors:
+              - { type: directory, value: src/Oracles/Application/.* }
+        - name: OraclesInfrastructure
+          collectors:
+              - { type: directory, value: src/Oracles/Infrastructure/.* }
+
+        - name: CharactersDomain
+          collectors:
+              - { type: directory, value: src/Characters/Domain/.* }
+        - name: CharactersApplication
+          collectors:
+              - { type: directory, value: src/Characters/Application/.* }
+        - name: CharactersInfrastructure
+          collectors:
+              - { type: directory, value: src/Characters/Infrastructure/.* }
+
+        - name: DiceDomain
+          collectors:
+              - { type: directory, value: src/Dice/Domain/.* }
+        - name: DiceApplication
+          collectors:
+              - { type: directory, value: src/Dice/Application/.* }
+        - name: DiceInfrastructure
+          collectors:
+              - { type: directory, value: src/Dice/Infrastructure/.* }
+
+        - name: IdentityDomain
+          collectors:
+              - { type: directory, value: src/Identity/Domain/.* }
+        - name: IdentityApplication
+          collectors:
+              - { type: directory, value: src/Identity/Application/.* }
+        - name: IdentityInfrastructure
+          collectors:
+              - { type: directory, value: src/Identity/Infrastructure/.* }
+
+    ruleset:
+        SharedKernelDomain: []
+        SharedKernelApplication:
+            - SharedKernelDomain
+        SharedKernelInfrastructure:
+            - SharedKernelApplication
+            - SharedKernelDomain
+
+        # Every context follows the same inward-only shape and may use the shared kernel.
+        RulesetsDomain:
+            - SharedKernelDomain
+        RulesetsApplication:
+            - RulesetsDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        RulesetsInfrastructure:
+            - RulesetsApplication
+            - RulesetsDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        CampaignsDomain:
+            - SharedKernelDomain
+        # Explicit cross-context edges (see comment above): the guided-play
+        # loop is orchestrated by Campaigns — its application handlers append
+        # journal entries (and cascade confirmed deletes) through the Journal
+        # context's repository port, passing the Journal aggregate through as
+        # a value. Oracles repeats this pattern for saved consultations (US4).
+        CampaignsApplication:
+            - CampaignsDomain
+            - JournalApplication
+            - JournalDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        CampaignsInfrastructure:
+            - CampaignsApplication
+            - CampaignsDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        JournalDomain:
+            - SharedKernelDomain
+        JournalApplication:
+            - JournalDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        # Explicit cross-context edge: the journal HTTP surface (GET/POST on
+        # /campaigns/{id}/journal) delegates ownership enforcement upstream to
+        # the Campaigns play-loop handlers/fetcher (FR-019) — the Journal
+        # context never judges players itself.
+        JournalInfrastructure:
+            - JournalApplication
+            - JournalDomain
+            - CampaignsApplication
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        OraclesDomain:
+            - SharedKernelDomain
+        OraclesApplication:
+            - OraclesDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        OraclesInfrastructure:
+            - OraclesApplication
+            - OraclesDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        CharactersDomain:
+            - SharedKernelDomain
+        CharactersApplication:
+            - CharactersDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        CharactersInfrastructure:
+            - CharactersApplication
+            - CharactersDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        DiceDomain:
+            - SharedKernelDomain
+        DiceApplication:
+            - DiceDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        DiceInfrastructure:
+            - DiceApplication
+            - DiceDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+        IdentityDomain:
+            - SharedKernelDomain
+        IdentityApplication:
+            - IdentityDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+        IdentityInfrastructure:
+            - IdentityApplication
+            - IdentityDomain
+            - SharedKernelDomain
+            - SharedKernelApplication
+            - SharedKernelInfrastructure
+
+    # Cross-context collaboration happens ONLY through context-owned ports or published
+    # identifiers (shared kernel). Direct Domain→Domain imports across contexts are violations;
+    # Application→Application cross-context ports are allowed via the explicit edges below as
+    # contexts grow (e.g. Campaigns consuming Rulesets' FlowDefinition provider port).
+    skip_violations: {}

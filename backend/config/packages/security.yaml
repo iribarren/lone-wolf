@@ -1,0 +1,64 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        App\Identity\Infrastructure\Security\SecurityUser: 'auto'
+        App\Identity\Infrastructure\Security\HashingSubject: 'auto'
+
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        app_user_provider:
+            id: App\Identity\Infrastructure\Security\UserProvider
+
+    firewalls:
+        dev:
+            pattern: ^/(_profiler|_wdt|assets|build)/
+            security: false
+
+        # Player/admin login — issues the contract's AuthToken payload (FR-030).
+        login:
+            pattern: ^/api/auth/login$
+            stateless: true
+            provider: app_user_provider
+            json_login:
+                check_path: api_auth_login
+                username_path: email
+                password_path: password
+                success_handler: App\Identity\Infrastructure\Security\JwtSuccessHandler
+                failure_handler: App\Identity\Infrastructure\Security\JsonLoginFailureHandler
+
+        # All player-facing API endpoints (contract bearerAuth).
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            jwt: true
+
+        # EasyAdmin backoffice (ROLE_ADMIN, FR-030).
+        admin:
+            pattern: ^/admin
+            stateless: true
+            provider: app_user_provider
+            jwt: true
+            # EasyAdmin's layout renders a logout link; JWT sessions are
+            # dropped client-side, this just satisfies the URL generator.
+            logout:
+                path: app_logout
+
+    # Note: Only the *first* matching rule is applied
+    access_control:
+        - { path: ^/api/auth/(register|login)$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/docs(\.|$), roles: PUBLIC_ACCESS }
+        - { path: ^/api/health$, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            App\Identity\Infrastructure\Security\SecurityUser:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon
