@@ -5,6 +5,7 @@ default:
                 - features
             contexts:
                 - App\Tests\Acceptance\Context\ApiPlumbingContext
+                - App\Tests\Acceptance\Context\RulesetsContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:

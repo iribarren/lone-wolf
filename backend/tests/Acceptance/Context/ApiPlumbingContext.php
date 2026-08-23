@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Acceptance\Context;
 
+use Behat\Step\When;
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -65,5 +67,11 @@ final class ApiPlumbingContext implements Context
                 sprintf('Response body does not contain "%s".', $needle),
             );
         }
+    }
+
+    #[When('the admin authors an :arg1 system with stages :arg2 starting at :arg3')]
+    public function theAdminAuthorsAnSystemWithStagesStartingAt($arg1, $arg2, $arg3): void
+    {
+        throw new PendingException();
     }
 }
