@@ -39,6 +39,10 @@ services:
     # Oracles port binding (US3, Constitution I).
     App\Oracles\Application\Port\OracleRepositoryInterface: '@App\Oracles\Infrastructure\Persistence\PersistenceOracleRepository'
 
+    # Characters port bindings (US5, Constitution I).
+    App\Characters\Application\Port\CharacterRepositoryInterface: '@App\Characters\Infrastructure\Persistence\PersistenceCharacterRepository'
+    App\Characters\Application\Port\SheetStructureProviderInterface: '@App\Characters\Infrastructure\Persistence\DoctrineSheetStructureProvider'
+
     # Shared-kernel current-player port, implemented by Identity's security bridge.
     App\Shared\Application\CurrentUserProviderInterface: '@App\Identity\Infrastructure\Security\CurrentPlayerProvider'
 

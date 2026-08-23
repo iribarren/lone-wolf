@@ -51,3 +51,17 @@ services:
     App\Oracles\Application\Port\OracleRepositoryInterface:
         alias: App\Oracles\Infrastructure\Persistence\PersistenceOracleRepository
         public: true
+
+    # US5 handlers/repos exercised against the real PostgreSQL adapters.
+    App\Characters\Application\CreateCharacterHandler:
+        public: true
+        autowire: true
+    App\Characters\Application\UpdateCharacterHandler:
+        public: true
+        autowire: true
+    App\Characters\Application\ListCharactersHandler:
+        public: true
+        autowire: true
+    App\Characters\Application\Port\CharacterRepositoryInterface:
+        alias: App\Characters\Infrastructure\Persistence\PersistenceCharacterRepository
+        public: true

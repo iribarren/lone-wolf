@@ -592,6 +592,23 @@ components:
             driftIssues:
               type: array
               items: { type: string }
+            structureVersion:
+              type: integer
+              description: Current version of the owning system's sheet structure
+            structureFields:
+              type: array
+              nullable: true
+              description: Sheet metadata so clients render forms dynamically (T079/T082)
+              items:
+                type: object
+                required: [key, label, type]
+                properties:
+                  key: { type: string }
+                  label: { type: string }
+                  type: { type: string, enum: [text, number, select] }
+                  requiredForPc: { type: boolean }
+                  requiredForNpc: { type: boolean }
+                  options: { type: array, items: { type: string } }
 
     SheetValidationProblem:
       allOf:
