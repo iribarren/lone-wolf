@@ -114,8 +114,12 @@ deptrac:
 
         CampaignsDomain:
             - SharedKernelDomain
+        # Explicit cross-context edge (see comment above): the guided-play
+        # loop appends journal entries and cascades confirmed deletes through
+        # the Journal context's application ports.
         CampaignsApplication:
             - CampaignsDomain
+            - JournalApplication
             - SharedKernelDomain
             - SharedKernelApplication
         CampaignsInfrastructure:
