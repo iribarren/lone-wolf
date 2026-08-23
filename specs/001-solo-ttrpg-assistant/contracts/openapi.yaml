@@ -239,12 +239,51 @@ paths:
     post:
       tags: [Oracles]
       summary: Consult an oracle — exactly one weighted-random result (FR-010) or friendly empty-table notice (FR-011)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                save:
+                  type: boolean
+                  description: Persist a selected result into the journal in the same round trip
       responses:
         '200':
           description: Single selected entry, or empty/unavailable notice payload
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ConsultationOutcome' }
+
+  /campaigns/{campaignId}/oracles/{oracleId}/save:
+    parameters:
+      - $ref: '#/components/parameters/CampaignId'
+      - in: path
+        name: oracleId
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [Oracles]
+      summary: Save an already-shown consultation result into the journal (US4 scenario 3) — no re-roll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text: { type: string }
+                interpretation: { type: string, description: Appended as a follow-up narrative entry when non-empty }
+      responses:
+        '201':
+          description: Saved result acknowledged with its journal entry id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsultationOutcome' }
+
+  /campaigns/{campaignId}/characters:
 
   /campaigns/{campaignId}/characters:
     parameters:
@@ -504,6 +543,11 @@ components:
           properties:
             entryId: { type: string, format: uuid }
             text: { type: string }
+        journalEntryId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Present when the consultation was saved to the journal (request save=true)
 
     FieldDefinition:
       type: object
