@@ -25,13 +25,13 @@ use App\Journal\Domain\RollSnapshot;
         new Get(
             uriTemplate: '/campaigns/{campaignId}/journal',
             provider: Provider\JournalPageProvider::class,
-            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            security: "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('CAMPAIGN_OWNER', request.get('campaignId'))",
         ),
         new Post(
             uriTemplate: '/campaigns/{campaignId}/journal',
             input: Input\AppendNarrativeInput::class,
             processor: Processor\AppendNarrativeProcessor::class,
-            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            security: "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('CAMPAIGN_OWNER', request.get('campaignId'))",
             validationContext: ['skip_validation_groups' => true],
         ),
     ],

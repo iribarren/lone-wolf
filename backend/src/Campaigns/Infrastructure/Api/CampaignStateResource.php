@@ -31,19 +31,19 @@ use ApiPlatform\Metadata\ApiProperty;
         new Get(
             uriTemplate: '/campaigns/{campaignId}',
             provider: Provider\CampaignStateProvider::class,
-            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            security: "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('CAMPAIGN_OWNER', request.get('campaignId'))",
         ),
         new Delete(
             uriTemplate: '/campaigns/{campaignId}',
             provider: Provider\CampaignStateProvider::class,
             processor: Processor\DeleteCampaignProcessor::class,
-            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            security: "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('CAMPAIGN_OWNER', request.get('campaignId'))",
         ),
         new Post(
             uriTemplate: '/campaigns/{campaignId}/advance',
             input: Input\AdvanceStageInput::class,
             processor: Processor\AdvanceStageProcessor::class,
-            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            security: "is_granted('IS_AUTHENTICATED_FULLY') and is_granted('CAMPAIGN_OWNER', request.get('campaignId'))",
             validationContext: ['skip_validation_groups' => true],
         ),
     ],
