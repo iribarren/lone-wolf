@@ -25,6 +25,7 @@ final class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToRoute('Game systems', 'fa fa-dice-d20', 'admin_dashboard');
+        yield MenuItem::linkToRoute('Game systems', 'fa fa-dice-d20', 'admin_dashboard_system_index');
+        yield MenuItem::linkToRoute('Oracles', 'fa fa-book-skull', 'admin_dashboard_oracle_index');
     }
 }

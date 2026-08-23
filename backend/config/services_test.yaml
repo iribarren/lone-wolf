@@ -46,3 +46,8 @@ services:
     App\Journal\Application\Port\JournalEntryRepositoryInterface:
         alias: App\Journal\Infrastructure\Persistence\PersistenceJournalEntryRepository
         public: true
+
+    # US3 scoping tests pull the oracle repository through its port.
+    App\Oracles\Application\Port\OracleRepositoryInterface:
+        alias: App\Oracles\Infrastructure\Persistence\PersistenceOracleRepository
+        public: true

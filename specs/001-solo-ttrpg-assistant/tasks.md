@@ -137,16 +137,16 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 3 (write FIRST, ensure they FAIL)
 
-- [ ] T056 [P] [US3] Unit tests for `OracleScope` strategy (GlobalScope/SystemScope) visibility predicate matrix + `Oracle` aggregate weight>0 invariants (FR-007) in `backend/tests/Unit/Oracles/OracleScopeTest.php` + `backend/tests/Unit/Oracles/OracleAggregateTest.php`
-- [ ] T057 [P] [US3] Integration test: partial unique index enforces system-scope integrity and scoped listing query returns global ∪ own-system rows (FR-009 predicate) in `backend/tests/Integration/Oracles/PersistenceScopingTest.php`
+- [X] X056 [P] [US3] Unit tests for `OracleScope` strategy (GlobalScope/SystemScope) visibility predicate matrix + `Oracle` aggregate weight>0 invariants (FR-007) in `backend/tests/Unit/Oracles/OracleScopeTest.php` + `backend/tests/Unit/Oracles/OracleAggregateTest.php`
+- [X] X057 [P] [US3] Integration test: partial unique index enforces system-scope integrity and scoped listing query returns global ∪ own-system rows (FR-009 predicate) in `backend/tests/Integration/Oracles/PersistenceScopingTest.php`
 
 ### Implementation for User Story 3
 
-- [ ] T059 [US3] Implement Oracles Domain: `OracleScope` VO (`GlobalScope` | `SystemScope(GameSystemId)`), `OracleEntry` (text, weight int>0), `Oracle` aggregate with entry management + `isAvailableTo(GameSystemId)` in `backend/src/Oracles/Domain/`
-- [ ] T060 [US3] Define `OracleRepositoryInterface` port + handlers `CreateOracle`, `UpdateOracle` (reweight/edit entries), `ListOraclesVisibleToSystem` in `backend/src/Oracles/Application/`
-- [ ] T061 [US3] Doctrine mapping: `scope_type` discriminator column + `scope_system_id` with partial unique index `WHERE scope_type='system'`; migration in `backend/migrations/`
-- [ ] T062 [US3] EasyAdmin Oracle CRUD with scoping picker and weighted-entries grid in `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`
-- [ ] T063 [US3] Behat authoring feature: global table visible to both demo systems, scoped table only to its own (US3 scenarios 1–3) in `backend/features/oracles/authoring.feature`
+- [X] X059 [US3] Implement Oracles Domain: `OracleScope` VO (`GlobalScope` | `SystemScope(GameSystemId)`), `OracleEntry` (text, weight int>0), `Oracle` aggregate with entry management + `isAvailableTo(GameSystemId)` in `backend/src/Oracles/Domain/`
+- [X] X060 [US3] Define `OracleRepositoryInterface` port + handlers `CreateOracle`, `UpdateOracle` (reweight/edit entries), `ListOraclesVisibleToSystem` in `backend/src/Oracles/Application/`
+- [X] X061 [US3] Doctrine mapping: `scope_type` discriminator column + `scope_system_id` with partial unique index `WHERE scope_type='system'`; migration in `backend/migrations/`
+- [X] X062 [US3] EasyAdmin Oracle CRUD with scoping picker and weighted-entries grid in `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`
+- [X] X063 [US3] Behat authoring feature: global table visible to both demo systems, scoped table only to its own (US3 scenarios 1–3) in `backend/features/oracles/authoring.feature`
 
 **Checkpoint**: US1–US3 deliver the complete admin authoring surface.
 
