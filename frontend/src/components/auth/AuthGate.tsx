@@ -6,7 +6,7 @@
  */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 
-import { ApiError, ApiClient } from '@/lib/api/client';
+import { ApiError, apiPath } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 import { loadSession, saveSession } from '@/lib/auth';
 
@@ -40,7 +40,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
         try {
             const payload =
                 mode === 'login'
-                    ? ((await api.json('api_auth_login' as Parameters<ApiClient['json']>[0], {
+                    ? ((await api.json(apiPath('/api/auth/login'), {
                           method: 'POST',
                           body: { email, password },
                       })) as AuthResponse | null)

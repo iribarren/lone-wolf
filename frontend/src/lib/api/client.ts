@@ -7,6 +7,12 @@ import type { components, paths } from './schema.gen';
 
 export type ApiSchemas = components['schemas'];
 export type ApiPaths = paths;
+export type ApiPath = keyof ApiPaths;
+
+/** Casts an interpolated runtime path to the generated path-key union. */
+export function apiPath(path: string): ApiPath {
+    return path as ApiPath;
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
@@ -16,6 +22,7 @@ export class ApiError extends Error {
         public readonly title: string,
         public readonly detail?: string,
         public readonly violations?: readonly { property: string; message: string }[],
+        public readonly extra?: Readonly<Record<string, unknown>>,
     ) {
         super(detail ? `${title}: ${detail}` : title);
         this.name = 'ApiError';
@@ -34,11 +41,20 @@ export class ApiError extends Error {
             ? (payload['violations'] as { property: string; message: string }[])
             : undefined;
 
+        const known = new Set(['title', 'detail', 'violations', 'status', 'type', 'instance']);
+        const extra: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(payload)) {
+            if (!known.has(key)) {
+                extra[key] = value;
+            }
+        }
+
         return new ApiError(
             response.status,
             typeof payload['title'] === 'string' ? payload['title'] : `HTTP ${response.status}`,
             typeof payload['detail'] === 'string' ? payload['detail'] : undefined,
             violations,
+            extra,
         );
     }
 }
