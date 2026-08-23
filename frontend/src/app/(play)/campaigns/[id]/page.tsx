@@ -13,6 +13,10 @@ import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
 import EntryComposer from '@/components/journal/EntryComposer';
 import JournalTimeline from '@/components/journal/JournalTimeline';
+import OracleDrawer, {
+    type ConsultationOutcomeView,
+    type OracleSummaryView,
+} from '@/components/oracles/OracleDrawer';
 import { ApiError, apiPath, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 
@@ -30,6 +34,13 @@ export default function CampaignConsolePage() {
     const params = useParams<{ id: string }>();
     const campaignId = params?.id ?? '';
     const [refusal, setRefusal] = useState<RefusalFeedback | null>(null);
+    const [oraclesOpen, setOraclesOpen] = useState(false);
+    const [consultingOracleId, setConsultingOracleId] = useState<string | null>(null);
+    const [consulted, setConsulted] = useState<{
+        oracleId: string;
+        title: string;
+        outcome: ConsultationOutcomeView;
+    } | null>(null);
 
     const campaign = useQuery({
         queryKey: ['campaign', campaignId],
@@ -84,6 +95,41 @@ export default function CampaignConsolePage() {
         onSuccess: () => {
             router.push('/campaigns');
         },
+    });
+
+    const oracles = useQuery({
+        queryKey: ['campaign', campaignId, 'oracles'],
+        enabled: campaignId !== '' && oraclesOpen,
+        queryFn: async (): Promise<OracleSummaryView[]> =>
+            (await api.json(apiPath(`/api/campaigns/${campaignId}/oracles`))) as OracleSummaryView[],
+    });
+
+    async function consult(oracleId: string): Promise<void> {
+        setConsultingOracleId(oracleId);
+        setConsulted(null);
+
+        try {
+            const outcome = (await api.json(
+                apiPath(`/api/campaigns/${campaignId}/oracles/${oracleId}/consult`),
+                { method: 'POST', body: {} },
+            )) as ConsultationOutcomeView;
+
+            const title =
+                oracles.data?.find((table) => table.oracleId === oracleId)?.title ?? 'Oracle';
+            setConsulted({ oracleId, title, outcome });
+        } finally {
+            setConsultingOracleId(null);
+        }
+    }
+
+    const saveResult = useMutation({
+        mutationFn: async ({ text, interpretation }: { text: string; interpretation: string }): Promise<void> => {
+            await api.json(apiPath(`/api/campaigns/${campaignId}/oracles/${consulted?.oracleId ?? ''}/save`), {
+                method: 'POST',
+                body: { text, interpretation },
+            });
+        },
+        onSuccess: () => void journal.refetch(),
     });
 
     if (campaign.isLoading) {
@@ -148,6 +194,32 @@ export default function CampaignConsolePage() {
                 disabled={campaign.isFetching}
                 pending={remove.isPending}
                 onDelete={() => remove.mutate()}
+            />
+
+            <div style={{ position: 'fixed', right: '1rem', bottom: '1rem' }}>
+                <button type="button" onClick={() => setOraclesOpen((open) => !open)}>
+                    {oraclesOpen ? 'Hide oracles' : 'Oracles'}
+                </button>
+            </div>
+
+            <OracleDrawer
+                open={oraclesOpen}
+                oracles={oracles.data ?? []}
+                loading={oracles.isLoading}
+                consultingOracleId={consultingOracleId}
+                consultedTitle={consulted?.title ?? null}
+                outcome={consulted?.outcome ?? null}
+                saving={saveResult.isPending}
+                saved={saveResult.isSuccess && consulted !== null}
+                onClose={() => {
+                    setOraclesOpen(false);
+                    setConsulted(null);
+                    saveResult.reset();
+                }}
+                onConsult={(oracleId) => void consult(oracleId)}
+                onSave={(text, interpretation) =>
+                    saveResult.mutate({ text, interpretation })
+                }
             />
         </main>
     );

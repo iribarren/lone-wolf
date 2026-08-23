@@ -162,17 +162,17 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 4 (write FIRST, ensure they FAIL)
 
-- [ ] T065 [P] [US4] Unit tests for `WeightedOracleSelector`: distribution within ±5% over 10,000 seeded-RNG consultations (SC-004), `empty_table` outcome for zero entries (FR-011), deterministic reproducibility in `backend/tests/Unit/Oracles/WeightedOracleSelectorTest.php`
-- [ ] T066 [P] [US4] Integration test: consult endpoint visibility per campaign system + unavailable-oracle graceful outcome (retired table edge case) in `backend/tests/Integration/Oracles/ConsultVisibilityTest.php`
+- [x] T065 [P] [US4] Unit tests for `WeightedOracleSelector`: distribution within ±5% over 10,000 seeded-RNG consultations (SC-004), `empty_table` outcome for zero entries (FR-011), deterministic reproducibility in `backend/tests/Unit/Oracles/WeightedOracleSelectorTest.php`
+- [x] T066 [P] [US4] Integration test: consult endpoint visibility per campaign system + unavailable-oracle graceful outcome (retired table edge case) in `backend/tests/Integration/Oracles/ConsultVisibilityTest.php`
 
 ### Implementation for User Story 4
 
-- [ ] T068 [US4] Implement Domain: `ConsultationOutcome` result object (`selected` | `empty_table` | `unavailable`) and `WeightedOracleSelector` (cumulative-weight pick via injected RandomSource) in `backend/src/Oracles/Domain/`
-- [ ] T069 [US4] Implement handlers: `ConsultOracleHandler` (visibility check against campaign's system) and `SaveConsultationToJournalHandler` creating `oracle_result` entry with denormalized `{oracleTitle, resultText}` snapshot in `backend/src/Oracles/Application/` + `backend/src/Journal/Application/`
-- [ ] T070 [US4] Expose endpoints `GET /api/campaigns/{id}/oracles` and `POST /api/campaigns/{id}/oracles/{oracleId}/consult` per contract schemas OracleSummary/ConsultationOutcome in `backend/src/Oracles/Infrastructure/Api/`
-- [ ] T071 [US4] Frontend floating Oracle drawer widget during play: scoped table list, consult action rendering single result, save-to-journal composer with interpretation field, friendly empty-table notice in `frontend/src/components/oracles/OracleDrawer.tsx`
-- [ ] T072 [P] [US4] Vitest component test for OracleDrawer states (list filtering, selected-result render, empty-table notice) in `frontend/tests/components/oracles/OracleDrawer.test.tsx`
-- [ ] T073 [US4] Behat consultation journey: browse scoped, single weighted result, save to journal (US4 scenarios 1–3) in `backend/features/oracles/consultation.feature`
+- [x] T068 [US4] Implement Domain: `ConsultationOutcome` result object (`selected` | `empty_table` | `unavailable`) and `WeightedOracleSelector` (cumulative-weight pick via injected RandomSource) in `backend/src/Oracles/Domain/`
+- [x] T069 [US4] Implement handlers: `ConsultOracleHandler` (visibility check against campaign's system) and `SaveConsultationToJournalHandler` creating `oracle_result` entry with denormalized `{oracleTitle, resultText}` snapshot in `backend/src/Oracles/Application/` + `backend/src/Journal/Application/`
+- [x] T070 [US4] Expose endpoints `GET /api/campaigns/{id}/oracles` and `POST /api/campaigns/{id}/oracles/{oracleId}/consult` per contract schemas OracleSummary/ConsultationOutcome in `backend/src/Oracles/Infrastructure/Api/`
+- [x] T071 [US4] Frontend floating Oracle drawer widget during play: scoped table list, consult action rendering single result, save-to-journal composer with interpretation field, friendly empty-table notice in `frontend/src/components/oracles/OracleDrawer.tsx`
+- [x] T072 [P] [US4] Vitest component test for OracleDrawer states (list filtering, selected-result render, empty-table notice) in `frontend/tests/components/oracles/OracleDrawer.test.tsx`
+- [x] T073 [US4] Behat consultation journey: browse scoped, single weighted result, save to journal (US4 scenarios 1–3) in `backend/features/oracles/consultation.feature`
 
 **Checkpoint**: Improvisation loop live — uncertainty converts to journal-recorded story in-app.
 

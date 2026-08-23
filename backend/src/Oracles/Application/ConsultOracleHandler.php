@@ -4,46 +4,45 @@ declare(strict_types=1);
 
 namespace App\Oracles\Application;
 
+use App\Campaigns\Application\OwnedCampaignFetcher;
+use App\Campaigns\Application\Port\CampaignRepositoryInterface;
 use App\Oracles\Application\Port\OracleRepositoryInterface;
 use App\Oracles\Domain\ConsultationOutcome;
 use App\Oracles\Domain\WeightedOracleSelector;
-use App\Campaigns\Application\Port\CampaignRepositoryInterface;
 use App\Shared\Domain\Identifier\CampaignId;
-use App\Shared\Domain\Identifier\GameSystemId;
 use App\Shared\Domain\Identifier\OracleId;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Shared\Domain\Identifier\UserId;
 
-final class ConsultOracleHandler
+/**
+ * US4 scenario 2 (FR-010): consult an oracle for exactly one
+ * weighted-random answer, or degrade gracefully — a foreign system's table,
+ * a retired table or an unknown campaign yields `unavailable`/denial, never
+ * an error (Edge Cases §3). Ownership (FR-019) is enforced through the
+ * shared owned-campaign fetcher.
+ */
+final readonly class ConsultOracleHandler
 {
     public function __construct(
-        private OracleRepositoryInterface $oracleRepository,
-        private CampaignRepositoryInterface $campaignRepository,
+        private OracleRepositoryInterface $oracles,
+        private CampaignRepositoryInterface $campaigns,
     ) {
     }
 
-    public function handle(CampaignId $campaignId, OracleId $oracleId): ConsultationOutcome
+    public function handle(UserId $playerId, CampaignId $campaignId, OracleId $oracleId): ConsultationOutcome
     {
-        $campaign = $this->campaignRepository->get($campaignId);
+        // Refuses unknown ids and foreign players identically (FR-019).
+        $campaign = (new OwnedCampaignFetcher($this->campaigns))->fetch($campaignId, $playerId);
 
-        if ($campaign === null) {
-            return ConsultationOutcome::unavailable('campaign not found');
-        }
-
-        $systemId = $campaign->gameSystemId();
-
-        $oracle = $this->oracleRepository->get($oracleId);
+        $oracle = $this->oracles->get($oracleId);
 
         if ($oracle === null) {
-            return ConsultationOutcome::unavailable('oracle not found');
+            return ConsultationOutcome::unavailable('This oracle is no longer available.');
         }
 
-        $isAvailable = $oracle->isAvailableTo($systemId);
-        if (!$isAvailable) {
-            return ConsultationOutcome::unavailable('oracle not visible to this campaign');
+        if (!$oracle->isAvailableTo($campaign->gameSystemId())) {
+            return ConsultationOutcome::unavailable('This oracle is not available to this campaign.');
         }
 
-        $entries = $oracle->entries();
-        $selector = new WeightedOracleSelector($entries);
-        return $selector->consult();
+        return (new WeightedOracleSelector($oracle->entries()))->consult();
     }
 }

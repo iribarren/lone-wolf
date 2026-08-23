@@ -33,27 +33,30 @@ final class WeightedOracleSelectorTest extends TestCase
             'Third option' => 0,
         ];
 
-        foreach (range(1, 3000) as $i) {
+        foreach (range(1, 10_000) as $i) {
             $result = $this->selector->select($entries);
-            $counts[$result->selected()->text()]++;
+            $selected = $result->selected();
+            self::assertNotNull($selected);
+            $counts[$selected->text()]++;
         }
 
         foreach ($counts as $option => $count) {
-            $deviation = abs($count - 1000) / 1000;
+            $deviation = abs($count - 10_000 / 3) / (10_000 / 3);
             self::assertLessThan(0.05, $deviation, sprintf(
-                'Option %s count %d deviates more than 5%% from expected 1000',
+                'Option %s count %d deviates more than 5%% from expected %d',
                 $option,
                 $count,
+                (int) (10_000 / 3),
             ));
         }
     }
 
-public function testEmptyTableOutcome(): void
-{
-    $outcome = $this->selector->select([]);
+    public function testEmptyTableOutcome(): void
+    {
+        $outcome = $this->selector->select([]);
 
-    self::assertTrue($outcome->isEmptyTable());
-}
+        self::assertTrue($outcome->isEmptyTable());
+    }
 
     public function testDeterministicReproducibility(): void
     {
@@ -66,6 +69,8 @@ public function testEmptyTableOutcome(): void
         $result1 = $this->selector->select($entries, $seed);
         $result2 = $this->selector->select($entries, $seed);
 
+        self::assertNotNull($result1->selected());
+        self::assertNotNull($result2->selected());
         self::assertSame($result1->selected()->text(), $result2->selected()->text());
     }
 
@@ -75,6 +80,7 @@ public function testEmptyTableOutcome(): void
         $outcome = $this->selector->consult([$entry]);
 
         self::assertTrue($outcome->isSelected());
+        self::assertNotNull($outcome->selected());
         self::assertSame('The answer', $outcome->selected()->text());
     }
 

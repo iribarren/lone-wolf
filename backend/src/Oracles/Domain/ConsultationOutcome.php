@@ -19,13 +19,20 @@ final readonly class ConsultationOutcome
     public const EMPTY_TABLE = 'empty_table';
     public const UNAVAILABLE = 'unavailable';
 
-    public function __construct(
+    private function __construct(
         public string $type,
         public ?OracleEntry $selected = null,
         public ?string $reason = null,
     ) {
     }
 
+    /** Outcome for a proportionally chosen entry (FR-010). */
+    public static function forSelection(OracleEntry $entry): self
+    {
+        return new self(self::SELECTED, $entry);
+    }
+
+    /** Friendly empty-table notice path (FR-011) — never an error. */
     public static function emptyTable(): self
     {
         return new self(self::EMPTY_TABLE);

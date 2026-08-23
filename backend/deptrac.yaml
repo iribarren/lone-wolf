@@ -152,13 +152,24 @@ deptrac:
 
         OraclesDomain:
             - SharedKernelDomain
+        # Explicit cross-context edges (US4): a saved consultation repeats
+        # the Campaigns pattern — fetch the owned campaign through the
+        # Campaigns application fetcher and append an oracle_result entry
+        # through the Journal context's repository port.
         OraclesApplication:
             - OraclesDomain
+            - CampaignsApplication
+            - JournalApplication
+            - JournalDomain
             - SharedKernelDomain
             - SharedKernelApplication
+        # Explicit cross-context edge (US4): the oracles HTTP surface resolves
+        # the campaign's bound system through the Campaigns repository port,
+        # exactly as Journal does for its play-loop surface.
         OraclesInfrastructure:
             - OraclesApplication
             - OraclesDomain
+            - CampaignsApplication
             - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
