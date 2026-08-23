@@ -60,15 +60,11 @@ final readonly class FlowDefinition
     public static function create(array $stages, string $startingStage, array $transitions): self
     {
         $objects = array_map(
-            static fn (FlowStage|string $stage): FlowStage => $stage instanceof FlowStage ? $stage : new FlowStage($stage),
+            static fn (FlowStage|string $stage): FlowStage => $stage instanceof FlowStage ? $stage : FlowStage::fromArray($stage),
             $stages,
         );
 
         if (\count($objects) < 2) {
-            throw new \InvalidArgumentException('A flow needs at least two stages.');
-        }
-
-        if (!isset($objects[0])) {
             throw new \InvalidArgumentException('A flow needs at least two stages.');
         }
 

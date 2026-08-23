@@ -27,6 +27,9 @@ final readonly class FieldDefinition
     ) {
     }
 
+    /**
+     * @param list<string> $options
+     */
     public static function text(string $key, string $label, bool $requiredForPc = false, bool $requiredForNpc = false, array $options = []): self
     {
         if ($options !== []) {

@@ -122,11 +122,13 @@ final readonly class SheetStructure
                 continue;
             }
 
-            if ($field->type() === FieldDefinition::TYPE_NUMBER && !is_numeric((string) $attributes[$key])) {
+            $value = $attributes[$key];
+
+            if ($field->type() === FieldDefinition::TYPE_NUMBER && (!is_scalar($value) || !is_numeric((string) $value))) {
                 $errors[] = sprintf('"%s" (%s) must be a number.', $key, $field->label());
             }
 
-            if ($field->type() === FieldDefinition::TYPE_SELECT && !\in_array((string) $attributes[$key], $field->options(), true)) {
+            if ($field->type() === FieldDefinition::TYPE_SELECT && is_scalar($value) && !\in_array((string) $value, $field->options(), true)) {
                 $errors[] = sprintf(
                     '"%s" (%s) must be one of: %s.',
                     $key,

@@ -28,10 +28,20 @@ final class FlowModificationGuardTest extends KernelTestCase
         self::bootKernel();
         $container = static::getContainer();
 
-        $this->createHandler = $container->get(CreateGameSystemHandler::class);
-        $this->updateHandler = $container->get(\App\Rulesets\Application\UpdateFlowDefinitionHandler::class);
-        $this->systems = $container->get(RulesetRepositoryInterface::class);
-        $this->checker = $container->get(StageOccupancyCheckerInterface::class);
+        $createHandler = $container->get(CreateGameSystemHandler::class);
+        $updateHandler = $container->get(\App\Rulesets\Application\UpdateFlowDefinitionHandler::class);
+        $systems = $container->get(RulesetRepositoryInterface::class);
+        $checker = $container->get(StageOccupancyCheckerInterface::class);
+
+        \assert($createHandler instanceof CreateGameSystemHandler);
+        \assert($updateHandler instanceof \App\Rulesets\Application\UpdateFlowDefinitionHandler);
+        \assert($systems instanceof RulesetRepositoryInterface);
+        \assert($checker instanceof \App\Rulesets\Infrastructure\Persistence\InMemoryStageOccupancyChecker);
+
+        $this->createHandler = $createHandler;
+        $this->updateHandler = $updateHandler;
+        $this->systems = $systems;
+        $this->checker = $checker;
     }
 
     public function testRemovingAnOccupiedStageIsRefused(): void
