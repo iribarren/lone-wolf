@@ -9,6 +9,7 @@ default:
                 - App\Tests\Acceptance\Context\CampaignsContext
                 - App\Tests\Acceptance\Context\OraclesContext
                 - App\Tests\Acceptance\Context\CharactersContext
+                - App\Tests\Acceptance\Context\DiceContext
 
     extensions:
         FriendsOfBehat\SymfonyExtension:
