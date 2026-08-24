@@ -12,6 +12,10 @@ import AdvanceActions, { type RefusalFeedback } from '@/components/campaign/Adva
 import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
 import CharacterPanel, { type CharacterPanelCharacter } from '@/components/characters/CharacterPanel';
+import DiceRollerWidget, {
+    type DiceProblemView,
+    type DiceRollResultView,
+} from '@/components/dice/DiceRollerWidget';
 import EntryComposer from '@/components/journal/EntryComposer';
 import JournalTimeline from '@/components/journal/JournalTimeline';
 import OracleDrawer, {
@@ -36,6 +40,11 @@ export default function CampaignConsolePage() {
     const campaignId = params?.id ?? '';
     const [refusal, setRefusal] = useState<RefusalFeedback | null>(null);
     const [oraclesOpen, setOraclesOpen] = useState(false);
+    const [diceOpen, setDiceOpen] = useState(false);
+    const [diceResult, setDiceResult] = useState<DiceRollResultView | null>(null);
+    const [diceProblem, setDiceProblem] = useState<DiceProblemView | null>(null);
+    const [rollLogged, setRollLogged] = useState(false);
+    const [rollingDice, setRollingDice] = useState(false);
     const [consultingOracleId, setConsultingOracleId] = useState<string | null>(null);
     const [consulted, setConsulted] = useState<{
         oracleId: string;
@@ -140,6 +149,55 @@ export default function CampaignConsolePage() {
         onSuccess: () => void journal.refetch(),
     });
 
+    async function roll(notation: string): Promise<void> {
+        setDiceProblem(null);
+        setDiceResult(null);
+        setRollLogged(false);
+        setRollingDice(true);
+
+        try {
+            // Invalid notation is refused pre-roll with a typed reason —
+            // never a fake result (FR-027).
+            const rolled = (await api.json(apiPath('/api/dice/roll'), {
+                method: 'POST',
+                body: { notation },
+            })) as DiceRollResultView;
+            setDiceResult(rolled);
+        } catch (err) {
+            if (err instanceof ApiError) {
+                const reason = err.extra?.['reason'];
+                setDiceProblem({
+                    reason: (
+                        reason === 'invalid_count' ||
+                        reason === 'invalid_faces' ||
+                        reason === 'out_of_bounds'
+                    )
+                        ? reason
+                        : 'malformed',
+                    detail: err.detail,
+                });
+            }
+        } finally {
+            setRollingDice(false);
+        }
+    }
+
+    const logRoll = useMutation({
+        // The logged-roll endpoint performs the roll AND journals it, so the
+        // shown result is replaced by exactly what the journal recorded.
+        mutationFn: async (): Promise<{ roll: DiceRollResultView }> => {
+            return (await api.json(apiPath(`/api/campaigns/${campaignId}/rolls`), {
+                method: 'POST',
+                body: { notation: diceResult?.notation ?? '' },
+            })) as { roll: DiceRollResultView };
+        },
+        onSuccess: (logged) => {
+            setDiceResult(logged.roll);
+            setRollLogged(true);
+            void journal.refetch();
+        },
+    });
+
     if (campaign.isLoading) {
         return (
             <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
@@ -210,11 +268,31 @@ export default function CampaignConsolePage() {
                 onDelete={() => remove.mutate()}
             />
 
-            <div style={{ position: 'fixed', right: '1rem', bottom: '1rem' }}>
+            <div style={{ position: 'fixed', right: '1rem', bottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                <button type="button" onClick={() => setDiceOpen((open) => !open)}>
+                    {diceOpen ? 'Hide dice' : 'Dice'}
+                </button>
                 <button type="button" onClick={() => setOraclesOpen((open) => !open)}>
                     {oraclesOpen ? 'Hide oracles' : 'Oracles'}
                 </button>
             </div>
+
+            <DiceRollerWidget
+                open={diceOpen}
+                rolling={rollingDice}
+                logging={logRoll.isPending}
+                logged={rollLogged}
+                result={diceResult}
+                problem={diceProblem}
+                onClose={() => {
+                    setDiceOpen(false);
+                    setDiceResult(null);
+                    setDiceProblem(null);
+                    setRollLogged(false);
+                }}
+                onRoll={(notation) => void roll(notation)}
+                onLogResult={() => logRoll.mutate()}
+            />
 
             <OracleDrawer
                 open={oraclesOpen}
