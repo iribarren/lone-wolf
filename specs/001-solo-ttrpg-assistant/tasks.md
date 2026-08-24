@@ -215,17 +215,17 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 6 (write FIRST, ensure they FAIL)
 
-- [ ] T086 [P] [US6] Unit tests for `DiceNotationParser` matrix: valid `2d6`,`1d20+5`,`3d6-2`; malformed `2d`,`d20x` → `malformed`; `0d6` → `invalid_count`; `1d0` → `invalid_faces`; overflow → `out_of_bounds` (bounds N∈[1,50], M∈[2,1000], K∈[-10000,10000]) in `backend/tests/Unit/Dice/DiceNotationParserTest.php`
-- [ ] T087 [P] [US6] Unit tests for `DiceRoller` over seeded batch: diceValues length/value ranges and Σ±modifier totals mathematically correct, 100%-valid/100%-refused gate (SC-005) in `backend/tests/Unit/Dice/DiceRollerTest.php`
+- [x] T086 [P] [US6] Unit tests for `DiceNotationParser` matrix: valid `2d6`,`1d20+5`,`3d6-2`; malformed `2d`,`d20x` → `malformed`; `0d6` → `invalid_count`; `1d0` → `invalid_faces`; overflow → `out_of_bounds` (bounds N∈[1,50], M∈[2,1000], K∈[-10000,10000]) in `backend/tests/Unit/Dice/DiceNotationParserTest.php`
+- [x] T087 [P] [US6] Unit tests for `DiceRoller` over seeded batch: diceValues length/value ranges and Σ±modifier totals mathematically correct, 100%-valid/100%-refused gate (SC-005) in `backend/tests/Unit/Dice/DiceRollerTest.php`
 
 ### Implementation for User Story 6
 
-- [ ] T089 [US6] Implement Dice Domain: `DiceNotation` value + parser with typed failure reasons, `DiceRoll` VO (diceValues, modifier, total, rolledAt via Clock), `DiceRoller` (RandomSource-injected) in `backend/src/Dice/Domain/`
-- [ ] T090 [US6] Implement handlers `RollDiceHandler` and `RollAndLogHandler` (creates `dice_roll` journal entry with `{notation, diceValues, modifier, total}` snapshot, FR-029) in `backend/src/Dice/Application/`
-- [ ] T091 [US6] Expose endpoints `POST /api/dice/roll` (200 result / 422 DiceNotationProblem) and `POST /api/campaigns/{id}/rolls` (201 roll + journalEntry) per contract in `backend/src/Dice/Infrastructure/Api/`
-- [ ] T092 [US6] Frontend floating dice widget: notation input, per-die chips + modified-total display, invalid-reason toast (never a fake result), log-to-journal action in `frontend/src/components/dice/DiceRollerWidget.tsx`
-- [ ] T093 [P] [US6] Vitest component test for DiceRollerWidget (result render, error states) in `frontend/tests/components/dice/DiceRollerWidget.test.tsx`
-- [ ] T094 [US6] Behat dice feature mirroring quickstart V6 table exactly in `backend/features/dice/notation.feature`
+- [x] T089 [US6] Implement Dice Domain: `DiceNotation` value + parser with typed failure reasons, `DiceRoll` VO (diceValues, modifier, total, rolledAt via Clock), `DiceRoller` (RandomSource-injected) in `backend/src/Dice/Domain/`
+- [x] T090 [US6] Implement handlers `RollDiceHandler` and `RollAndLogHandler` (creates `dice_roll` journal entry with `{notation, diceValues, modifier, total}` snapshot, FR-029) in `backend/src/Dice/Application/`
+- [x] T091 [US6] Expose endpoints `POST /api/dice/roll` (200 result / 422 DiceNotationProblem) and `POST /api/campaigns/{id}/rolls` (201 roll + journalEntry) per contract in `backend/src/Dice/Infrastructure/Api/`
+- [x] T092 [US6] Frontend floating dice widget: notation input, per-die chips + modified-total display, invalid-reason toast (never a fake result), log-to-journal action in `frontend/src/components/dice/DiceRollerWidget.tsx`
+- [x] T093 [P] [US6] Vitest component test for DiceRollerWidget (result render, error states) in `frontend/tests/components/dice/DiceRollerWidget.test.tsx`
+- [x] T094 [US6] Behat dice feature mirroring quickstart V6 table exactly in `backend/features/dice/notation.feature`
 
 **Checkpoint**: All six user stories independently functional.
 
