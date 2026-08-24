@@ -30,8 +30,9 @@ final readonly class RollAndLogHandler
     }
 
     /**
-     * @throws InvalidDiceNotationException                    Refused pre-roll, with reason.
-     * @throws \App\Campaigns\Domain\CampaignNotFoundException Unknown and foreign campaigns refuse identically (FR-019).
+     * @throws InvalidDiceNotationException Refused pre-roll, with reason; unknown and
+     *                                      foreign campaigns refuse identically through
+     *                                      the owned-campaign fetcher (FR-019).
      */
     public function handle(RollAndLogToJournal $command): LoggedRoll
     {

@@ -94,7 +94,12 @@ make console   # open a shell in the php container
 make test      # backend PHPUnit suites + frontend Vitest
 make lint      # PHPStan + deptrac layer rules
 make npm CMD="install"
+scripts/check-contract.sh   # Constitution V gate: runtime OpenAPI vs canonical contract
 ```
+
+The contract-drift check requires the backend to be up (`docker compose up -d`)
+and `python3` with PyYAML; it exits non-zero when the served `/api/docs.json`
+diverges from `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`.
 
 ## Documentation
 
