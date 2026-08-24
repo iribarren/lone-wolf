@@ -33,22 +33,28 @@ security:
             provider: app_user_provider
             jwt: true
 
-        # EasyAdmin backoffice (ROLE_ADMIN, FR-030).
+        # EasyAdmin backoffice (ROLE_ADMIN, FR-030). Browser session with a
+        # sign-in form; players' JWT flow stays on the /api firewalls below.
         admin:
             pattern: ^/admin
-            stateless: true
             provider: app_user_provider
-            jwt: true
-            # EasyAdmin's layout renders a logout link; JWT sessions are
-            # dropped client-side, this just satisfies the URL generator.
+            form_login:
+                login_path: admin_login
+                check_path: admin_login
+                enable_csrf: true
+                default_target_path: admin_dashboard
+            # EasyAdmin's layout renders a logout link; the firewall's logout
+            # listener invalidates the session and sends users to /.
             logout:
                 path: app_logout
+                target: /
 
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/api/auth/(register|login)$, roles: PUBLIC_ACCESS }
         - { path: ^/api/docs(\.|$), roles: PUBLIC_ACCESS }
         - { path: ^/api/health$, roles: PUBLIC_ACCESS }
+        - { path: ^/admin/login$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 

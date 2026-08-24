@@ -40,6 +40,7 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
     }
 
     #[\Override]
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // Nothing sensitive beyond the irreversible hash is held.

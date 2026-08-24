@@ -24,8 +24,9 @@ Two decoupled stacks talk only through an OpenAPI-documented REST contract:
 - **Player app** (`http://localhost:3000`): sign in, start a campaign on a
   system, follow stage guidance, journal, consult oracles, manage characters,
   roll dice.
-- **Admin backoffice** (`http://localhost:8080/admin`, `ROLE_ADMIN` only):
-  authors game systems + campaign flows + sheet structures, scoped oracles.
+- **Admin backoffice** (`http://localhost:8080/admin`, `ROLE_ADMIN` only,
+  sign in at `/admin/login`): authors game systems + campaign flows + sheet
+  structures, scoped oracles.
 - **API** (`http://localhost:8080/api`): the single integration surface;
   errors are RFC 7807 `application/problem+json`.
 
@@ -125,8 +126,11 @@ and schemas against the canonical contract and fails loudly.
 
 - JWT bearer auth (`lexik/jwtAuthenticationBundle`): one-hour tokens with a
   60 s clock-skew allowance (`token_ttl`/`clock_skew`, pinned in config);
-  `/api` is stateless, `/admin` requires `ROLE_ADMIN`; registration always
-  yields `ROLE_PLAYER`.
+  `/api` is stateless JWT, registration always yields `ROLE_PLAYER`.
+- Backoffice: the `admin` firewall is a browser session — `/admin/login`
+  renders the EasyAdmin sign-in form (CSRF-protected), successful logins
+  land on `/admin`, and `/admin/logout` invalidates the session. The
+  backoffice account is provisioned by `app:create-admin`.
 - Ownership: every campaign-scoped operation is gated by the `CAMPAIGN_OWNER`
   voter expression; unknown and foreign campaigns are indistinguishable (404).
 - Secrets enter only through env vars (`.env.dist` holds placeholders).

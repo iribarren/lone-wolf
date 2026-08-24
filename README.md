@@ -42,7 +42,8 @@ no server-side templating. Errors use RFC 7807 `application/problem+json`.
 - **Dice roller** — strict `NdM±K` notation with pre-roll refusals that name the
   reason, every die shown plus modified total, optional log-to-journal.
 
-Admin content ships via the EasyAdmin backoffice (`/admin`, `ROLE_ADMIN`) or the
+Admin content ships via the EasyAdmin backoffice — sign in at
+`http://localhost:8080/admin/login` (`ROLE_ADMIN`, browser session) or use the
 demo seeder (`app:seed:demo`); players play at `http://localhost:3000`.
 Architecture details: [docs/architecture.md](docs/architecture.md).
 
@@ -68,7 +69,8 @@ docker compose exec php bin/console app:seed:demo      # optional: quickstart de
 
 Expected: backend health responds at <http://localhost:8080/api/health> with
 `{"status":"ok"}`; the player app renders at <http://localhost:3000> behind its
-sign-in gate; the EasyAdmin backoffice serves at <http://localhost:8080/admin>.
+sign-in gate; the EasyAdmin backoffice serves <http://localhost:8080/admin>
+behind its sign-in form.
 
 Verified boot state (Phase-9 parity pass):
 

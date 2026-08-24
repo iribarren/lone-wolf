@@ -16,11 +16,15 @@ api_auth_login:
     path: /api/auth/login
     methods: [POST]
 
-# JWT "logout" is client-side token disposal; this route only exists so
-# EasyAdmin's layout can generate a logout link (T034).
+# Backoffice sign-in form (FR-030). GET renders the EasyAdmin login page;
+# POST is intercepted by the admin firewall's form_login authenticator.
+admin_login:
+    path: /admin/login
+    controller: App\Identity\Infrastructure\Admin\AdminLoginController::index
+    methods: [GET, POST]
+
+# Matched by the admin firewall's logout listener (route-name match): it
+# invalidates the session and redirects to logout.target (/) without this
+# route's controller ever resolving.
 app_logout:
     path: /admin/logout
-    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
-    defaults:
-        path: /
-        permanent: false
