@@ -195,13 +195,24 @@ deptrac:
 
         DiceDomain:
             - SharedKernelDomain
+        # Explicit cross-context edges (US6): the logged roll repeats the
+        # Campaigns pattern — fetch the owned campaign through the shared
+        # fetcher and append a dice_roll entry through the Journal context's
+        # repository port.
         DiceApplication:
             - DiceDomain
+            - CampaignsApplication
+            - JournalApplication
+            - JournalDomain
             - SharedKernelDomain
             - SharedKernelApplication
+        # Explicit cross-context edge (US6): the /rolls response embeds THE
+        # canonical JournalEntry projection rather than duplicating it —
+        # duplicating the contract shape would invite drift (Constitution V).
         DiceInfrastructure:
             - DiceApplication
             - DiceDomain
+            - JournalInfrastructure
             - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
