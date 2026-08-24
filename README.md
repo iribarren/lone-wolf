@@ -95,6 +95,7 @@ make test      # backend PHPUnit suites + frontend Vitest
 make lint      # PHPStan + deptrac layer rules
 make npm CMD="install"
 scripts/check-contract.sh   # Constitution V gate: runtime OpenAPI vs canonical contract
+scripts/check-journal-performance.sh  # SC-008 evidence: 500-entry journal, latest view < 2 s
 ```
 
 The contract-drift check requires the backend to be up (`docker compose up -d`)

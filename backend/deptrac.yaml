@@ -142,10 +142,20 @@ deptrac:
         # /campaigns/{id}/journal) delegates ownership enforcement upstream to
         # the Campaigns play-loop handlers/fetcher (FR-019) — the Journal
         # context never judges players itself.
+        #
+        # Fixture edges (Phase 9, T098): app:seed:large-journal composes the
+        # SC-008 evidence fixture through application ports only — Identity's
+        # user repository and Rulesets' system repository — with aggregates
+        # crossing as values (same pattern as CampaignsApplication →
+        # JournalDomain above). No runtime Journal code depends on them.
         JournalInfrastructure:
             - JournalApplication
             - JournalDomain
             - CampaignsApplication
+            - IdentityApplication
+            - IdentityDomain
+            - RulesetsApplication
+            - RulesetsDomain
             - SharedKernelDomain
             - SharedKernelApplication
             - SharedKernelInfrastructure
