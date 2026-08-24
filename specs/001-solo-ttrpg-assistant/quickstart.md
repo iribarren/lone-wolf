@@ -124,3 +124,24 @@ curl -s localhost:8080/api/docs.json > /tmp/runtime-openapi.json
 
 Diff runtime document against `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`
 (paths/schemas must match; CI fails on drift).
+
+## Increment Validation: Admin Campaign-Flows Editor
+
+Prerequisites: stack up, an admin account (`docker compose exec php bin/console app:create-admin`),
+at least one authored system.
+
+1. Sign in at `http://localhost:8080/admin/login` → backoffice loads.
+2. Open **Game systems**: the list renders every row (previously crashed with
+   "flowDefinition … can't be converted into a string" once data existed).
+3. Open **Campaign flows** (new menu entry): systems listed; NEW/DELETE absent.
+4. Edit a flow: add/remove stage rows, set guidance, pick starting stage, wire
+   transitions via from/to selects, save → success flash.
+5. Remove a stage currently occupied by a campaign → refusal naming the stage
+   (FR-005), nothing persisted.
+6. Point a transition at a not-yet-existing stage and save → domain validation
+   error, no partial write.
+7. `GET /admin/system` detail + oracles pages still render normally.
+
+Automated: `tests/Integration/Rulesets/AdminGameFlowPagesTest.php` covers
+authenticated index/edit round-trip; unit suite covers form mapping without
+booting the kernel.

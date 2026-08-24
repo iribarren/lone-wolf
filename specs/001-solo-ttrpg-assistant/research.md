@@ -163,5 +163,35 @@ in both layers.
 
 ---
 
+## R11. Increment — admin backoffice: system index crash + dedicated Campaign-flows editor
+
+**Decision**: Fix the `/admin/system` index crash by keeping the jsonb-backed
+`flowDefinition`/`sheetStructure` fields off list/detail pages (EasyAdmin's
+`TextConfigurator` throws on non-stringable values before `formatValue` runs).
+Replace raw-JSON flow editing with a second CRUD controller over the same
+`PersistenceGameSystem` entity (`GameFlowCrudController`, index + edit only)
+rendering structured Symfony forms (`FlowDefinitionType` → stages collection,
+starting-stage select, transitions collection). Stage-name selects use a lenient
+`ChoiceLoader` (accepts any submitted name) so the domain stays the single
+validation authority; a small static JS asset populates prototype-row selects
+and wires collection add/remove.
+
+**Rationale**: EasyAdmin supports multiple CRUD controllers per entity and
+derives route names from the controller short name (`game_flow`), which the
+existing menu already relies on for systems/oracles. Lenient loaders avoid the
+classic fragile PRE_SUBMIT choice-rebuild dance while `UpdateFlowDefinitionHandler`
+keeps enforcing FR-005 occupancy guards, domain invariants, and supersede
+warnings unchanged. No schema or API contract changes are required.
+
+**Alternatives considered**:
+- *Structured forms inside the existing Systems CRUD only*: leaves flows
+  undiscoverable (the reported menu gap); rejected.
+- *Separate flow entity/table*: violates FR-002 1:1 ownership and needs a
+  migration; rejected.
+- *Dynamic choice rebuilding via form events*: brittle with collections;
+  rejected in favour of loader + JS.
+- *New Behat web-driving context*: out of scope for this increment; kernel-client
+  integration tests cover the new pages (matches AdminBackofficeLoginTest style).
+
 **Outcome**: All technical unknowns resolved. No remaining NEEDS CLARIFICATION items. Gates re-checked
 post-design in plan.md remain PASS.

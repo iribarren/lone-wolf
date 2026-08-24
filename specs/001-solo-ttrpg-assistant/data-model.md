@@ -243,3 +243,22 @@ malformed syntax (`2d`, `d20x`), zero/negative counts (`0d6`), invalid faces (`1
 | Campaign.currentPosition | stage → stage | edge exists in FlowDefinition, else refusal + legal list (FR-016) |
 | Character.reviewStatus | clean → flagged_for_review | stored attributes vs updated SheetStructure mismatch (FR-025) |
 | JournalEntry | append-only | immutable history |
+
+## Increment: Admin Campaign-Flows Editor (no schema change)
+
+Zero migrations. `game_systems.flow_definition` keeps its exact jsonb shape —
+the structured admin form is a *view* over the same payload:
+
+```text
+FlowPayload (unchanged, see RulesetJsonMapper phpdoc)
+├── stages:        list<{name: string, guidance: string}>   (≥2, unique non-empty names)
+├── starting_stage: string                                  (must be one of the stage names)
+└── transitions:   list<{from: string, to: string}>         (both must reference existing stages)
+```
+
+Form binding contract (`Rulesets/Infrastructure/Admin/Form/FlowDefinitionType`):
+child field names equal the payload keys above, so Symfony maps the stored array
+directly; submissions normalize back to the identical shape before
+`UpdateFlowDefinitionHandler` applies occupancy guards (FR-005) and optimistic-lock
+supersede detection. Creation path additionally validates the whole payload
+(including transitions) through `FlowFactory::fromPayload` before insert.
