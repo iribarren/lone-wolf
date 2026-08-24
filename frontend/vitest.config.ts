@@ -12,5 +12,7 @@ export default defineConfig({
     test: {
         environment: 'jsdom',
         setupFiles: './tests/setup.ts',
+        // tests/e2e is Playwright territory (T101) — driven by `npm run test:e2e`.
+        exclude: ['**/node_modules/**', 'tests/e2e/**'],
     },
 });
