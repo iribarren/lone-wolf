@@ -66,3 +66,9 @@ backend/.phpunit.cache
 backend/.phpunit.cache/test-results
 backend/.phpunit.cache/
 
+
+# === Playwright (frontend E2E, T101) ===
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.playwright/

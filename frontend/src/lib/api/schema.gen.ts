@@ -92,6 +92,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/campaigns/{campaignId}/characters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Character resource.
+         * @description Retrieves a Character resource.
+         */
+        get: operations["api_campaigns_campaignIdcharacters_get"];
+        put?: never;
+        /**
+         * Creates a Character resource.
+         * @description Creates a Character resource.
+         */
+        post: operations["api_campaigns_campaignIdcharacters_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/characters/{characterId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Character resource.
+         * @description Updates the Character resource.
+         */
+        patch: operations["api_characters_characterId_patch"];
+        trace?: never;
+    };
+    "/api/campaigns/{campaignId}/rolls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a DiceRoll resource.
+         * @description Creates a DiceRoll resource.
+         */
+        post: operations["api_campaigns_campaignIdrolls_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dice/roll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a DiceRoll resource.
+         * @description Creates a DiceRoll resource.
+         */
+        post: operations["api_diceroll_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/campaigns/{campaignId}/journal": {
         parameters: {
             query?: never;
@@ -307,6 +391,70 @@ export interface components {
             currentStageName?: string;
             updatedAt?: string;
         };
+        /**
+         * @description US5 player-facing character surface (contract paths /campaigns/{id}/characters,
+         *     /characters/{characterId}). Sheets render from the system's structure
+         *     metadata carried alongside each view; breaches answer 422 as a
+         *     SheetValidationProblem with field-level violations (FR-023).
+         */
+        Character: {
+            id?: string;
+            kind?: string;
+            name?: string;
+            attributes?: {
+                [key: string]: string | null;
+            };
+            validatedStructureVersion?: number;
+            reviewStatus?: string;
+            driftIssues?: string[];
+            structureVersion?: number | null;
+            structureFields?: components["schemas"]["SheetFieldEntryResource"][];
+        };
+        /**
+         * @description US5 player-facing character surface (contract paths /campaigns/{id}/characters,
+         *     /characters/{characterId}). Sheets render from the system's structure
+         *     metadata carried alongside each view; breaches answer 422 as a
+         *     SheetValidationProblem with field-level violations (FR-023).
+         */
+        "Character.SaveCharacterInput": {
+            kind?: string;
+            name?: string;
+            attributes?: {
+                [key: string]: string | null;
+            } | null;
+        };
+        /**
+         * @description US5 player-facing character surface (contract paths /campaigns/{id}/characters,
+         *     /characters/{characterId}). Sheets render from the system's structure
+         *     metadata carried alongside each view; breaches answer 422 as a
+         *     SheetValidationProblem with field-level violations (FR-023).
+         */
+        "Character.SaveCharacterInput.jsonMergePatch": {
+            kind?: string;
+            name?: string;
+            attributes?: {
+                [key: string]: string | null;
+            } | null;
+        };
+        /**
+         * @description US5 player-facing character surface (contract paths /campaigns/{id}/characters,
+         *     /characters/{characterId}). Sheets render from the system's structure
+         *     metadata carried alongside each view; breaches answer 422 as a
+         *     SheetValidationProblem with field-level violations (FR-023).
+         */
+        "Character.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            kind?: string;
+            name?: string;
+            attributes?: {
+                [key: string]: string | null;
+            };
+            validatedStructureVersion?: number;
+            reviewStatus?: string;
+            driftIssues?: string[];
+            structureVersion?: number | null;
+            structureFields?: components["schemas"]["SheetFieldEntryResource.jsonld"][];
+        };
         /** @description Unprocessable entity */
         ConstraintViolation: {
             /** @default 422 */
@@ -353,6 +501,88 @@ export interface components {
             readonly type?: string;
             readonly title?: string | null;
             readonly instance?: string | null;
+        };
+        ConsultedEntryResource: {
+            entryId?: string;
+            text?: string;
+        };
+        "ConsultedEntryResource.jsonld": {
+            entryId?: string;
+            text?: string;
+        };
+        /**
+         * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
+         *
+         *     POST /dice/roll rolls without logging (200 result | 422 DiceNotationProblem);
+         *     POST /campaigns/{campaignId}/rolls additionally appends a dice_roll journal
+         *     entry (FR-029) and answers 201 with {roll, journalEntry}.
+         */
+        DiceRoll: {
+            notation?: string;
+            diceValues?: number[];
+            modifier?: number;
+            total?: number;
+        };
+        /**
+         * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
+         *
+         *     POST /dice/roll rolls without logging (200 result | 422 DiceNotationProblem);
+         *     POST /campaigns/{campaignId}/rolls additionally appends a dice_roll journal
+         *     entry (FR-029) and answers 201 with {roll, journalEntry}.
+         */
+        "DiceRoll.LoggedRollResource": {
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            roll?: string;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            journalEntry?: string;
+        };
+        /**
+         * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
+         *
+         *     POST /dice/roll rolls without logging (200 result | 422 DiceNotationProblem);
+         *     POST /campaigns/{campaignId}/rolls additionally appends a dice_roll journal
+         *     entry (FR-029) and answers 201 with {roll, journalEntry}.
+         */
+        "DiceRoll.LoggedRollResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            roll?: string;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            journalEntry?: string;
+        };
+        /**
+         * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
+         *
+         *     POST /dice/roll rolls without logging (200 result | 422 DiceNotationProblem);
+         *     POST /campaigns/{campaignId}/rolls additionally appends a dice_roll journal
+         *     entry (FR-029) and answers 201 with {roll, journalEntry}.
+         */
+        "DiceRoll.RollDiceInput": {
+            notation?: string;
+        };
+        /**
+         * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
+         *
+         *     POST /dice/roll rolls without logging (200 result | 422 DiceNotationProblem);
+         *     POST /campaigns/{campaignId}/rolls additionally appends a dice_roll journal
+         *     entry (FR-029) and answers 201 with {roll, journalEntry}.
+         */
+        "DiceRoll.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            notation?: string;
+            diceValues?: number[];
+            modifier?: number;
+            total?: number;
         };
         /** @description A representation of common errors. */
         Error: {
@@ -519,6 +749,30 @@ export interface components {
          *     plus global ones (FR-009); POST consult yields exactly one weighted-random
          *     result or a friendly notice payload (FR-010/FR-011).
          */
+        "OracleSummary.ConsultationOutcomeResource": {
+            status?: string;
+            entry?: components["schemas"]["ConsultedEntryResource"] | null;
+            journalEntryId?: string | null;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
+        "OracleSummary.ConsultationOutcomeResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            status?: string;
+            entry?: components["schemas"]["ConsultedEntryResource.jsonld"] | null;
+            journalEntryId?: string | null;
+        };
+        /**
+         * @description US4 player-facing oracle surface (contract paths /campaigns/{campaignId}/oracles*).
+         *
+         *     GET lists only the tables applicable to the campaign's system — its own
+         *     plus global ones (FR-009); POST consult yields exactly one weighted-random
+         *     result or a friendly notice payload (FR-010/FR-011).
+         */
         "OracleSummary.SaveConsultationInput": {
             text?: string;
             interpretation?: string;
@@ -535,6 +789,22 @@ export interface components {
             title?: string;
             scopeType?: string;
             entryCount?: number;
+        };
+        SheetFieldEntryResource: {
+            key?: string;
+            label?: string;
+            type?: string;
+            requiredForPc?: boolean;
+            requiredForNpc?: boolean;
+            options?: string[];
+        };
+        "SheetFieldEntryResource.jsonld": {
+            key?: string;
+            label?: string;
+            type?: string;
+            requiredForPc?: boolean;
+            requiredForNpc?: boolean;
+            options?: string[];
         };
         StageActionResource: {
             kind?: string;
@@ -897,6 +1167,312 @@ export interface operations {
             };
         };
     };
+    api_campaigns_campaignIdcharacters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Character identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Character resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Character.jsonld"];
+                    "application/json": components["schemas"]["Character"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdcharacters_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Character identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Character resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Character.SaveCharacterInput"];
+                "application/json": components["schemas"]["Character.SaveCharacterInput"];
+            };
+        };
+        responses: {
+            /** @description Character resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Character.jsonld"];
+                    "application/json": components["schemas"]["Character"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_characters_characterId_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Character identifier */
+                characterId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Character resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Character.SaveCharacterInput.jsonMergePatch"];
+                "application/json": components["schemas"]["Character.SaveCharacterInput.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Character resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Character.jsonld"];
+                    "application/json": components["schemas"]["Character"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_campaigns_campaignIdrolls_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description DiceRoll identifier */
+                campaignId: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new DiceRoll resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["DiceRoll.RollDiceInput"];
+                "application/json": components["schemas"]["DiceRoll.RollDiceInput"];
+            };
+        };
+        responses: {
+            /** @description DiceRoll resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["DiceRoll.LoggedRollResource.jsonld"];
+                    "application/json": components["schemas"]["DiceRoll.LoggedRollResource"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_diceroll_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new DiceRoll resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["DiceRoll.RollDiceInput"];
+                "application/json": components["schemas"]["DiceRoll.RollDiceInput"];
+            };
+        };
+        responses: {
+            /** @description DiceRoll resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["DiceRoll.jsonld"];
+                    "application/json": components["schemas"]["DiceRoll"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     api_campaigns_campaignIdjournal_get: {
         parameters: {
             query?: never;
@@ -1108,8 +1684,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["OracleSummary.jsonld"];
-                    "application/json": components["schemas"]["OracleSummary"];
+                    "application/ld+json": components["schemas"]["OracleSummary.ConsultationOutcomeResource.jsonld"];
+                    "application/json": components["schemas"]["OracleSummary.ConsultationOutcomeResource"];
                 };
             };
             /** @description Invalid input */
@@ -1173,8 +1749,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["OracleSummary.jsonld"];
-                    "application/json": components["schemas"]["OracleSummary"];
+                    "application/ld+json": components["schemas"]["OracleSummary.ConsultationOutcomeResource.jsonld"];
+                    "application/json": components["schemas"]["OracleSummary.ConsultationOutcomeResource"];
                 };
             };
             /** @description Invalid input */

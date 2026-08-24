@@ -284,8 +284,6 @@ paths:
               schema: { $ref: '#/components/schemas/ConsultationOutcome' }
 
   /campaigns/{campaignId}/characters:
-
-  /campaigns/{campaignId}/characters:
     parameters:
       - $ref: '#/components/parameters/CampaignId'
     get:
@@ -428,17 +426,14 @@ components:
 
     SystemSummary:
       type: object
-      required: [id, name, description, startingStage]
+      required: [systemId, name, description, startingStage]
       properties:
-        id: { type: string, format: uuid }
+        systemId: { type: string, format: uuid }
         name: { type: string, maxLength: 120 }
         description: { type: string }
         startingStage:
-          type: object
-          required: [id, name]
-          properties:
-            id: { type: string, format: uuid }
-            name: { type: string }
+          type: string
+          description: Name of the designated opening stage
         openingGuidance: { type: string }
 
     CampaignSummary:
@@ -521,9 +516,9 @@ components:
 
     OracleSummary:
       type: object
-      required: [id, title, scopeType, entryCount]
+      required: [oracleId, title, scopeType, entryCount]
       properties:
-        id: { type: string, format: uuid }
+        oracleId: { type: string, format: uuid }
         title: { type: string }
         scopeType:
           type: string
@@ -563,6 +558,10 @@ components:
     SheetStructure:
       type: object
       required: [version, fields]
+      description: |
+        Authoring-side view of a system's sheet structure (EasyAdmin editor).
+        Never exposed verbatim by the player API — character views carry the
+        rendered `structureFields`/`structureVersion` metadata inline.
       properties:
         version: { type: integer }
         fields:

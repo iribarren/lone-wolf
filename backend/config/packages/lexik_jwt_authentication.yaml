@@ -2,3 +2,7 @@ lexik_jwt_authentication:
     secret_key: '%env(resolve:JWT_SECRET_KEY)%'
     public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
+    # Explicit lifetime (T100 hardening): one-hour access tokens; 60 s of
+    # skew tolerates small clock drift without widening the replay window.
+    token_ttl: 3600
+    clock_skew: 60

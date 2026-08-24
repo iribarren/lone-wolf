@@ -235,13 +235,13 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 **Purpose**: Gates, performance evidence, docs parity (Constitution VI)
 
-- [ ] T096 [P] Documentation parity pass: update root `README.md` + `docs/` architecture notes (contexts diagram, flow-engine explanation) reflecting everything delivered this change set
-- [ ] T097 [P] Add contract-drift check script `scripts/check-contract.sh`: download runtime `/api/docs.json`, diff paths/schemas against `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`, exit non-zero on drift (Constitution V gate)
-- [ ] T098 [P] Performance evidence fixture: seeder generating 500-entry journal + scripted timing assertion of latest-view < 2 s (SC-008) in `backend/src/Journal/Infrastructure/Console/SeedLargeJournalCommand.php` + `scripts/check-journal-performance.sh`
-- [ ] T099 [P] Extend `app:create-admin` into `app:seed:demo` providing quickstart demo content (Scene-Sequel + Act Ladder + Freeform Sandbox systems — the sandbox being a single terminal stage exercising dead-end guidance, satisfying SC-007's three-system requirement — plus global + scoped oracles) in `backend/src/Shared/Infrastructure/Console/`
-- [ ] T100 Security hardening sweep: verify ownership voter coverage on ALL player endpoints, JWT expiry/clock-skew config, `/admin` restricted to ROLE_ADMIN, secrets only via env (FR-030/FR-031)
-- [ ] T101 Playwright E2E smoke mirroring quickstart happy-path (login → new campaign → guidance → advance → journal entry visible) in `frontend/tests/e2e/play.spec.ts` + `npm run test:e2e` script
-- [ ] T102 Execute full `specs/001-solo-ttrpg-assistant/quickstart.md` walkthrough (V1–V6) fixing any gaps found; record results in PR description. Verify SC-007 explicitly: all three seeded systems run simultaneously with no cross-system leakage of stages, sheets, or oracles
+- [x] T096 [P] Documentation parity pass: update root `README.md` + `docs/` architecture notes (contexts diagram, flow-engine explanation) reflecting everything delivered this change set
+- [x] T097 [P] Add contract-drift check script `scripts/check-contract.sh`: download runtime `/api/docs.json`, diff paths/schemas against `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`, exit non-zero on drift (Constitution V gate)
+- [x] T098 [P] Performance evidence fixture: seeder generating 500-entry journal + scripted timing assertion of latest-view < 2 s (SC-008) in `backend/src/Journal/Infrastructure/Console/SeedLargeJournalCommand.php` + `scripts/check-journal-performance.sh`
+- [x] T099 [P] Extend `app:create-admin` into `app:seed:demo` providing quickstart demo content (Scene-Sequel + Act Ladder + Freeform Sandbox systems — the sandbox being a single terminal stage exercising dead-end guidance, satisfying SC-007's three-system requirement — plus global + scoped oracles) in `backend/src/Shared/Infrastructure/Console/`
+- [x] T100 Security hardening sweep: verify ownership voter coverage on ALL player endpoints, JWT expiry/clock-skew config, `/admin` restricted to ROLE_ADMIN, secrets only via env (FR-030/FR-031)
+- [x] T101 Playwright E2E smoke mirroring quickstart happy-path (login → new campaign → guidance → advance → journal entry visible) in `frontend/tests/e2e/play.spec.ts` + `npm run test:e2e` script
+- [x] T102 Execute full `specs/001-solo-ttrpg-assistant/quickstart.md` walkthrough (V1–V6) fixing any gaps found; record results in PR description. Verify SC-007 explicitly: all three seeded systems run simultaneously with no cross-system leakage of stages, sheets, or oracles
 
 ---
 
