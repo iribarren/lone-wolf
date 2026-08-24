@@ -26,7 +26,9 @@ no server-side templating. Errors use RFC 7807 `application/problem+json`.
 
 - **Game systems & campaign flows** — admins author systems with named stages,
   legal transitions, a designated starting stage and per-stage pacing guidance;
-  occupied stages are edit-guarded; deactivation never breaks running campaigns.
+  a dedicated "Campaign flows" backoffice section edits stages/transitions as
+  structured forms; occupied stages are edit-guarded; deactivation never breaks
+  running campaigns.
 - **Guided solo campaigns** — pick a system, land on its opening stage with
   guidance and suggested actions, advance only along legal transitions (illegal
   moves explain the alternatives), stop/resume with exact state restoration,

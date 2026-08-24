@@ -26,7 +26,9 @@ Two decoupled stacks talk only through an OpenAPI-documented REST contract:
   roll dice.
 - **Admin backoffice** (`http://localhost:8080/admin`, `ROLE_ADMIN` only,
   sign in at `/admin/login`): authors game systems + campaign flows + sheet
-  structures, scoped oracles.
+  structures, scoped oracles. Flows have a dedicated "Campaign flows" section
+  with a structured stage/transition editor (occupied stages are guarded,
+  FR-005); the systems section keeps profile, availability and sheet structure.
 - **API** (`http://localhost:8080/api`): the single integration surface;
   errors are RFC 7807 `application/problem+json`.
 
