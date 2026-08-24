@@ -65,17 +65,20 @@ final class SystemCrudController extends AbstractCrudController
                 GameSystemStatus::cases(),
             ));
 
+        // jsonb arrays are not stringable: EasyAdmin's TextConfigurator throws
+        // on list/detail pages before formatValue could ever run, so these two
+        // fields are form-only (index/detail render the profile columns).
         yield TextareaField::new('flowDefinition', 'Campaign flow (JSON)')
             ->setHelp('{"stages":[{"name":"Scene","guidance":"…"}],"starting_stage":"Scene","transitions":[]}')
             ->setFormType(JsonDocumentType::class)
             ->setFormTypeOption(JsonDocumentType::OPTION_IS_SHEET, false)
-            ->formatValue(static fn (?array $value): string => (string) json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            ->onlyOnForms();
 
         yield TextareaField::new('sheetStructure', 'Character sheet structure (JSON)')
             ->setHelp('Optional. {"fields":[{"key":"name","label":"Name","type":"text","required_for_pc":true,"required_for_npc":true}],"version":1}')
             ->setFormType(JsonDocumentType::class)
             ->setFormTypeOption(JsonDocumentType::OPTION_IS_SHEET, true)
-            ->formatValue(static fn (?array $value): string => (string) json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            ->onlyOnForms();
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
