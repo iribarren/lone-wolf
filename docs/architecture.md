@@ -123,8 +123,10 @@ and schemas against the canonical contract and fails loudly.
 
 ## Security model (FR-030/FR-031)
 
-- JWT bearer auth (`lexik/jwtAuthenticationBundle`); `/api` is stateless,
-  `/admin` requires `ROLE_ADMIN`; registration always yields `ROLE_PLAYER`.
+- JWT bearer auth (`lexik/jwtAuthenticationBundle`): one-hour tokens with a
+  60 s clock-skew allowance (`token_ttl`/`clock_skew`, pinned in config);
+  `/api` is stateless, `/admin` requires `ROLE_ADMIN`; registration always
+  yields `ROLE_PLAYER`.
 - Ownership: every campaign-scoped operation is gated by the `CAMPAIGN_OWNER`
   voter expression; unknown and foreign campaigns are indistinguishable (404).
 - Secrets enter only through env vars (`.env.dist` holds placeholders).
