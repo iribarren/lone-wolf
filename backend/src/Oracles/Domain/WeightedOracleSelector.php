@@ -57,7 +57,8 @@ final class WeightedOracleSelector
             $cumulativeWeights[] = $runningTotal;
         }
 
-        $randomValue = new Randomizer($seed === null ? null : new Mt19937($seed))->getInt(1, $runningTotal);
+        $randomizer = new Randomizer($seed === null ? null : new Mt19937($seed));
+        $randomValue = $randomizer->getInt(1, $runningTotal);
 
         $selectedIndex = 0;
         foreach ($cumulativeWeights as $index => $cumulativeWeight) {
