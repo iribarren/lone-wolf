@@ -97,6 +97,14 @@ deptrac:
         SharedKernelInfrastructure:
             - SharedKernelApplication
             - SharedKernelDomain
+            # Fixture edge (Phase 9, T099): app:seed:demo composes quickstart
+            # content through the Rulesets and Oracles application ports only,
+            # with aggregates crossing as values. No runtime shared-kernel
+            # code depends on the contexts.
+            - RulesetsApplication
+            - RulesetsDomain
+            - OraclesApplication
+            - OraclesDomain
 
         # Every context follows the same inward-only shape and may use the shared kernel.
         RulesetsDomain:
