@@ -33,6 +33,10 @@ final class FlowDefinitionType extends AbstractType
             'translation_domain' => false,
             'label' => false,
         ]);
+
+        // EasyAdmin's ArrayConfigurator injects CollectionType defaults that
+        // are meaningless here; declare them so they are swallowed silently.
+        $resolver->setDefined(['entry_type', 'entry_options', 'allow_add', 'allow_delete', 'delete_empty']);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -82,7 +86,6 @@ final class FlowDefinitionType extends AbstractType
             'prototype' => true,
             'prototype_name' => '__stage__',
             'error_bubbling' => false,
-            'attr' => ['class' => 'js-flow-collection js-flow-stages'],
         ]);
 
         $builder->add('starting_stage', StageNameChoiceType::class, [
@@ -99,7 +102,6 @@ final class FlowDefinitionType extends AbstractType
             'prototype' => true,
             'prototype_name' => '__transition__',
             'error_bubbling' => false,
-            'attr' => ['class' => 'js-flow-collection js-flow-transitions'],
         ]);
     }
 }

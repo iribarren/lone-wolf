@@ -22,6 +22,11 @@ final class JsonDocumentType extends AbstractType
     {
         $resolver->setDefault(self::OPTION_IS_SHEET, false);
         $resolver->setAllowedTypes(self::OPTION_IS_SHEET, 'bool');
+
+        // EasyAdmin's ArrayConfigurator injects CollectionType defaults that
+        // are meaningless for this plain textarea; declare them so they are
+        // swallowed silently.
+        $resolver->setDefined(['entry_type', 'entry_options', 'allow_add', 'allow_delete', 'delete_empty']);
     }
 
     public function getParent(): string
