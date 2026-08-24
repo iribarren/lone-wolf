@@ -268,8 +268,11 @@ final class DiceContext implements Context
                 ));
             }
 
-            // Timestamp present — the journal records WHEN it happened.
-            $entry->createdAt();
+            // The journal records WHEN it happened — a real timestamp must
+            // travel with the snapshot (quickstart V6 row 4).
+            if ($entry->createdAt()->getTimestamp() <= 0) {
+                throw new AssertionFailedError('The dice_roll entry lacks a usable timestamp.');
+            }
 
             return;
         }
@@ -279,10 +282,10 @@ final class DiceContext implements Context
 
     private function resultField(string $field): mixed
     {
-        if (($this->responseStatus ?? 0) !== 200) {
+        if ($this->responseStatus !== 200) {
             throw new AssertionFailedError(sprintf(
                 'A valid roll was expected to answer 200, got %d with body %s.',
-                $this->responseStatus ?? 0,
+                $this->responseStatus,
                 var_export($this->responseBody, true),
             ));
         }
@@ -328,9 +331,15 @@ final class DiceContext implements Context
         );
 
         $content = $this->client->getResponse()->getContent();
-        $decoded = is_string($content) ? json_decode($content, true) : null;
+        $decoded = is_string($content) ? json_decode($content, true, 512, JSON_THROW_ON_ERROR) : null;
 
         $this->responseStatus = $this->client->getResponse()->getStatusCode();
-        $this->responseBody = is_array($decoded) ? $decoded : null;
+
+        if (is_array($decoded)) {
+            /** @var array<string, mixed> $decoded */
+            $this->responseBody = $decoded;
+        } else {
+            $this->responseBody = null;
+        }
     }
 }
