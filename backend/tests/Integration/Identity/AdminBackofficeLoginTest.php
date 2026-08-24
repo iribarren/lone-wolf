@@ -90,7 +90,7 @@ final class AdminBackofficeLoginTest extends WebTestCase
         $client->followRedirect();
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('body', 'Lone Wolf backoffice');
+        self::assertSelectorTextContains('body', 'Game systems');
     }
 
     public function testPlayerRoleCannotReachTheBackoffice(): void
@@ -130,6 +130,9 @@ final class AdminBackofficeLoginTest extends WebTestCase
         self::assertRouteSame('admin_login');
     }
 
+    /**
+     * @param list<User::ROLE_*> $extraRoles
+     */
     private function registerUser(string $prefix, array $extraRoles): User
     {
         $email = sprintf('%s-%s@integration.test', $prefix, bin2hex(random_bytes(4)));
