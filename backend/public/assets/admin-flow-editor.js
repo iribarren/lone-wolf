@@ -170,7 +170,12 @@
                 });
             });
 
-        syncSelects(document.body);
+        // syncSelects() resolves its scope with closest('form'), which is null
+        // for document.body — the initial population has to start from the
+        // forms themselves or it silently no-ops (audit A2).
+        document.querySelectorAll('form').forEach(function (form) {
+            syncSelects(form);
+        });
     }
 
     ready(enhance);
