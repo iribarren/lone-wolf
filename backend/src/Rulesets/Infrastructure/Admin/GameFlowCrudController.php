@@ -86,9 +86,17 @@ final class GameFlowCrudController extends AbstractCrudController
     {
         \assert($entityInstance instanceof PersistenceGameSystem);
 
+        // The form mapper has already written the submitted payload onto the
+        // row; keep it, because the command below only carries structure.
+        $submitted = $entityInstance->flowDefinition();
+
         try {
             // FR-005: occupancy-aware validation + save via the application handler.
             $this->flowHandler->handle(self::updateFlowCommand($entityInstance));
+
+            $entityInstance->setFlowDefinition(
+                self::withSubmittedGuidance($entityInstance->flowDefinition(), $submitted),
+            );
 
             parent::updateEntity($entityManager, $entityInstance);
         } catch (\DomainException $e) {
