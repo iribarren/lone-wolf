@@ -264,11 +264,9 @@ what it means in the fiction. An empty table produces a friendly notice, not an 
 - Every individual die is shown as a chip alongside the modified total.
 - Bad notation is refused **before** rolling, and the message names the specific problem
   (malformed, die count, face count, out of bounds) rather than saying "invalid".
-
-> **Known defect.** Pressing **Log to journal** crashes the player app with a blank
-> *"Application error"* page. The roll *is* saved to the journal — reload the page and you will
-> see it — but the app has to be reloaded. Use the dice roller for un-logged rolls and write the
-> result into the journal by hand until this is fixed. See [audit finding A5](audit/README.md).
+- **Log to journal** rolls again server-side and records that roll, so what stays on screen is
+  exactly what the journal now holds. *"Logged to your journal."* replaces the button and the
+  entry appears in the timeline, stamped with your current stage.
 
 **Campaign settings.** A collapsed *danger zone*. Deleting a campaign is irreversible and takes
 its journal and characters with it; the delete button stays disabled until you type `DELETE`
@@ -353,7 +351,7 @@ Base URL `http://localhost:8080/api`. All endpoints except registration, login, 
 | | |
 |---|---|
 | `POST /dice/roll` | `{notation}` → `{notation, diceValues[], modifier, total}` |
-| `POST /campaigns/{id}/rolls` | Rolls **and** journals it → `201`. ⚠️ Returns IRI strings rather than the documented embedded objects — see [audit finding A5](audit/README.md). |
+| `POST /campaigns/{id}/rolls` | Rolls **and** journals it → `201` with both embedded: `{roll: {…}, journalEntry: {…}}` |
 
 ### Errors — RFC 7807 `application/problem+json`
 
@@ -393,7 +391,6 @@ Every refusal carries a machine-readable reason, not just a message.
 | | |
 |---|---|
 | A4 | Oracle entries cannot be authored in the backoffice at all |
-| A5 | "Log to journal" in the dice widget crashes the player app |
 | B2 | No character create/edit UI — API only |
 | B3 | Journal shows only the 50 newest entries, with no way to page back |
 | B4 | No sign-out, no password reset, no handling of an expired token |
@@ -410,7 +407,6 @@ folders or tagging, search across the journal, mobile-specific layout, offline p
 | Symptom | Cause and fix |
 |---|---|
 | `app:create-admin` says *"Provide a valid email"* | `ADMIN_EMAIL`/`ADMIN_PASSWORD` are commented out in `.env.dist`. Pass `--email` / `--password`. |
-| Player app shows *"Application error"* | Most likely finding A5 — you pressed *Log to journal*. Reload; the roll was saved. |
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
 | API returns `{"@context": …, "member": […]}` | You did not send `Accept: application/json`; you got JSON-LD. |
 | Consulting an oracle says the table is empty | It genuinely has no entries — see finding A4. |
