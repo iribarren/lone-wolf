@@ -30,7 +30,10 @@
 
     function stageNames(scope) {
         var names = [];
-        scope.querySelectorAll('input[name$="[name]"]').forEach(function (input) {
+        // Narrow enough to skip the game system's own …[name] field, which a
+        // bare [name$="[name]"] offered as if it were a stage (audit A3). Same
+        // selector the change/blur wiring in enhance() uses.
+        scope.querySelectorAll('input[name*="[stages]"][name$="[name]"]').forEach(function (input) {
             var value = input.value.trim();
             if (value !== '' && names.indexOf(value) === -1) {
                 names.push(value);
@@ -50,7 +53,14 @@
 
         form.querySelectorAll('select[name$="[starting_stage]"], select[name$="[from]"], select[name$="[to]"]')
             .forEach(function (select) {
+                // The server renders no <option selected> — the choice list is
+                // deliberately empty (LenientStageNameLoader) — so on the first
+                // pass the stored stage only exists in data-flow-selected. Drop
+                // the hint once it has been honoured so later edits win.
                 var current = select.value;
+                if (current === '') {
+                    current = select.getAttribute('data-flow-selected') || '';
+                }
 
                 Array.prototype.slice.call(select.options).forEach(function (option) {
                     if (option.value !== '') {
@@ -67,7 +77,25 @@
 
                 if (names.indexOf(current) !== -1) {
                     select.value = current;
+                    select.removeAttribute('data-flow-selected');
                 }
+            });
+    }
+
+    function wireStageNameInputs(scope) {
+        scope.querySelectorAll('input[name*="[stages]"][name$="[name]"]')
+            .forEach(function (input) {
+                if (input.getAttribute('data-flow-wired')) {
+                    return;
+                }
+
+                input.setAttribute('data-flow-wired', '1');
+                input.addEventListener('change', function () {
+                    syncSelects(input);
+                });
+                input.addEventListener('blur', function () {
+                    syncSelects(input);
+                });
             });
     }
 
@@ -115,6 +143,9 @@
             row.setAttribute('data-flow-row', '');
             ensureDeleteButton(row);
             holder.insertBefore(row, addButtonWrap);
+            // Rows added after load need the same change/blur listeners, or
+            // naming the new stage never reaches the selects.
+            wireStageNameInputs(row);
             syncSelects(row);
         });
 
@@ -155,22 +186,14 @@
             wireCollection(holder);
         });
 
-        document.querySelectorAll('input[name*="[stages]"][name$="[name]"]')
-            .forEach(function (input) {
-                if (input.getAttribute('data-flow-wired')) {
-                    return;
-                }
+        wireStageNameInputs(document);
 
-                input.setAttribute('data-flow-wired', '1');
-                input.addEventListener('change', function () {
-                    syncSelects(input);
-                });
-                input.addEventListener('blur', function () {
-                    syncSelects(input);
-                });
-            });
-
-        syncSelects(document.body);
+        // syncSelects() resolves its scope with closest('form'), which is null
+        // for document.body — the initial population has to start from the
+        // forms themselves or it silently no-ops (audit A2).
+        document.querySelectorAll('form').forEach(function (form) {
+            syncSelects(form);
+        });
     }
 
     ready(enhance);

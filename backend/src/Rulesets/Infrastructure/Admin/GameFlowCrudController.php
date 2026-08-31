@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
@@ -38,6 +39,16 @@ final class GameFlowCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return PersistenceGameSystem::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        // Adds data-flow-selected to the stage selects so admin-flow-editor.js
+        // can re-select the stored stage once it has built the options.
+        return $crud->setFormThemes([
+            '@EasyAdmin/crud/form_theme.html.twig',
+            'admin/flow_form_theme.html.twig',
+        ]);
     }
 
     public function configureFilters(Filters $filters): Filters

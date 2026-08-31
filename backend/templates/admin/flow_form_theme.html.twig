@@ -1,0 +1,10 @@
+{#
+ # The stage selects have no server-side choice list: LenientStageNameLoader
+ # accepts any submitted name, so Symfony has nothing to mark as `selected` and
+ # the stored stage never reaches the browser. The editor builds the options
+ # client-side, so hand it the stored value to re-select once it has.
+ #}
+{% block flow_stage_name_choice_widget %}
+    {%- set attr = attr|merge({'data-flow-selected': value}) -%}
+    {{- block('choice_widget') -}}
+{% endblock %}

@@ -152,16 +152,6 @@ by an authoring mistake. (Renaming is likewise unsafe for occupied stages — jo
 a denormalised copy of the stage name, so history survives renames, but the live campaign
 position would not.)
 
-> **Known defects in this editor** — verified in a browser on 2026-08-30:
-> 1. The *Starting stage*, *from* and *to* dropdowns load **empty** — no stage names are
->    offered — so the form cannot be completed on a fresh page load. They populate only after
->    you click into and out of a stage-name field.
-> 2. Once populated, the dropdowns also offer the **game system's own name** as if it were a
->    stage.
->
-> Workaround: click into a stage-name input and then click away (blur it) before touching the
-> dropdowns, and ignore the system name in the list. See [audit findings A2 and A3](audit/README.md).
-
 ### 4.4 Oracles
 
 `/admin/oracle` — the weighted random tables.
@@ -384,8 +374,6 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| A2 | Campaign-flow editor dropdowns are empty until a stage-name field is blurred |
-| A3 | Those dropdowns then offer the game system's name as a stage |
 | A4 | Oracle entries cannot be authored in the backoffice at all |
 | A5 | "Log to journal" in the dice widget crashes the player app |
 | B2 | No character create/edit UI — API only |
@@ -404,7 +392,6 @@ folders or tagging, search across the journal, mobile-specific layout, offline p
 | Symptom | Cause and fix |
 |---|---|
 | `app:create-admin` says *"Provide a valid email"* | `ADMIN_EMAIL`/`ADMIN_PASSWORD` are commented out in `.env.dist`. Pass `--email` / `--password`. |
-| Flow editor dropdowns are empty | Finding A2. Click into a stage-name field, then click away. |
 | Player app shows *"Application error"* | Most likely finding A5 — you pressed *Log to journal*. Reload; the roll was saved. |
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
 | API returns `{"@context": …, "member": […]}` | You did not send `Accept: application/json`; you got JSON-LD. |
