@@ -24,6 +24,9 @@ final class SupersedeSimulator
     {
     }
 
+    /**
+     * @param BeforeEntityUpdatedEvent<object> $event
+     */
     #[AsEventListener(event: BeforeEntityUpdatedEvent::class)]
     public function supersede(BeforeEntityUpdatedEvent $event): void
     {

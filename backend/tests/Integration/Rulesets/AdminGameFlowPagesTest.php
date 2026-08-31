@@ -184,9 +184,12 @@ final class AdminGameFlowPagesTest extends WebTestCase
             true,
         );
         self::assertIsArray($stored);
-        self::assertIsArray($stored['fields'] ?? null);
-        self::assertCount(1, $stored['fields']);
-        self::assertSame('grit', $stored['fields'][0]['key'] ?? null);
+        $fields = $stored['fields'] ?? null;
+        self::assertIsArray($fields);
+        self::assertCount(1, $fields);
+        $field = $fields[0] ?? null;
+        self::assertIsArray($field);
+        self::assertSame('grit', $field['key'] ?? null);
     }
 
     /**

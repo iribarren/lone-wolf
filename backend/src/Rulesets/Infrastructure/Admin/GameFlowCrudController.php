@@ -99,7 +99,9 @@ final class GameFlowCrudController extends AbstractCrudController
             );
 
             parent::updateEntity($entityManager, $entityInstance);
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\InvalidArgumentException $e) {
+            // FR-005 occupancy refusals and FR-002..004 structural ones alike
+            // are answers for the author, not exception pages.
             $this->addFlash('danger', $e->getMessage());
             $entityManager->refresh($entityInstance);
         } catch (OptimisticLockException) {

@@ -140,7 +140,7 @@ final class SystemCrudController extends AbstractCrudController
             }
 
             parent::updateEntity($entityManager, $entityInstance);
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\InvalidArgumentException $e) {
             $this->addFlash('danger', $e->getMessage());
             $entityManager->refresh($entityInstance);
         } catch (OptimisticLockException) {
