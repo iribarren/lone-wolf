@@ -55,6 +55,13 @@ plus the frontend checks (`npm run typecheck`/`lint`/`test`) and the Playwright
 quickstart happy path. Run `make lint && make test` before pushing to get the
 same answer sooner.
 
+Gate 6 is checked by path: a PR touching application code must also touch a
+document. That proves the question was asked, not that the answer was any
+good — judging the answer stays with the reviewer. Tests do not count as
+code, and a change with genuinely nothing to document is waived with the
+`docs:none` label, which the job log records and the PR shows. Satisfying
+gate 6 with a cosmetic documentation edit is itself a Constitution VI breach.
+
 A PR failing any gate must not be merged; a red pipeline is not a reason to
 weaken, skip or delete the failing check. Reviewers cite the violated
 Constitution principle number when rejecting work.
