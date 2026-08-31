@@ -30,7 +30,10 @@
 
     function stageNames(scope) {
         var names = [];
-        scope.querySelectorAll('input[name$="[name]"]').forEach(function (input) {
+        // Narrow enough to skip the game system's own …[name] field, which a
+        // bare [name$="[name]"] offered as if it were a stage (audit A3). Same
+        // selector the change/blur wiring in enhance() uses.
+        scope.querySelectorAll('input[name*="[stages]"][name$="[name]"]').forEach(function (input) {
             var value = input.value.trim();
             if (value !== '' && names.indexOf(value) === -1) {
                 names.push(value);

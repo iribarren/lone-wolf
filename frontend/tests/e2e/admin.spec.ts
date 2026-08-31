@@ -122,8 +122,11 @@ test('the flow editor never offers the game system itself as a stage', async ({ 
     // A3 was only ever observable once a blur had populated the selects, so
     // assert the invariant holds through that path too — the same blur that
     // re-syncs the dropdowns must not smuggle `PersistenceGameSystem[name]` in.
+    // Stage rows live in a collapsed EasyAdmin accordion; open the first one
+    // so the blur is a real one rather than a synthetic event.
+    await page.locator('.field-collection-item').first().locator('.accordion-button').click();
     await page.locator(`input[name="${FLOW}[stages][0][name]"]`).click();
-    await page.locator(`input[name="${FLOW}[stages][0][guidance]"]`).click();
+    await page.locator(`input[name="${FLOW}[stages][0][name]"]`).press('Tab');
 
     expect(await offeredStages(page)).toEqual(DEMO_STAGES);
 });
