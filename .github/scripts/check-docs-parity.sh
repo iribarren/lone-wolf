@@ -6,6 +6,9 @@
 # A pull request that changes application code must also change at least one
 # document (Markdown anywhere, or anything under docs/ or specs/). Nothing
 # else about the documentation is judged here; that stays with the reviewer.
+#
+# Adding or repairing a test is never the change that invalidates a document,
+# so backend/tests and frontend/tests do not count as code here.
 set -euo pipefail
 
 BASE_REF="${BASE_REF:?BASE_REF (the PR base branch) must be set}"
@@ -15,7 +18,7 @@ BASE="$(git merge-base "origin/${BASE_REF}" HEAD)"
 
 CHANGED="$(git diff --name-only "$BASE" HEAD)"
 
-CODE="$(echo "$CHANGED" | grep -E '^(backend/(src|config|migrations|features|tests)/|frontend/(src|app|components|lib|tests)/|scripts/)' || true)"
+CODE="$(echo "$CHANGED" | grep -E '^(backend/(src|config|migrations|features)/|frontend/(src|app|components|lib)/|scripts/)' || true)"
 DOCS="$(echo "$CHANGED" | grep -E '(\.md$|^docs/|^specs/)' || true)"
 
 if [ -z "$CODE" ]; then
