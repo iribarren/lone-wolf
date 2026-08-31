@@ -44,10 +44,19 @@ Work is specified in `specs/<feature-folder>/` (`spec.md` → `plan.md` →
 3. Behat features for touched stories green (ubiquitous-language specs)
 4. PHPStan level-max + deptrac layer rules clean (`composer lint`)
 5. API matches the feature's contract in `specs/<feature>/contracts/`
-   (run the drift check once it exists)
+   (`scripts/check-contract.sh`)
 6. Documentation updated in the same change set (Constitution VI)
 
-A PR failing any gate must not be merged. Reviewers cite the violated
+**CI enforces all six.** `.github/workflows/ci.yml` runs them on every pull
+request and on every push to `master`, each gate as its own named step, none
+of them `continue-on-error`. It boots the stack from this repository's
+`docker-compose.yml` and runs the same commands the `Makefile` runs locally,
+plus the frontend checks (`npm run typecheck`/`lint`/`test`) and the Playwright
+quickstart happy path. Run `make lint && make test` before pushing to get the
+same answer sooner.
+
+A PR failing any gate must not be merged; a red pipeline is not a reason to
+weaken, skip or delete the failing check. Reviewers cite the violated
 Constitution principle number when rejecting work.
 
 ### Remotes
