@@ -112,4 +112,43 @@ class PersistenceGameSystem
     {
         return $this->version;
     }
+
+    /*
+     * Field mutators for the ORM/form adapter boundary only. Symfony's
+     * DataMapper writes every mapped, submitted field back onto the bound
+     * object, and PropertyAccess mistakes the property-named accessors above
+     * for mutators without them (A6). Domain snapshots keep going through
+     * replace(); nothing outside Infrastructure may call these.
+     */
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
+    }
+
+    public function setStatus(GameSystemStatus $status): void
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @param FlowPayload $flowDefinition
+     */
+    public function setFlowDefinition(array $flowDefinition): void
+    {
+        $this->flowDefinition = $flowDefinition;
+    }
+
+    /**
+     * @param SheetPayload|null $sheetStructure
+     */
+    public function setSheetStructure(?array $sheetStructure): void
+    {
+        $this->sheetStructure = $sheetStructure;
+    }
 }

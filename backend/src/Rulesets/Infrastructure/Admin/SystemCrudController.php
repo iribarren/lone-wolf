@@ -140,13 +140,15 @@ final class SystemCrudController extends AbstractCrudController
             }
 
             parent::updateEntity($entityManager, $entityInstance);
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\InvalidArgumentException $e) {
             $this->addFlash('danger', $e->getMessage());
             $entityManager->refresh($entityInstance);
         } catch (OptimisticLockException) {
-            // Edge case §8: concurrent supersede.
+            // Edge case §8: concurrent supersede. The failed flush already
+            // closed the EntityManager, so the row cannot be refreshed here —
+            // the warning tells the author to reload and re-apply, and the
+            // next request reads the winning version.
             $this->addFlash('warning', self::SUPERSEDED_MESSAGE);
-            $entityManager->refresh($entityInstance);
         }
     }
 

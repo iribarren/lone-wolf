@@ -146,6 +146,21 @@ For each system you edit:
 - **Starting stage** — a dropdown; exactly one stage.
 - **Legal transitions** — repeatable *from* → *to* pairs.
 
+**Saving.** *Save changes* validates the whole graph and then writes it. What you submit is what
+is stored: the stage guidance you type is kept, and a save that changes nothing leaves the stored
+flow byte-for-byte identical. Every refusal comes back as a red message and writes nothing —
+
+- fewer than two stages, a starting stage that is not one of them, or a transition pointing at a
+  stage that no longer exists (FR-002..FR-004);
+- an edit that would orphan an occupied stage (below);
+- *"your changes were superseded"* if another admin saved between your page load and your submit.
+
+A refusal returns you to the flows list, so reopen the editor and re-apply the change.
+
+> **Known limitation.** Add **one** stage or transition row per save. The editor gives every row
+> you add after page load the same field name, so if you add two before saving, only the last one
+> is submitted — the other is silently dropped. Save, reopen, add the next.
+
 **The occupied-stage guard.** A flow edit that would remove a stage some campaign is currently
 parked on is refused, with a message naming the stage. Running campaigns can never be orphaned
 by an authoring mistake. (Renaming is likewise unsafe for occupied stages — journal entries keep
@@ -161,6 +176,9 @@ position would not.)
 | Table title | Shown to players in the oracle drawer. |
 | Visibility | *Global — visible to every system*, or *One game system*. |
 | Scoped system | Required when visibility is system-scoped. Each system owns at most one scoped table — enforced by a database constraint, and a friendly message explains the refusal. |
+
+Editing any of those three and pressing *Save changes* persists the change; the table's entries
+are left exactly as they were.
 
 > **Known defect — this is the big one.** The oracle form exposes **no field for the table's
 > entries**. You can create a titled, scoped oracle, but you cannot add, edit, weight or remove

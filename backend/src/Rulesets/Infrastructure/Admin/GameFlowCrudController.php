@@ -86,18 +86,30 @@ final class GameFlowCrudController extends AbstractCrudController
     {
         \assert($entityInstance instanceof PersistenceGameSystem);
 
+        // The form mapper has already written the submitted payload onto the
+        // row; keep it, because the command below only carries structure.
+        $submitted = $entityInstance->flowDefinition();
+
         try {
             // FR-005: occupancy-aware validation + save via the application handler.
             $this->flowHandler->handle(self::updateFlowCommand($entityInstance));
 
+            $entityInstance->setFlowDefinition(
+                self::withSubmittedGuidance($entityInstance->flowDefinition(), $submitted),
+            );
+
             parent::updateEntity($entityManager, $entityInstance);
-        } catch (\DomainException $e) {
+        } catch (\DomainException|\InvalidArgumentException $e) {
+            // FR-005 occupancy refusals and FR-002..004 structural ones alike
+            // are answers for the author, not exception pages.
             $this->addFlash('danger', $e->getMessage());
             $entityManager->refresh($entityInstance);
         } catch (OptimisticLockException) {
-            // Edge case §8: concurrent supersede.
+            // Edge case §8: concurrent supersede. The failed flush already
+            // closed the EntityManager, so the row cannot be refreshed here —
+            // the warning tells the author to reload and re-apply, and the
+            // next request reads the winning version.
             $this->addFlash('warning', self::SUPERSEDED_MESSAGE);
-            $entityManager->refresh($entityInstance);
         }
     }
 }
