@@ -233,4 +233,6 @@ jobs:
       - name: Gate 6 · Documentation moves in the same change set
         env:
           BASE_REF: ${{ github.base_ref }}
+          # A "docs:none" label waives the gate, loudly and on the record.
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: ./.github/scripts/check-docs-parity.sh
