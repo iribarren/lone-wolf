@@ -53,7 +53,14 @@
 
         form.querySelectorAll('select[name$="[starting_stage]"], select[name$="[from]"], select[name$="[to]"]')
             .forEach(function (select) {
+                // The server renders no <option selected> — the choice list is
+                // deliberately empty (LenientStageNameLoader) — so on the first
+                // pass the stored stage only exists in data-flow-selected. Drop
+                // the hint once it has been honoured so later edits win.
                 var current = select.value;
+                if (current === '') {
+                    current = select.getAttribute('data-flow-selected') || '';
+                }
 
                 Array.prototype.slice.call(select.options).forEach(function (option) {
                     if (option.value !== '') {
@@ -70,6 +77,7 @@
 
                 if (names.indexOf(current) !== -1) {
                     select.value = current;
+                    select.removeAttribute('data-flow-selected');
                 }
             });
     }
