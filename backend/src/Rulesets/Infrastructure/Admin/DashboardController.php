@@ -27,7 +27,7 @@ final class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return parent::configureAssets()
-            ->addJsFile('admin/flow-editor.js');
+            ->addJsFile('assets/admin-flow-editor.js');
     }
 
     public function configureMenuItems(): iterable
