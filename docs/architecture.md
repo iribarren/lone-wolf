@@ -32,6 +32,15 @@ Two decoupled stacks talk only through an OpenAPI-documented REST contract:
 - **API** (`http://localhost:8080/api`): the single integration surface;
   errors are RFC 7807 `application/problem+json`.
 
+Both backend surfaces sit behind nginx (`docker/nginx/default.conf`), which
+serves `backend/public/` from disk before handing anything to Symfony. Two
+rules follow from that, and breaking either one took the whole backoffice
+offline once (audit A1): **no file or directory under `public/` may share a
+name with a route** — backoffice assets live in `public/assets/`, never in
+`public/admin/` — and nginx runs with `absolute_redirect off` so its own
+redirects stay relative and keep the published port instead of rebuilding
+the URL from its container-internal listen port 80.
+
 ## Bounded contexts (Constitution II)
 
 No global `Entity/`/`Repository/`/`Controller/` folders exist. Each context

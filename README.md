@@ -45,7 +45,7 @@ no server-side templating. Errors use RFC 7807 `application/problem+json`.
   reason, every die shown plus modified total, optional log-to-journal.
 
 Admin content ships via the EasyAdmin backoffice — sign in at
-`http://localhost:8080/admin/login` (`ROLE_ADMIN`, browser session) or use the
+`http://localhost:8080/admin` (`ROLE_ADMIN`, browser session) or use the
 demo seeder (`app:seed:demo`); players play at `http://localhost:3000`.
 Architecture details: [docs/architecture.md](docs/architecture.md).
 
