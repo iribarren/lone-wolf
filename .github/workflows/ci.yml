@@ -1,0 +1,236 @@
+# Lone Wolf — merge gates (AGENTS.md "Merge gates", Constitution I–VI).
+#
+# Every gate here is the exact command the Makefile already runs locally; the
+# stack is booted with the repository's own docker-compose.yml so CI and local
+# development cannot drift apart. No step is allowed continue-on-error: a gate
+# that cannot fail the build is not a gate.
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # .env/.env.* are gitignored (secrets stay local), so CI synthesises the
+  # non-secret local defaults the compose stack expects.
+  POSTGRES_DB: lone_wolf
+  POSTGRES_USER: lone_wolf
+  POSTGRES_PASSWORD: change_me_local
+
+jobs:
+  backend:
+    name: Backend gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python for the contract check
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML (scripts/check-contract.sh)
+        run: python3 -m pip install --disable-pip-version-check pyyaml
+
+      # backend/vendor is bind-mounted over the image's copy, so Composer runs
+      # inside the container on every job; cache its downloads under the
+      # mounted var/ directory to keep that cheap.
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: backend/var/composer-cache
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Write the local environment files
+        run: ./.github/scripts/write-env.sh
+
+      - name: Boot the stack (waits on the postgres healthcheck)
+        run: docker compose up -d --build --wait php nginx postgres
+
+      - name: Install PHP dependencies
+        run: >-
+          docker compose exec -T -e COMPOSER_CACHE_DIR=/var/www/backend/var/composer-cache
+          php composer install --no-interaction --no-progress
+
+      - name: Generate the JWT keypair
+        run: docker compose exec -T php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction
+
+      - name: Migrate the dev database
+        run: docker compose exec -T php bin/console doctrine:migrations:migrate --no-interaction
+
+      - name: Migrate the test database
+        run: |
+          docker compose exec -T php bin/console doctrine:database:create --env=test --if-not-exists --no-interaction
+          docker compose exec -T php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
+      - name: Seed the admin account and demo content
+        run: |
+          docker compose exec -T php bin/console app:create-admin \
+            --email=ci-admin@example.test --password=ci-admin-passphrase --no-interaction
+          docker compose exec -T php bin/console app:seed:demo --no-interaction
+
+      - name: Wait for the API to answer
+        run: ./.github/scripts/wait-for-http.sh http://localhost:8080/api/docs.json
+
+      - name: Gate 4 · PHPStan level max + deptrac layers (composer lint)
+        run: docker compose exec -T php composer lint
+
+      - name: Gate 1 · PHPUnit unit suite
+        run: docker compose exec -T php vendor/bin/phpunit --testsuite unit
+
+      - name: Gate 2 · PHPUnit integration suite
+        run: docker compose exec -T php vendor/bin/phpunit --testsuite integration
+
+      - name: Gate 3 · Behat acceptance features
+        run: docker compose exec -T php vendor/bin/behat
+
+      - name: Gate 5 · OpenAPI contract drift
+        run: scripts/check-contract.sh
+
+      - name: Dump service logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: TypeScript types (npm run typecheck)
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: ESLint (npm run lint)
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Vitest component suite (npm run test)
+        working-directory: frontend
+        run: npm run test
+
+  e2e:
+    name: End-to-end quickstart
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: backend/var/composer-cache
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      # frontend/ is bind-mounted into the next container, so the runner's
+      # node_modules is the one the dev server uses (same Node 22 as the image).
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install the Playwright browser
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Write the local environment files
+        run: ./.github/scripts/write-env.sh
+
+      - name: Boot the stack (waits on the postgres healthcheck)
+        run: docker compose up -d --build --wait
+
+      - name: Install PHP dependencies
+        run: >-
+          docker compose exec -T -e COMPOSER_CACHE_DIR=/var/www/backend/var/composer-cache
+          php composer install --no-interaction --no-progress
+
+      - name: Generate the JWT keypair
+        run: docker compose exec -T php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction
+
+      - name: Migrate and seed the database
+        run: |
+          docker compose exec -T php bin/console doctrine:migrations:migrate --no-interaction
+          docker compose exec -T php bin/console app:create-admin \
+            --email=ci-admin@example.test --password=ci-admin-passphrase --no-interaction
+          docker compose exec -T php bin/console app:seed:demo --no-interaction
+
+      - name: Wait for the API and the Next.js dev server
+        run: |
+          ./.github/scripts/wait-for-http.sh http://localhost:8080/api/docs.json
+          ./.github/scripts/wait-for-http.sh http://localhost:3000 180
+
+      - name: Playwright quickstart happy path (npm run test:e2e)
+        working-directory: frontend
+        env:
+          E2E_BASE_URL: http://localhost:3000
+        run: npm run test:e2e
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Dump service logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+
+  documentation:
+    name: Gate 6 · Documentation parity
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gate 6 · Documentation moves in the same change set
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: ./.github/scripts/check-docs-parity.sh
