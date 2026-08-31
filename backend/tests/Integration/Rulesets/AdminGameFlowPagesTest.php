@@ -254,6 +254,29 @@ final class AdminGameFlowPagesTest extends WebTestCase
     }
 
     /**
+     * FR-002: a structurally invalid edit — here, deleting stage rows until
+     * one is left — is a refusal the author has to read, not an exception
+     * page. Same contract as the create form, which already flashes it.
+     */
+    public function testAStructurallyInvalidFlowEditIsRefusedWithAFlashMessage(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+        $before = $this->storedFlow($system['id']);
+
+        $edited = $this->decodedFlow($system['id']);
+        $edited['stages'] = [$edited['stages'][0]];
+        $edited['starting_stage'] = 'Setup';
+        $edited['transitions'] = [];
+        $this->submitFlowEditor($client, $system['id'], $edited);
+
+        self::assertSaveSucceeded($client);
+        $client->followRedirect();
+        self::assertSelectorTextContains('body', 'at least two stages');
+        self::assertSame($before, $this->storedFlow($system['id']));
+    }
+
+    /**
      * Edge case §8: another admin's save lands between this request loading
      * the row and flushing it. The author must get the supersede warning, not
      * an exception page.
