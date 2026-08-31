@@ -39,3 +39,4 @@ Feature: Roll dice with standard notation
     Given I am playing a campaign on the system named like "Dice Home"
     When I log the roll of "1d20+5" into my journal over HTTP
     Then my journal records a dice_roll entry for "1d20+5"
+    And the logged roll answers with the roll and the journal entry embedded
