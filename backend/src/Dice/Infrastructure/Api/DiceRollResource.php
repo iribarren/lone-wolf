@@ -70,12 +70,22 @@ final readonly class DiceRollResource
 
 /**
  * Contract payload of the logged roll: the result plus the created journal
- * entry reference (FR-029).
+ * entry, both EMBEDDED (openapi.yaml /campaigns/{campaignId}/rolls answers
+ * `{roll: DiceRollResult, journalEntry: JournalEntry}`, FR-029).
+ *
+ * Both properties are themselves `#[ApiResource]` classes, which API Platform
+ * serialises as IRI references by default — that produced a `roll` string the
+ * player app could not render at all (audit A5). `readableLink: true` keeps
+ * the canonical resources as the single source of truth for both shapes
+ * (see the DiceInfrastructure -> JournalInfrastructure note in deptrac.yaml)
+ * while writing them into the body.
  */
 final readonly class LoggedRollResource
 {
     public function __construct(
+        #[ApiProperty(readableLink: true)]
         public DiceRollResource $roll,
+        #[ApiProperty(readableLink: true)]
         public \App\Journal\Infrastructure\Api\JournalEntryResource $journalEntry,
     ) {
     }

@@ -280,6 +280,61 @@ final class DiceContext implements Context
         throw new AssertionFailedError(sprintf('No dice_roll entry records "%s".', $notation));
     }
 
+    /**
+     * The contract answers the logged roll with the result and the created
+     * entry embedded, never as IRI references — the player app renders both
+     * straight from this body (openapi.yaml /campaigns/{campaignId}/rolls).
+     *
+     * @Then the logged roll answers with the roll and the journal entry embedded
+     */
+    public function assertLoggedRollEmbedsBothPayloads(): void
+    {
+        $roll = $this->responseBody['roll'] ?? null;
+
+        if (!is_array($roll)) {
+            throw new AssertionFailedError(sprintf(
+                'The logged roll must carry an embedded roll object, got %s.',
+                var_export($roll, true),
+            ));
+        }
+
+        foreach (['notation', 'diceValues', 'modifier', 'total'] as $field) {
+            if (!array_key_exists($field, $roll)) {
+                throw new AssertionFailedError(sprintf(
+                    'The embedded roll lacks "%s": %s.',
+                    $field,
+                    var_export($roll, true),
+                ));
+            }
+        }
+
+        $entry = $this->responseBody['journalEntry'] ?? null;
+
+        if (!is_array($entry)) {
+            throw new AssertionFailedError(sprintf(
+                'The logged roll must carry an embedded journal entry object, got %s.',
+                var_export($entry, true),
+            ));
+        }
+
+        foreach (['id', 'stageName', 'kind', 'createdAt'] as $field) {
+            if (!array_key_exists($field, $entry)) {
+                throw new AssertionFailedError(sprintf(
+                    'The embedded journal entry lacks "%s": %s.',
+                    $field,
+                    var_export($entry, true),
+                ));
+            }
+        }
+
+        if ($entry['kind'] !== 'dice_roll') {
+            throw new AssertionFailedError(sprintf(
+                'The embedded journal entry records kind "%s" instead of "dice_roll".',
+                var_export($entry['kind'], true),
+            ));
+        }
+    }
+
     private function resultField(string $field): mixed
     {
         if ($this->responseStatus !== 200) {

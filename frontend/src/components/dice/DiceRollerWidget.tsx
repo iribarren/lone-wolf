@@ -13,7 +13,31 @@ export interface DiceRollResultView {
     total: number;
 }
 
-export type DiceProblemReason = 'malformed' | 'invalid_count' | 'invalid_faces' | 'out_of_bounds';
+export type DiceProblemReason =
+    | 'malformed'
+    | 'invalid_count'
+    | 'invalid_faces'
+    | 'out_of_bounds'
+    | 'unreadable_result';
+
+/**
+ * The result shape is what the widget renders, so it is also what callers
+ * must prove before handing anything over: an endpoint answering off-contract
+ * once blanked the whole page (audit A5). Nothing is assumed about `value`.
+ */
+export function isDiceRollResultView(value: unknown): value is DiceRollResultView {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Partial<Record<keyof DiceRollResultView, unknown>>;
+
+    return typeof candidate.notation === 'string'
+        && Array.isArray(candidate.diceValues)
+        && candidate.diceValues.every((die) => typeof die === 'number')
+        && typeof candidate.modifier === 'number'
+        && typeof candidate.total === 'number';
+}
 
 export interface DiceProblemView {
     reason: DiceProblemReason;
@@ -38,6 +62,7 @@ const REASON_MESSAGES: Record<DiceProblemReason, string> = {
     invalid_count: 'The die count must be at least 1.',
     invalid_faces: 'A die needs at least 2 faces.',
     out_of_bounds: 'Those numbers are outside the supported range (N ≤ 50, M ≤ 1000, |K| ≤ 10000).',
+    unreadable_result: 'The roll came back in a shape this app cannot read — reload to see whether it reached your journal.',
 };
 
 export default function DiceRollerWidget({
@@ -58,6 +83,10 @@ export default function DiceRollerWidget({
             </section>
         );
     }
+
+    // A result the widget cannot read is no result at all — never a render
+    // that takes the page down with it (audit A5).
+    const shown = isDiceRollResultView(result) ? result : null;
 
     return (
         <aside
@@ -92,18 +121,18 @@ export default function DiceRollerWidget({
                 </p>
             ) : null}
 
-            {!problem && result ? (
+            {!problem && shown ? (
                 <section
-                    aria-label={`Result of ${result.notation}`}
+                    aria-label={`Result of ${shown.notation}`}
                     data-testid="dice-result"
                     style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '0.5rem' }}
                 >
                     <p>
-                        <strong>{result.notation}</strong>
+                        <strong>{shown.notation}</strong>
                     </p>
 
                     <ul data-testid="dice-chips" style={{ listStyle: 'none', display: 'flex', gap: '0.25rem', padding: 0 }}>
-                        {result.diceValues.map((value, index) => (
+                        {shown.diceValues.map((value, index) => (
                             <li key={index} data-testid="dice-chip" style={{ border: '1px solid #999', borderRadius: 4, padding: '0 0.4rem' }}>
                                 {value}
                             </li>
@@ -113,10 +142,10 @@ export default function DiceRollerWidget({
                     <p>
                         Total:{' '}
                         <strong data-testid="dice-total">
-                            {result.total}
+                            {shown.total}
                         </strong>
-                        {result.modifier !== 0 ? (
-                            <span data-testid="dice-modifier"> ({result.modifier > 0 ? '+' : ''}{result.modifier})</span>
+                        {shown.modifier !== 0 ? (
+                            <span data-testid="dice-modifier"> ({shown.modifier > 0 ? '+' : ''}{shown.modifier})</span>
                         ) : null}
                     </p>
 
