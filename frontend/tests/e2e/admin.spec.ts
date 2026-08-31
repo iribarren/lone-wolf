@@ -130,3 +130,26 @@ test('the flow editor never offers the game system itself as a stage', async ({ 
 
     expect(await offeredStages(page)).toEqual(DEMO_STAGES);
 });
+
+test('a stage added after load reaches every dropdown once it is named', async ({ page }) => {
+    await openFlowEditor(page);
+
+    await page.getByRole('button', { name: '+ Add stage' }).click();
+
+    // The new row renders inside a collapsed accordion, so set the value and
+    // fire the events the editor listens for rather than fighting the CSS —
+    // the listeners are exactly what a real keystroke-then-blur would reach.
+    await page.locator(`input[name*="[stages]"][name$="[name]"]`).last().evaluate((element) => {
+        const input = element as HTMLInputElement;
+
+        input.value = 'Denouement';
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+    });
+
+    expect(await offeredStages(page)).toEqual([...DEMO_STAGES, 'Denouement']);
+
+    // Naming a new stage must not disturb what is already stored.
+    const startingStage = await readSelect(page, `${FLOW}[starting_stage]`);
+    expect(startingStage.value).toBe(DEMO_STARTING_STAGE);
+});

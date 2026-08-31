@@ -82,6 +82,23 @@
             });
     }
 
+    function wireStageNameInputs(scope) {
+        scope.querySelectorAll('input[name*="[stages]"][name$="[name]"]')
+            .forEach(function (input) {
+                if (input.getAttribute('data-flow-wired')) {
+                    return;
+                }
+
+                input.setAttribute('data-flow-wired', '1');
+                input.addEventListener('change', function () {
+                    syncSelects(input);
+                });
+                input.addEventListener('blur', function () {
+                    syncSelects(input);
+                });
+            });
+    }
+
     function ensureDeleteButton(row) {
         if (row.querySelector('.js-flow-delete')) {
             return;
@@ -126,6 +143,9 @@
             row.setAttribute('data-flow-row', '');
             ensureDeleteButton(row);
             holder.insertBefore(row, addButtonWrap);
+            // Rows added after load need the same change/blur listeners, or
+            // naming the new stage never reaches the selects.
+            wireStageNameInputs(row);
             syncSelects(row);
         });
 
@@ -166,20 +186,7 @@
             wireCollection(holder);
         });
 
-        document.querySelectorAll('input[name*="[stages]"][name$="[name]"]')
-            .forEach(function (input) {
-                if (input.getAttribute('data-flow-wired')) {
-                    return;
-                }
-
-                input.setAttribute('data-flow-wired', '1');
-                input.addEventListener('change', function () {
-                    syncSelects(input);
-                });
-                input.addEventListener('blur', function () {
-                    syncSelects(input);
-                });
-            });
+        wireStageNameInputs(document);
 
         // syncSelects() resolves its scope with closest('form'), which is null
         // for document.body — the initial population has to start from the
