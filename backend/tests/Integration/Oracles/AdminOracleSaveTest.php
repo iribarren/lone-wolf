@@ -45,13 +45,16 @@ final class AdminOracleSaveTest extends WebTestCase
 
     /**
      * Entries are not on the form yet (A4/prompt 05); a title edit must not
-     * silently empty the table.
+     * silently empty or reword the table. Row identity is not asserted: the
+     * update handler re-places every entry, so entry ids are reissued on each
+     * save — nothing references them, and the entries field itself belongs to
+     * prompt 05.
      */
     public function testEditingTheTitleKeepsTheEntries(): void
     {
         $client = $this->adminClient();
         $oracle = $this->createOracle();
-        $before = $this->storedColumn('SELECT entries::text FROM oracles WHERE id = ?', $oracle);
+        $before = $this->entryContents($oracle);
 
         $crawler = $client->request(
             'GET',
@@ -64,7 +67,26 @@ final class AdminOracleSaveTest extends WebTestCase
         $status = $client->getResponse()->getStatusCode();
         self::assertLessThan(400, $status, sprintf('Saving the oracle form returned HTTP %d.', $status));
         self::assertSame('Still weather', $this->storedColumn('SELECT title FROM oracles WHERE id = ?', $oracle));
-        self::assertSame($before, $this->storedColumn('SELECT entries::text FROM oracles WHERE id = ?', $oracle));
+        self::assertSame($before, $this->entryContents($oracle));
+    }
+
+    /**
+     * @return list<array{text: string, weight: int}>
+     */
+    private function entryContents(string $oracleId): array
+    {
+        $decoded = json_decode($this->storedColumn('SELECT entries::text FROM oracles WHERE id = ?', $oracleId), true);
+        self::assertIsArray($decoded);
+
+        $contents = [];
+        foreach ($decoded as $entry) {
+            self::assertIsArray($entry);
+            self::assertIsString($entry['text'] ?? null);
+            self::assertIsInt($entry['weight'] ?? null);
+            $contents[] = ['text' => $entry['text'], 'weight' => $entry['weight']];
+        }
+
+        return $contents;
     }
 
     private function createOracle(): string

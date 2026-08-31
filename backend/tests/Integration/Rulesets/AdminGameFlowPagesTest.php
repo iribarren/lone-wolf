@@ -133,10 +133,94 @@ final class AdminGameFlowPagesTest extends WebTestCase
 
         $after = $this->decodedFlow($system['id']);
         self::assertSame(
-            [...$before['transitions'], ['from' => 'Setup', 'to' => 'Sequel']],
-            $after['transitions'],
+            [...array_map(self::arrow(...), $before['transitions']), 'Setup -> Sequel'],
+            array_map(self::arrow(...), $after['transitions']),
         );
         self::assertSame($before['stages'], $after['stages']);
+    }
+
+    /**
+     * The Systems edit form maps plain scalars plus the sheet-structure jsonb
+     * document — the third form the A6 report caught returning 500.
+     */
+    public function testSavingASystemsDescriptionAndSheetStructurePersistsThem(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+
+        $crawler = $client->request(
+            'GET',
+            $this->route('admin_dashboard_system_edit', ['entityId' => $system['id']]),
+        );
+        self::assertResponseIsSuccessful();
+
+        $sheet = [
+            'version' => 1,
+            'fields' => [[
+                'key' => 'grit',
+                'label' => 'Grit',
+                'type' => 'number',
+                'required_for_pc' => true,
+                'required_for_npc' => false,
+                'options' => [],
+            ]],
+        ];
+
+        $form = $crawler->selectButton('Save changes')->form();
+        $form[self::FORM.'[description]'] = 'Edited in the backoffice.';
+        $form[self::FORM.'[sheetStructure]'] = (string) json_encode($sheet, JSON_THROW_ON_ERROR);
+        $client->submit($form);
+
+        self::assertSaveSucceeded($client);
+
+        self::assertSame(
+            'Edited in the backoffice.',
+            $this->storedColumn('SELECT description FROM game_systems WHERE id = ?', $system['id']),
+        );
+
+        $stored = json_decode(
+            $this->storedColumn('SELECT sheet_structure::text FROM game_systems WHERE id = ?', $system['id']),
+            true,
+        );
+        self::assertIsArray($stored);
+        self::assertIsArray($stored['fields'] ?? null);
+        self::assertCount(1, $stored['fields']);
+        self::assertSame('grit', $stored['fields'][0]['key'] ?? null);
+    }
+
+    /**
+     * Guidance is stage prose the editor authors alongside the structure
+     * (FR-013/FR-014). The update command carries names only, so it has to be
+     * carried across explicitly — and a second, untouched save must then be a
+     * true no-op down to the stored bytes.
+     */
+    public function testAuthoredStageGuidanceSurvivesTheSaveAndTheNextOne(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+
+        $authored = $this->decodedFlow($system['id']);
+        $authored['stages'] = array_map(
+            static fn (array $stage): array => [
+                'name' => $stage['name'],
+                'guidance' => 'How to play '.$stage['name'].'.',
+            ],
+            $authored['stages'],
+        );
+        $this->submitFlowEditor($client, $system['id'], $authored);
+        self::assertSaveSucceeded($client);
+
+        $stored = $this->decodedFlow($system['id']);
+        self::assertSame(
+            ['How to play Setup.', 'How to play Scene.', 'How to play Sequel.'],
+            array_map(static fn (array $stage): string => $stage['guidance'], $stored['stages']),
+        );
+
+        $before = $this->storedFlow($system['id']);
+        $this->submitFlowEditor($client, $system['id'], $stored);
+
+        self::assertSaveSucceeded($client);
+        self::assertSame($before, $this->storedFlow($system['id']));
     }
 
     /**
@@ -189,6 +273,14 @@ final class AdminGameFlowPagesTest extends WebTestCase
         $values[self::FORM] = $entity;
 
         $client->request($form->getMethod(), $form->getUri(), $values);
+    }
+
+    /**
+     * @param array{from: string, to: string} $transition
+     */
+    private static function arrow(array $transition): string
+    {
+        return $transition['from'].' -> '.$transition['to'];
     }
 
     private static function assertSaveSucceeded(KernelBrowser $client): void
