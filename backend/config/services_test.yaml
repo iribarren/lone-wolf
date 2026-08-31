@@ -9,6 +9,11 @@ services:
 
     Symfony\Bundle\FrameworkBundle\KernelBrowser: '@test.client'
 
+    # Plays the second admin in the concurrent-supersede race (edge case §8).
+    App\Tests\Integration\Support\SupersedeSimulator:
+        autowire: true
+        autoconfigure: true
+
     # Integration tests pull these handlers straight from the test container.
     App\Rulesets\Application\CreateGameSystemHandler:
         public: true

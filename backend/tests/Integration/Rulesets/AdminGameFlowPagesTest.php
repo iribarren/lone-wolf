@@ -13,6 +13,7 @@ use App\Rulesets\Application\CreateGameSystemHandler;
 use App\Shared\Domain\Identifier\GameSystemId;
 use App\Shared\Domain\Identifier\UserId;
 use App\Tests\Integration\Support\SignsInAsAdmin;
+use App\Tests\Integration\Support\SupersedeSimulator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -249,6 +250,34 @@ final class AdminGameFlowPagesTest extends WebTestCase
         self::assertSaveSucceeded($client);
         $client->followRedirect();
         self::assertSelectorTextContains('body', 'occupied');
+        self::assertSame($before, $this->storedFlow($system['id']));
+    }
+
+    /**
+     * Edge case §8: another admin's save lands between this request loading
+     * the row and flushing it. The author must get the supersede warning, not
+     * an exception page.
+     */
+    public function testASupersededFlowEditWarnsInsteadOfCrashing(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+        $before = $this->storedFlow($system['id']);
+
+        $edited = $this->decodedFlow($system['id']);
+        $edited['starting_stage'] = 'Setup';
+
+        SupersedeSimulator::$armed = true;
+
+        try {
+            $this->submitFlowEditor($client, $system['id'], $edited);
+        } finally {
+            SupersedeSimulator::$armed = false;
+        }
+
+        self::assertSaveSucceeded($client);
+        $client->followRedirect();
+        self::assertSelectorTextContains('body', 'superseded');
         self::assertSame($before, $this->storedFlow($system['id']));
     }
 
