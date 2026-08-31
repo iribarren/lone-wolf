@@ -13,6 +13,7 @@ import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
 import CharacterPanel, { type CharacterPanelCharacter } from '@/components/characters/CharacterPanel';
 import DiceRollerWidget, {
+    isDiceRollResultView,
     type DiceProblemView,
     type DiceRollResultView,
 } from '@/components/dice/DiceRollerWidget';
@@ -158,10 +159,17 @@ export default function CampaignConsolePage() {
         try {
             // Invalid notation is refused pre-roll with a typed reason —
             // never a fake result (FR-027).
-            const rolled = (await api.json(apiPath('/api/dice/roll'), {
+            const rolled = await api.json(apiPath('/api/dice/roll'), {
                 method: 'POST',
                 body: { notation },
-            })) as DiceRollResultView;
+            });
+
+            if (!isDiceRollResultView(rolled)) {
+                setDiceProblem({ reason: 'unreadable_result' });
+
+                return;
+            }
+
             setDiceResult(rolled);
         } catch (err) {
             if (err instanceof ApiError) {
@@ -185,14 +193,27 @@ export default function CampaignConsolePage() {
     const logRoll = useMutation({
         // The logged-roll endpoint performs the roll AND journals it, so the
         // shown result is replaced by exactly what the journal recorded.
-        mutationFn: async (): Promise<{ roll: DiceRollResultView }> => {
-            return (await api.json(apiPath(`/api/campaigns/${campaignId}/rolls`), {
+        mutationFn: async (): Promise<unknown> => {
+            return await api.json(apiPath(`/api/campaigns/${campaignId}/rolls`), {
                 method: 'POST',
                 body: { notation: diceResult?.notation ?? '' },
-            })) as { roll: DiceRollResultView };
+            });
         },
         onSuccess: (logged) => {
-            setDiceResult(logged.roll);
+            const rolled = (logged as { roll?: unknown } | null)?.roll;
+
+            // Nothing off-contract may reach the render (audit A5): the roll
+            // is journalled server-side either way, so an unreadable body
+            // degrades to the dice error notice, never to a blank page.
+            if (!isDiceRollResultView(rolled)) {
+                setDiceProblem({ reason: 'unreadable_result' });
+                setRollLogged(false);
+                void journal.refetch();
+
+                return;
+            }
+
+            setDiceResult(rolled);
             setRollLogged(true);
             void journal.refetch();
         },
