@@ -126,6 +126,31 @@ describe('DiceRollerWidget', () => {
         expect(screen.getByTestId('dice-logged')).toHaveTextContent('Logged to your journal.');
     });
 
+    // A5: the logged-roll endpoint once answered an IRI string where the
+    // contract promises an object, and rendering it blanked the whole page.
+    // Same guarantee as the refusal case above — a result the widget cannot
+    // read is no result at all.
+    it.each([
+        ['an IRI string', '/api/.well-known/genid/b3984bd9e95e94a4c185'],
+        ['an object with no dice values', { notation: '2d6+3', modifier: 3, total: 8 }],
+        ['dice values that are not a list', { notation: '2d6+3', diceValues: 4, modifier: 3, total: 8 }],
+    ])('never crashes when handed %s as a result', (_label, malformed) => {
+        expect(() =>
+            render(
+                <DiceRollerWidget
+                    open
+                    result={malformed as unknown as DiceRollResultView}
+                    onClose={vi.fn()}
+                    onRoll={vi.fn()}
+                    onLogResult={vi.fn()}
+                />,
+            ),
+        ).not.toThrow();
+
+        expect(screen.queryByTestId('dice-result')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('dice-chip')).not.toBeInTheDocument();
+    });
+
     it('stays collapsed while closed', () => {
         render(
             <DiceRollerWidget
