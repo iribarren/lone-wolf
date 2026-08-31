@@ -33,6 +33,7 @@ parallel by different sessions.
 | **Wave 1 — restore the admin surface.** Nothing can be authored until these land. ||||
 | 02 | [`fix-admin-url`](02-fix-admin-url.md) | A1 · backoffice unreachable | ~2 h |
 | 03 | [`fix-flow-editor`](03-fix-flow-editor.md) | A2, A3 · flow editor unusable | ~2 h |
+| 22 | [`fix-admin-save`](22-fix-admin-save.md) | A6 · no backoffice form can be saved | ~3 h |
 | **Wave 2 — the crash.** ||||
 | 04 | [`fix-logged-roll`](04-fix-logged-roll.md) | A5 · "Log to journal" white-screens | ~2 h |
 | **Wave 3 — oracle authoring.** ||||
@@ -61,7 +62,7 @@ parallel by different sessions.
 ### Dependencies
 
 ```text
-01 ci-pipeline ──┬─> 02 fix-admin-url ──> 03 fix-flow-editor ──> 05 oracle-authoring
+01 ci-pipeline ──┬─> 02 fix-admin-url ──> 03 fix-flow-editor ──> 22 fix-admin-save ──> 05 oracle-authoring
                  ├─> 04 fix-logged-roll
                  ├─> 06 / 07 / 08          (player UI, independent)
                  ├─> 09..16                (process debt, independent)
@@ -81,6 +82,7 @@ an oracle form on a backoffice you cannot reach.
 | A1 backoffice unreachable | Critical | 02 |
 | A2 flow-editor selects empty | Critical | 03 |
 | A3 selects offer the system name | High | 03 |
+| A6 no backoffice form can be saved | Critical | 22 |
 | A4 oracle entries unauthorable | Critical | 05 |
 | A5 logged roll crashes the app | Critical | 04 |
 | B1 no CI | Critical | 01 |
