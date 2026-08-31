@@ -89,15 +89,9 @@ Then:
 | Surface | URL |
 |---|---|
 | Player app | <http://localhost:3000> |
-| Admin backoffice | <http://localhost:8080/admin/login> — **use this exact URL** |
+| Admin backoffice | <http://localhost:8080/admin> — redirects to the sign-in form |
 | API + Swagger UI | <http://localhost:8080/api/docs> |
 | Health probe | <http://localhost:8080/api/health> → `{"status":"ok"}` |
-
-> **Known defect.** `http://localhost:8080/admin` does **not** work in a browser — it redirects
-> to `http://localhost/admin/`, dropping the port, and after a successful sign-in you land on
-> that dead URL too. Until it is fixed, reach the backoffice by going straight to
-> `/admin/login`, and after signing in navigate directly to `/admin/system`,
-> `/admin/game-flow` or `/admin/oracle`. See [audit finding A1](audit/README.md).
 
 ### The demo content
 
@@ -121,7 +115,7 @@ Note that Scene-Sequel starts on *Scene*, not *Setup* — the starting stage is 
 
 ### 4.1 Signing in
 
-Go to `http://localhost:8080/admin/login`, sign in with the account you created. The menu has
+Go to `http://localhost:8080/admin`, sign in with the account you created. The menu has
 three sections: **Game systems**, **Campaign flows**, **Oracles**.
 
 ### 4.2 Game systems
@@ -390,7 +384,6 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| A1 | `/admin` is unreachable in a browser; the port is dropped on redirect |
 | A2 | Campaign-flow editor dropdowns are empty until a stage-name field is blurred |
 | A3 | Those dropdowns then offer the game system's name as a stage |
 | A4 | Oracle entries cannot be authored in the backoffice at all |
@@ -411,7 +404,6 @@ folders or tagging, search across the journal, mobile-specific layout, offline p
 | Symptom | Cause and fix |
 |---|---|
 | `app:create-admin` says *"Provide a valid email"* | `ADMIN_EMAIL`/`ADMIN_PASSWORD` are commented out in `.env.dist`. Pass `--email` / `--password`. |
-| Signing into `/admin` lands on a *Not Found* page | Finding A1. Navigate directly to `/admin/system`, `/admin/game-flow` or `/admin/oracle`. |
 | Flow editor dropdowns are empty | Finding A2. Click into a stage-name field, then click away. |
 | Player app shows *"Application error"* | Most likely finding A5 — you pressed *Log to journal*. Reload; the roll was saved. |
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
