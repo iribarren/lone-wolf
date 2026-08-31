@@ -94,4 +94,25 @@ class PersistenceOracle
         $this->scopeSystemId = $scopeSystemId;
         $this->entries = $entries;
     }
+
+    /*
+     * Field mutators for the ORM/form adapter boundary only — see the same
+     * note on PersistenceGameSystem (A6). `entries` deliberately has none:
+     * the admin form does not map it yet (A4).
+     */
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function setScopeType(string $scopeType): void
+    {
+        $this->scopeType = $scopeType;
+    }
+
+    public function setScopeSystemId(?string $scopeSystemId): void
+    {
+        $this->scopeSystemId = $scopeSystemId;
+    }
 }
