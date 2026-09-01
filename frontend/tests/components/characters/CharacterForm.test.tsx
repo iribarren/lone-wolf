@@ -25,7 +25,9 @@ describe('CharacterForm', () => {
         render(<CharacterForm fields={withSelect} onSubmit={vi.fn()} />);
 
         expect(screen.getByLabelText(/^Name/)).toHaveAttribute('type', 'text');
-        expect(screen.getByLabelText(/Hit points/)).toHaveAttribute('type', 'number');
+        // A numeric text input, not type="number": the browser must not eat a
+        // wrong-typed entry before the sheet gets to refuse it by name.
+        expect(screen.getByLabelText(/Hit points/)).toHaveAttribute('inputmode', 'numeric');
 
         const klass = screen.getByLabelText(/Class/);
         expect(klass.tagName).toBe('SELECT');
@@ -142,7 +144,7 @@ describe('CharacterForm', () => {
         );
 
         expect(screen.getByLabelText(/^Name/)).toHaveValue('Vela');
-        expect(screen.getByLabelText(/Hit points/)).toHaveValue(12);
+        expect(screen.getByLabelText(/Hit points/)).toHaveValue('12');
     });
 
     it('offers no kind control when editing an existing character', () => {
