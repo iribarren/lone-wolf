@@ -81,9 +81,8 @@ contract requires an embedded `DiceRollResult`, the player app crashed on it,
 and the gate still printed *Contract OK* (audit A5). The gate needs a booted,
 `app:seed:demo`-ed stack; it reuses one fixture account and deletes the campaign
 it creates, so it is safe to run as often as you like. Its intentional
-exceptions live in the script header with a rationale each — including one
-*known* drift it deliberately does not call, which is recorded there rather than
-silently skipped.
+exceptions live in the script header with a rationale each; add one only when a
+response genuinely cannot be checked, never to quiet a payload that drifted.
 
 Gate 8 keeps the requirements honest. `specs/<feature>/traceability.md` carries
 one row per functional requirement — story, citing task, proving test,

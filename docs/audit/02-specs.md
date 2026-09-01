@@ -136,23 +136,35 @@ component still exempt. `/auth/login` remains invisible to Gate A — the json_l
 reaches API Platform's metadata — but Gate C now validates its *response* against `AuthToken`, so
 only the declaration, not the payload, is unverified.
 
-Gate C found three drifts, all pre-existing and all out of scope for the change that added it
-(fixing any of them needs an `openapi.yaml` amendment with a migration path, or application code):
+Gate C found three drifts on its first run, all pre-existing. All three were closed in the same
+change set, and the gate is green:
 
-- **`SuggestedAction` requires a property the contract never defines.** `openapi.yaml:451` lists
-  `required: [kind, label]`, but the schema's properties are `kind`, `toStageId`, `toStageName`
-  and `prompt` — there is no `label`. No response can satisfy it; the runtime sends `prompt`.
-  Gate B never saw it because property-set coverage ignores `required`. Surfaces on
-  `POST /campaigns`, `GET /campaigns/{id}` and inside `IllegalTransitionProblem.legalAlternatives`.
-- **`POST /campaigns/{campaignId}/advance` answers `201 Created`; the contract declares `200`.**
-  Advancing a stage creates nothing. The runtime `docs.json` declares `201` too, so Gate A missed
-  it: Gate A compares paths and methods, never status codes.
-- **A character created with no attributes answers `"attributes": []`.** PHP's empty array
-  serialised as a JSON array where `CharacterWrite.attributes` requires an object — reproduce with
+- **`SuggestedAction` required a property the contract never defined.** `required: [kind, label]`
+  listed a `label` the schema had no property for, while the runtime carries the text in `prompt` —
+  so no response could satisfy it. Gate B never saw this because property-set coverage ignores
+  `required`. *Fixed:* the requirement now names `prompt`, which
+  `StageActionResource::$prompt` always emits as a non-nullable string. Not breaking under
+  Principle V — nothing could ever have produced `label`, and the generated client is built from
+  `docs.json`, which never declared it.
+- **`POST /campaigns/{campaignId}/advance` answered `201 Created` where the contract declared
+  `200`.** The runtime `docs.json` declares `201` too, so gate A missed it: gate A compares paths
+  and methods, never status codes. *Fixed by moving the contract to `201`*, matching the shipped
+  behaviour. Not breaking: the frontend client reads success through `response.ok` and was
+  generated from a document that has always said 201. Reservation on the record — advancing a stage
+  creates no resource, so `200` is the semantically better answer and changing the backend was the
+  alternative considered; the contract was moved deliberately.
+- **A character created with no attributes answered `"attributes": []`.** PHP's empty array
+  serialised as a JSON array where `CharacterWrite.attributes` types an object; reproduced with
   `POST /campaigns/{id}/characters {"kind":"npc","name":"X","attributes":{}}`, whose sheet requires
-  nothing of an NPC. Gate C deliberately does not make that call, and says so in its header, rather
-  than skipping it silently: adding it would turn merge gate 5 red for a defect the gate is
-  forbidden to fix.
+  nothing of an NPC. *Fixed:* `CharacterResource::$attributes` is an `\ArrayObject` wrapped at the
+  single construction point, with `PRESERVE_EMPTY_OBJECTS` on the resource. Gate C now makes that
+  call on every run, and `backend/features/characters/sheets.feature` asserts the shape against the
+  raw body — `json_decode(..., true)` renders `{}` and `[]` identically and would have passed
+  against the defect.
+
+Regenerating the client for the attributes fix also surfaced staleness nobody had caught:
+`frontend/src/lib/api/schema.gen.ts` still typed the logged roll's `roll` and `journalEntry` as IRI
+strings, from before `9e55af3` embedded them (A5).
 
 ### 2.2.7 A constitutional tension nobody resolved
 
