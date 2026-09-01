@@ -10,12 +10,14 @@ use App\Identity\Application\UserRepositoryInterface;
 use App\Identity\Domain\User;
 use App\Rulesets\Application\Command\CreateGameSystemCommand;
 use App\Rulesets\Application\CreateGameSystemHandler;
+use App\Rulesets\Domain\GameSystemStatus;
 use App\Shared\Domain\Identifier\GameSystemId;
 use App\Shared\Domain\Identifier\UserId;
 use App\Tests\Integration\Support\SignsInAsAdmin;
 use App\Tests\Integration\Support\SupersedeSimulator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * Backoffice regression coverage for the Rulesets sections:
@@ -84,6 +86,54 @@ final class AdminGameFlowPagesTest extends WebTestCase
             self::assertStringNotContainsString('Persistence', $heading, $url);
             self::assertStringContainsString($expected, $heading, $url);
         }
+    }
+
+    /**
+     * C7: availability used to be a raw ChoiceField write straight to the
+     * column, bypassing SetSystemStatusHandler — which then had no callers at
+     * all. The toggle now runs through the Application layer (Constitution I),
+     * so it has to keep working end to end from the form.
+     */
+    public function testTogglingAvailabilityPersistsThroughTheStatusHandler(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+
+        self::assertSame(
+            'active',
+            $this->storedColumn('SELECT status FROM game_systems WHERE id = ?', $system['id']),
+        );
+
+        $crawler = $client->request(
+            'GET',
+            $this->route('admin_dashboard_system_edit', ['entityId' => $system['id']]),
+        );
+        self::assertResponseIsSuccessful();
+
+        $form = $crawler->selectButton('Save changes')->form();
+        $form[self::FORM.'[status]'] = self::statusOptionValue($crawler, GameSystemStatus::Inactive);
+        $client->submit($form);
+
+        self::assertSaveSucceeded($client);
+        self::assertSame(
+            'inactive',
+            $this->storedColumn('SELECT status FROM game_systems WHERE id = ?', $system['id']),
+        );
+
+        // And back, so the handler's activate() branch is covered too.
+        $crawler = $client->request(
+            'GET',
+            $this->route('admin_dashboard_system_edit', ['entityId' => $system['id']]),
+        );
+        $form = $crawler->selectButton('Save changes')->form();
+        $form[self::FORM.'[status]'] = self::statusOptionValue($crawler, GameSystemStatus::Active);
+        $client->submit($form);
+
+        self::assertSaveSucceeded($client);
+        self::assertSame(
+            'active',
+            $this->storedColumn('SELECT status FROM game_systems WHERE id = ?', $system['id']),
+        );
     }
 
     public function testCampaignFlowsSectionOpensTheStructuredEditor(): void
@@ -412,6 +462,29 @@ final class AdminGameFlowPagesTest extends WebTestCase
      * The demo-shaped fixture: three stages and a full transition ring, so an
      * edit to one key can be proven not to disturb the rest.
      *
+     * @return array{id: string, name: string}
+     */
+    /**
+     * The availability field binds enum *instances*, so Symfony numbers the
+     * options rather than using their backed values. Resolve the submit value
+     * from the rendered label instead of hard-coding an index.
+     */
+    private static function statusOptionValue(Crawler $crawler, GameSystemStatus $status): string
+    {
+        $label = ucfirst($status->value);
+
+        foreach ($crawler->filter(sprintf('select[name="%s[status]"] option', self::FORM)) as $option) {
+            \assert($option instanceof \DOMElement);
+
+            if (trim($option->textContent) === $label) {
+                return $option->getAttribute('value');
+            }
+        }
+
+        self::fail(sprintf('The availability select offers no "%s" option.', $label));
+    }
+
+    /**
      * @return array{id: string, name: string}
      */
     private function createSystem(): array

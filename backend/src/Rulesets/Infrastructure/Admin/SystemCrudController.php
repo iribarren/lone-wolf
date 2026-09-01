@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Rulesets\Infrastructure\Admin;
 
 use App\Rulesets\Application\FlowFactory;
+use App\Rulesets\Application\Command\SetSystemStatusCommand;
 use App\Rulesets\Application\Command\UpdateSheetStructureCommand;
+use App\Rulesets\Application\SetSystemStatusHandler;
 use App\Rulesets\Application\UpdateSheetStructureHandler;
 use App\Rulesets\Domain\FieldDefinition;
 use App\Rulesets\Domain\GameSystemStatus;
@@ -33,6 +35,7 @@ final class SystemCrudController extends AbstractCrudController
 
     public function __construct(
         private readonly UpdateSheetStructureHandler $sheetHandler,
+        private readonly SetSystemStatusHandler $statusHandler,
     ) {
     }
 
@@ -147,6 +150,16 @@ final class SystemCrudController extends AbstractCrudController
             if ($entityInstance->sheetStructure() !== null) {
                 $this->sheetHandler->handle(self::updateSheetCommand($entityInstance));
             }
+
+            // FR-001/FR-006: availability is a use case, not a column write.
+            // The form mapper has already put the submitted status on the row —
+            // the same shape GameFlowCrudController relies on — so the command
+            // carries it into the Application layer, which is what decides
+            // whether the aggregate activates or deactivates (Constitution I).
+            $this->statusHandler->handle(new SetSystemStatusCommand(
+                GameSystemId::fromString($entityInstance->id()),
+                $entityInstance->status() === GameSystemStatus::Active,
+            ));
 
             parent::updateEntity($entityManager, $entityInstance);
         } catch (\DomainException|\InvalidArgumentException $e) {
