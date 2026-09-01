@@ -27,8 +27,11 @@ final class Version20260823075023 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE game_systems');
+        // Reverse order of up(), one DROP per CREATE — including the index on
+        // the table this migration drops, which PostgreSQL would remove with
+        // it anyway (audit C5: say what is undone, do not rely on a cascade).
         $this->addSql('DROP INDEX uniq_users_email');
+        $this->addSql('DROP INDEX uniq_game_systems_name');
+        $this->addSql('DROP TABLE game_systems');
     }
 }
