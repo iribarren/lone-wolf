@@ -11,7 +11,11 @@ import { useState } from 'react';
 import AdvanceActions, { type RefusalFeedback } from '@/components/campaign/AdvanceActions';
 import CampaignSettings from '@/components/campaign/CampaignSettings';
 import StagePanel from '@/components/campaign/StagePanel';
-import CharacterPanel, { type CharacterPanelCharacter } from '@/components/characters/CharacterPanel';
+import CharacterForm, { type CharacterDraft } from '@/components/characters/CharacterForm';
+import CharacterPanel, {
+    type CharacterPanelCharacter,
+    type SheetViolation,
+} from '@/components/characters/CharacterPanel';
 import DiceRollerWidget, {
     isDiceRollResultView,
     type DiceProblemView,
@@ -34,6 +38,30 @@ interface JournalPage {
     nextCursor?: string | null;
 }
 
+/**
+ * Sheet refusals name a `field`, where the generic problem parser expects a
+ * `property` — read both rather than let the shape decide whether a player
+ * sees the message (contract SheetValidationProblem, FR-023).
+ */
+function sheetViolationsOf(error: unknown): SheetViolation[] {
+    if (!(error instanceof ApiError) || !Array.isArray(error.violations)) {
+        return [];
+    }
+
+    return error.violations.flatMap((raw): SheetViolation[] => {
+        const entry = raw as { field?: unknown; property?: unknown; message?: unknown };
+        const field = typeof entry.field === 'string'
+            ? entry.field
+            : typeof entry.property === 'string'
+                ? entry.property
+                : null;
+
+        return field === null || typeof entry.message !== 'string'
+            ? []
+            : [{ field, message: entry.message }];
+    });
+}
+
 export default function CampaignConsolePage() {
     const api = useApiClient();
     const router = useRouter();
@@ -47,6 +75,8 @@ export default function CampaignConsolePage() {
     const [rollLogged, setRollLogged] = useState(false);
     const [rollingDice, setRollingDice] = useState(false);
     const [consultingOracleId, setConsultingOracleId] = useState<string | null>(null);
+    const [characterFormOpen, setCharacterFormOpen] = useState(false);
+    const [editingCharacter, setEditingCharacter] = useState<CharacterPanelCharacter | null>(null);
     const [consulted, setConsulted] = useState<{
         oracleId: string;
         title: string;
@@ -121,6 +151,40 @@ export default function CampaignConsolePage() {
         queryFn: async (): Promise<CharacterPanelCharacter[]> =>
             (await api.json(apiPath(`/api/campaigns/${campaignId}/characters`))) as CharacterPanelCharacter[],
     });
+
+    // Create and edit share one payload and one refusal shape, so they share
+    // one mutation: the id decides which endpoint takes it (FR-021..FR-023).
+    const saveCharacter = useMutation({
+        mutationFn: async ({ id, draft }: { id?: string; draft: CharacterDraft }): Promise<unknown> =>
+            id === undefined
+                ? await api.json(apiPath(`/api/campaigns/${campaignId}/characters`), {
+                    method: 'POST',
+                    body: draft,
+                })
+                : await api.json(apiPath(`/api/characters/${id}`), {
+                    method: 'PATCH',
+                    body: draft,
+                }),
+        onSuccess: () => {
+            setCharacterFormOpen(false);
+            setEditingCharacter(null);
+            // A conforming save clears drift server-side, so the badge goes
+            // with the refetch rather than with a reload (FR-025).
+            void characters.refetch();
+        },
+    });
+
+    function openCharacterForm(character: CharacterPanelCharacter | null): void {
+        saveCharacter.reset();
+        setEditingCharacter(character);
+        setCharacterFormOpen(true);
+    }
+
+    function closeCharacterForm(): void {
+        saveCharacter.reset();
+        setEditingCharacter(null);
+        setCharacterFormOpen(false);
+    }
 
     async function consult(oracleId: string): Promise<void> {
         setConsultingOracleId(oracleId);
@@ -242,6 +306,11 @@ export default function CampaignConsolePage() {
     const state = campaign.data;
     const stage = state.currentStage;
     const actions = stage?.suggestedActions ?? [];
+    // The sheet shape travels beside the characters; every character of a
+    // campaign carries the same one, so the first that has it speaks for all.
+    const sheetFields = characters.data?.find((character) => character.structureFields)?.structureFields ?? [];
+    const saveProblem = saveCharacter.error instanceof ApiError ? saveCharacter.error : null;
+    const sheetViolations = sheetViolationsOf(saveCharacter.error);
 
     return (
         <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
@@ -272,7 +341,27 @@ export default function CampaignConsolePage() {
                 characters={characters.data ?? []}
                 loading={characters.isLoading}
                 violations={[]}
+                onEdit={openCharacterForm}
             />
+
+            {characterFormOpen ? (
+                <CharacterForm
+                    // Re-key so the form reseeds when the target changes.
+                    key={editingCharacter?.id ?? 'new-character'}
+                    fields={sheetFields}
+                    character={editingCharacter}
+                    violations={sheetViolations}
+                    error={sheetViolations.length === 0 ? saveProblem?.detail ?? saveProblem?.title ?? null : null}
+                    sheetless={saveProblem?.status === 422 && sheetViolations.length === 0}
+                    pending={saveCharacter.isPending}
+                    onSubmit={(draft) => saveCharacter.mutate({ id: editingCharacter?.id, draft })}
+                    onCancel={closeCharacterForm}
+                />
+            ) : (
+                <button type="button" onClick={() => openCharacterForm(null)}>
+                    Add a character
+                </button>
+            )}
 
             <EntryComposer
                 stageName={stage?.name}
