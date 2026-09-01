@@ -1,5 +1,5 @@
-import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import CharacterPanel, { type CharacterPanelCharacter } from '@/components/characters/CharacterPanel';
 
@@ -64,6 +64,17 @@ describe('CharacterPanel', () => {
         const violations = screen.getByTestId('sheet-violations');
         expect(violations).toHaveTextContent('hp: Hit points must be a number.');
         expect(violations).toHaveTextContent('class: Class must be one of: Fighter, Mage.');
+    });
+
+    it('offers an edit control per character only when the parent handles one', () => {
+        render(<CharacterPanel characters={[fighter]} />);
+        expect(screen.queryByRole('button', { name: /edit vex/i })).not.toBeInTheDocument();
+
+        const onEdit = vi.fn();
+        render(<CharacterPanel characters={[fighter]} onEdit={onEdit} />);
+        fireEvent.click(screen.getByRole('button', { name: /edit vex/i }));
+
+        expect(onEdit).toHaveBeenCalledWith(fighter);
     });
 
     it('flags drifted characters with their issues', () => {
