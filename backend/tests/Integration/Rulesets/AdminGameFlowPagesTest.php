@@ -63,6 +63,29 @@ final class AdminGameFlowPagesTest extends WebTestCase
         self::assertSelectorExists('select.js-flow-stage-select');
     }
 
+    /**
+     * C3: EasyAdmin titles a page from the bound entity class unless the CRUD
+     * sets an entity label, so the backoffice read "Edit PersistenceGameSystem".
+     */
+    public function testRulesetsPagesAreTitledInTheDomainLanguage(): void
+    {
+        $client = $this->adminClient();
+        $system = $this->createSystem();
+
+        foreach ([
+            $this->route('admin_dashboard_system_new') => 'Game system',
+            $this->route('admin_dashboard_system_edit', ['entityId' => $system['id']]) => 'Game system',
+            $this->route('admin_dashboard_game_flow_edit', ['entityId' => $system['id']]) => 'Campaign flow',
+        ] as $url => $expected) {
+            $crawler = $client->request('GET', $url);
+            self::assertResponseIsSuccessful();
+
+            $heading = $crawler->filter('h1')->text();
+            self::assertStringNotContainsString('Persistence', $heading, $url);
+            self::assertStringContainsString($expected, $heading, $url);
+        }
+    }
+
     public function testCampaignFlowsSectionOpensTheStructuredEditor(): void
     {
         $client = $this->adminClient();

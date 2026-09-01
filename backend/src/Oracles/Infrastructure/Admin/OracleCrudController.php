@@ -43,6 +43,15 @@ final class OracleCrudController extends AbstractCrudController
         return PersistenceOracle::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        // Without these EasyAdmin titles the pages from the persistence class
+        // name — "Create PersistenceOracle" (audit C3).
+        return $crud
+            ->setEntityLabelInSingular('Oracle table')
+            ->setEntityLabelInPlural('Oracle tables');
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         return $actions->add(Crud::PAGE_INDEX, Action::DETAIL);

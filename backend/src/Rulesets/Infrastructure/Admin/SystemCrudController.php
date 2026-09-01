@@ -41,6 +41,15 @@ final class SystemCrudController extends AbstractCrudController
         return PersistenceGameSystem::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        // Without these EasyAdmin titles the pages from the persistence class
+        // name — "Create PersistenceGameSystem" (audit C3).
+        return $crud
+            ->setEntityLabelInSingular('Game system')
+            ->setEntityLabelInPlural('Game systems');
+    }
+
     public function configureFilters(Filters $filters): Filters
     {
         return $filters->add('name')->add('status');

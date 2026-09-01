@@ -45,10 +45,15 @@ final class GameFlowCrudController extends AbstractCrudController
     {
         // Adds data-flow-selected to the stage selects so admin-flow-editor.js
         // can re-select the stored stage once it has built the options.
-        return $crud->setFormThemes([
-            '@EasyAdmin/crud/form_theme.html.twig',
-            'admin/flow_form_theme.html.twig',
-        ]);
+        // The labels keep the persistence class name out of the page titles
+        // (audit C3).
+        return $crud
+            ->setEntityLabelInSingular('Campaign flow')
+            ->setEntityLabelInPlural('Campaign flows')
+            ->setFormThemes([
+                '@EasyAdmin/crud/form_theme.html.twig',
+                'admin/flow_form_theme.html.twig',
+            ]);
     }
 
     public function configureFilters(Filters $filters): Filters
