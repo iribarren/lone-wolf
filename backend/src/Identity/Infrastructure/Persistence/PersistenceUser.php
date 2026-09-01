@@ -24,7 +24,7 @@ class PersistenceUser
     private string $email;
 
     /** @var array<string> */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(type: 'jsonb')]
     private array $roles = [];
 
     #[ORM\Column(type: 'string', length: 255)]
