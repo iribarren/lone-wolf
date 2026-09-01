@@ -31,6 +31,10 @@ final class CharactersContext implements Context
 
     private ?string $campaignId = null;
 
+    private ?string $characterId = null;
+
+    private ?string $characterKind = null;
+
     /** @var array<string, list<string>> scenario system prefix => created system ids */
     private array $systemIds = [];
 
@@ -100,6 +104,7 @@ final class CharactersContext implements Context
     }
 
     /**
+     * @Given I created a\/an :kind named :name with attributes :attributes over HTTP
      * @When I create a\/an :kind named :name with attributes :attributes over HTTP
      */
     public function createCharacterOverHttp(string $kind, string $name, string $attributes): void
@@ -111,6 +116,37 @@ final class CharactersContext implements Context
         $this->requestJson(
             'POST',
             sprintf('/api/campaigns/%s/characters', $this->campaignId),
+            ['kind' => $kind, 'name' => $name, 'attributes' => $this->decodeJson($attributes)],
+        );
+
+        $created = $this->responseBody['id'] ?? null;
+
+        if (is_string($created)) {
+            $this->characterId = $created;
+            $this->characterKind = $kind;
+        }
+    }
+
+    /**
+     * @When I re-save that character as :name with attributes :attributes over HTTP
+     */
+    public function reSaveCharacterOverHttp(string $name, string $attributes): void
+    {
+        $this->reSaveCharacterAsKindOverHttp($this->characterKind ?? 'pc', $name, $attributes);
+    }
+
+    /**
+     * @When I re-save that character as a\/an :kind named :name with attributes :attributes over HTTP
+     */
+    public function reSaveCharacterAsKindOverHttp(string $kind, string $name, string $attributes): void
+    {
+        if ($this->characterId === null) {
+            throw new AssertionFailedError('A created character is required first.');
+        }
+
+        $this->requestJson(
+            'PATCH',
+            sprintf('/api/characters/%s', $this->characterId),
             ['kind' => $kind, 'name' => $name, 'attributes' => $this->decodeJson($attributes)],
         );
     }
@@ -127,6 +163,52 @@ final class CharactersContext implements Context
                 var_export($this->responseBody, true),
             ));
         }
+    }
+
+    /**
+     * @Then the character is updated
+     */
+    public function assertUpdated(): void
+    {
+        if ($this->responseStatus !== 200) {
+            throw new AssertionFailedError(sprintf(
+                'Expected the character to be updated, got %s: %s.',
+                var_export($this->responseStatus, true),
+                var_export($this->responseBody, true),
+            ));
+        }
+    }
+
+    /**
+     * @Then that character is named :name
+     */
+    public function assertStoredName(string $name): void
+    {
+        $stored = $this->fetchCharacter();
+
+        if (($stored['name'] ?? null) !== $name) {
+            throw new AssertionFailedError(sprintf(
+                'Expected the stored character to be named "%s", got %s.',
+                $name,
+                var_export($stored['name'] ?? null, true),
+            ));
+        }
+    }
+
+    /**
+     * @Then that character is flagged for review
+     */
+    public function assertFlagged(): void
+    {
+        $this->assertReviewStatus('flagged_for_review');
+    }
+
+    /**
+     * @Then that character is clean
+     */
+    public function assertClean(): void
+    {
+        $this->assertReviewStatus('clean');
     }
 
     /**
@@ -172,6 +254,46 @@ final class CharactersContext implements Context
                 ));
             }
         }
+    }
+
+    private function assertReviewStatus(string $expected): void
+    {
+        $stored = $this->fetchCharacter();
+
+        if (($stored['reviewStatus'] ?? null) !== $expected) {
+            throw new AssertionFailedError(sprintf(
+                'Expected review status "%s", got %s (drift issues: %s).',
+                $expected,
+                var_export($stored['reviewStatus'] ?? null, true),
+                var_export($stored['driftIssues'] ?? null, true),
+            ));
+        }
+    }
+
+    /**
+     * Reads the character back through the player-facing list projection.
+     *
+     * @return array<array-key, mixed>
+     */
+    private function fetchCharacter(): array
+    {
+        if ($this->campaignId === null || $this->characterId === null) {
+            throw new AssertionFailedError('A created character is required first.');
+        }
+
+        [$status, $body] = $this->sendJson('GET', sprintf('/api/campaigns/%s/characters', $this->campaignId), null);
+
+        if ($status !== 200 || $body === null) {
+            throw new AssertionFailedError(sprintf('Could not list characters (status %d).', $status));
+        }
+
+        foreach ($body as $view) {
+            if (is_array($view) && ($view['id'] ?? null) === $this->characterId) {
+                return $view;
+            }
+        }
+
+        throw new AssertionFailedError(sprintf('Character %s is not in the campaign listing.', $this->characterId));
     }
 
     private function applySheet(\App\Shared\Domain\Identifier\GameSystemId $systemId, string $spec): void
@@ -228,6 +350,23 @@ final class CharactersContext implements Context
      */
     private function requestJson(string $method, string $path, array $payload): void
     {
+        [$status, $body] = $this->sendJson($method, $path, $payload);
+
+        $this->responseStatus = $status;
+
+        if ($body !== null) {
+            /** @var array<string, mixed> $body */
+            $this->responseBody = $body;
+        }
+    }
+
+    /**
+     * @param array<string, mixed>|null $payload
+     *
+     * @return array{0: int, 1: array<array-key, mixed>|null}
+     */
+    private function sendJson(string $method, string $path, ?array $payload): array
+    {
         if (!$this->player instanceof User) {
             throw new AssertionFailedError('A registered player is required first.');
         }
@@ -244,7 +383,7 @@ final class CharactersContext implements Context
                 'CONTENT_TYPE' => 'application/json',
                 'HTTP_ACCEPT' => 'application/json',
             ],
-            (string) json_encode($payload, JSON_THROW_ON_ERROR),
+            $payload === null ? null : (string) json_encode($payload, JSON_THROW_ON_ERROR),
         );
 
         $response = $this->client->getResponse();
@@ -254,12 +393,8 @@ final class CharactersContext implements Context
             throw new AssertionFailedError('The response body could not be read.');
         }
 
-        $this->responseStatus = $response->getStatusCode();
         $decoded = json_decode($content, true);
 
-        if (is_array($decoded)) {
-            /** @var array<string, mixed> $decoded */
-            $this->responseBody = $decoded;
-        }
+        return [$response->getStatusCode(), is_array($decoded) ? $decoded : null];
     }
 }
