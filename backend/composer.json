@@ -80,6 +80,7 @@
             "@layers"
         ],
         "test:unit": "phpunit --testsuite unit",
+        "test:fast": "@test:unit",
         "test:integration": "phpunit --testsuite integration",
         "post-install-cmd": [
             "@auto-scripts"

@@ -2,6 +2,9 @@
 
 Guidance for AI agents and contributors working in this repository.
 
+The short version Claude Code auto-loads is `CLAUDE.md` at the repository root; this
+file remains the authority on delivery rules.
+
 ## Project
 
 Solo TTRPG digital assistant ("Lone Wolf"). Monorepo: `/backend` (PHP 8.3,
