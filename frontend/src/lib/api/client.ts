@@ -62,7 +62,21 @@ export class ApiError extends Error {
 export interface ApiClientOptions {
     /** Resolves the bearer token, when the visitor is authenticated. */
     getToken?: () => string | null;
+    /**
+     * Called when the server rejects the session with a 401, so the app can
+     * end it. Symmetrical with `getToken`, which keeps this module free of
+     * React. Never fired for the auth endpoints — a 401 from `/api/auth/login`
+     * is a wrong password, which `AuthGate` renders itself.
+     */
+    onUnauthorized?: () => void;
 }
+
+/**
+ * Endpoints where a 401 means "those credentials are wrong", not "your
+ * session died". Registration is included: it answers 401 on a bad payload
+ * without any session ever having existed.
+ */
+const AUTH_PATH_PREFIX = '/api/auth/';
 
 type Json = Record<string, unknown>;
 
@@ -95,6 +109,10 @@ export class ApiClient {
         });
 
         if (!response.ok) {
+            if (response.status === 401 && !String(path).startsWith(AUTH_PATH_PREFIX)) {
+                this.options.onUnauthorized?.();
+            }
+
             throw await ApiError.fromResponse(response);
         }
 
