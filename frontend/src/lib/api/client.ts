@@ -80,8 +80,11 @@ export class ApiClient {
             headers.set('Content-Type', 'application/json');
         }
 
+        // Any falsy token means "no token": an absent `getToken` yields
+        // `undefined`, which must omit the header rather than send the literal
+        // string "Bearer undefined" (C1).
         const token = this.options.getToken?.();
-        if (token !== null && !headers.has('Authorization')) {
+        if (token && !headers.has('Authorization')) {
             headers.set('Authorization', `Bearer ${token}`);
         }
 
