@@ -123,6 +123,37 @@ Related: `/auth/login` never reaches the OpenAPI document at all (it is firewall
 the login request and response are the one part of the integration surface with **no contract and
 no types** — `AuthGate` reaches it through an `apiPath()` cast.
 
+**Resolved 2026-09-02** — `scripts/check-contract.sh` gained **Gate C: response-payload
+conformance**. It registers (or logs in) a stable fixture player, plays a campaign through the
+whole loop against the live stack, and validates each response body against the contract's schema
+for that operation: declared status code, declared media type, required properties, JSON types,
+enums, and a `$ref` to an object that comes back as an IRI string — the A5 shape. Gate B was
+tightened at the same time to anchor on schema *name* through an explicit contract→runtime rename
+map, so an unrelated schema sharing field names can no longer satisfy a contract schema; and the
+three controller-emitted RFC 7807 schemas moved out of the skip list into Gate C, which asserts
+them against live 422 payloads and fails if it never reached them. `SheetStructure` is the only
+component still exempt. `/auth/login` remains invisible to Gate A — the json_login listener never
+reaches API Platform's metadata — but Gate C now validates its *response* against `AuthToken`, so
+only the declaration, not the payload, is unverified.
+
+Gate C found three drifts, all pre-existing and all out of scope for the change that added it
+(fixing any of them needs an `openapi.yaml` amendment with a migration path, or application code):
+
+- **`SuggestedAction` requires a property the contract never defines.** `openapi.yaml:451` lists
+  `required: [kind, label]`, but the schema's properties are `kind`, `toStageId`, `toStageName`
+  and `prompt` — there is no `label`. No response can satisfy it; the runtime sends `prompt`.
+  Gate B never saw it because property-set coverage ignores `required`. Surfaces on
+  `POST /campaigns`, `GET /campaigns/{id}` and inside `IllegalTransitionProblem.legalAlternatives`.
+- **`POST /campaigns/{campaignId}/advance` answers `201 Created`; the contract declares `200`.**
+  Advancing a stage creates nothing. The runtime `docs.json` declares `201` too, so Gate A missed
+  it: Gate A compares paths and methods, never status codes.
+- **A character created with no attributes answers `"attributes": []`.** PHP's empty array
+  serialised as a JSON array where `CharacterWrite.attributes` requires an object — reproduce with
+  `POST /campaigns/{id}/characters {"kind":"npc","name":"X","attributes":{}}`, whose sheet requires
+  nothing of an NPC. Gate C deliberately does not make that call, and says so in its header, rather
+  than skipping it silently: adding it would turn merge gate 5 red for a defect the gate is
+  forbidden to fix.
+
 ### 2.2.7 A constitutional tension nobody resolved
 
 Principle V prohibits "session sharing" between frontend and backend. The `/admin/login` firewall
