@@ -63,14 +63,8 @@
 #     defect class turns on; string-format checking would only restate the
 #     backend's own validators.
 #   - Extra properties in a response are not drift, matching Gate B.
-#   - Not exercised: `DELETE /campaigns/{id}` without ?confirm (the contract
-#     declares a bare 400 with no schema, so there is nothing to conform to),
-#     and creating a character whose sheet has no required attributes. The
-#     latter is a REAL drift, deliberately left ungated: an NPC posted with
-#     `attributes: {}` comes back with `"attributes": []` — PHP's empty array
-#     serialised as a JSON array where the contract requires an object. Fixing
-#     it is application work and needs its own task; this gate may not change
-#     application code. Do not add the call here until that task lands.
+#   - Not exercised: `DELETE /campaigns/{id}` without ?confirm — the contract
+#     declares a bare 400 with no schema, so there is nothing to conform to.
 #   - Fixture data: one stable player account (CONTRACT_GATE_EMAIL) reused
 #     across runs, and one campaign created and deleted per run. Re-running the
 #     script leaves nothing behind but that account.
@@ -532,7 +526,7 @@ def gate_c() -> None:
         if not actions:
             operational(f"the starting stage of {gate_system!r} suggests no advance to exercise")
         check(
-            "POST", "/campaigns/{campaignId}/advance", f"{campaign_path}/advance", 200,
+            "POST", "/campaigns/{campaignId}/advance", f"{campaign_path}/advance", 201,
             token=token, body={"toStageId": actions[0].get("toStageId")},
         )
 
@@ -615,6 +609,14 @@ def gate_c() -> None:
                     "attributes": fixture_attributes,
                 },
             )
+        # An NPC's sheet requires nothing of it, so this is the payload that used
+        # to come back as `"attributes": []` — a JSON array where the contract
+        # types an object. It is the only call that reaches the empty-map path.
+        check(
+            "POST", "/campaigns/{campaignId}/characters", f"{campaign_path}/characters", 201,
+            token=token,
+            body={"kind": "npc", "name": "Contract Gate NPC", "attributes": {}},
+        )
         problem = check(
             "POST", "/campaigns/{campaignId}/characters", f"{campaign_path}/characters", 422,
             token=token,
