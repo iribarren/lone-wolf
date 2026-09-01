@@ -30,6 +30,11 @@ flipping them to `[X]` in the same diff, hiding user story US3 from every id-bas
 The same commit deleted `backend/features/oracles/author_oracle_visibility.feature`, the
 deliverable T063 claimed. Both are repaired; the commits stay in the log as evidence.
 
+Tasks T103 and up are not part of that original generation: they are **converged increment
+work** (Phase 10), appended by `/speckit-converge` for eight commits of admin-backoffice work
+that shipped without a task. The ids run on from T102 unbroken — the phase heading, not a
+numbering gap, marks where the original plan ends.
+
 ## Path Conventions
 
 Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure}`, `backend/tests/{Unit,Integration}`, `backend/features/` (Behat), `frontend/src/{app,components,lib}`.
@@ -258,6 +263,50 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 - [x] T100 Security hardening sweep: verify ownership voter coverage on ALL player endpoints, JWT expiry/clock-skew config, `/admin` restricted to ROLE_ADMIN, secrets only via env (FR-030/FR-031)
 - [x] T101 Playwright E2E smoke mirroring quickstart happy-path (login → new campaign → guidance → advance → journal entry visible) in `frontend/tests/e2e/play.spec.ts` + `npm run test:e2e` script
 - [x] T102 Execute full `specs/001-solo-ttrpg-assistant/quickstart.md` walkthrough (V1–V6) fixing any gaps found; record results in PR description. Verify SC-007 explicitly: all three seeded systems run simultaneously with no cross-system leakage of stages, sheets, or oracles
+
+---
+
+## Phase 10: Convergence — Admin Backoffice Increment
+
+**Purpose**: Bring the out-of-band admin-backoffice increment into the ledger it was built outside of
+
+Everything from `T103` on is **converged increment work**, appended by `/speckit-converge`, not
+part of the original T001–T102 generation. The numbering runs on from T102 without a gap; the
+phase boundary is the discontinuity. Eight commits shipped between `1511584` and this phase
+without a task — the admin sign-in form, the `/admin/system` index-crash fix and the dedicated
+campaign-flows editor — and their design artifacts (`research.md` R11, the `data-model.md`
+increment section, the `quickstart.md` validation section and
+`specs/001-solo-ttrpg-assistant/contracts/admin-backoffice.md`) were retro-fitted by hand while
+`tasks.md` still reported 89/89. Because the work was never gated, it shipped three critical
+regressions — audit A1, A2 and A3 — which are logged here as their own tasks rather than folded
+into the tasks that caused them.
+
+Each task names the commit that delivered it. Completion here was verified twice: every cited
+path was checked on disk, and every user-facing claim was re-driven in a browser (Playwright
+against the running stack) — the increment is the exact case where "marked complete" and "actually
+works" came apart.
+
+### Delivered work converged from commits (US1)
+
+- [x] T103 [US1] Failing integration spec for backoffice session login — unauthenticated redirect, bad credentials, admin lands on the dashboard, ROLE_PLAYER refused, logout ends the session — in `backend/tests/Integration/Identity/AdminBackofficeLoginTest.php` (FR-030) — commit `d827901`
+- [x] T104 [US1] Session `form_login` firewall for `/admin` plus the Identity sign-in page: `backend/config/packages/security.yaml`, `backend/config/routes.yaml`, `backend/src/Identity/Infrastructure/Admin/AdminLoginController.php`, `backend/src/Identity/Infrastructure/Security/SecurityUser.php`, `backend/templates/admin/login.html.twig` (FR-030) — commit `32e18b7`
+- [x] T105 [US1] Document the backoffice sign-in surface and its provisioning env vars in `.env.dist`, `README.md` and `docs/architecture.md` (FR-030, Constitution VI) — commit `6990e3c`
+- [x] T106 [US1] Design artifacts for the increment: decision R11 in `specs/001-solo-ttrpg-assistant/research.md`, the no-migration form-binding contract in `specs/001-solo-ttrpg-assistant/data-model.md`, the validation walkthrough in `specs/001-solo-ttrpg-assistant/quickstart.md`, and the new `specs/001-solo-ttrpg-assistant/contracts/admin-backoffice.md` (FR-002, FR-003, FR-004) — commit `ef205e2`
+- [x] T107 [US1] Keep the jsonb-backed `flowDefinition`/`sheetStructure` fields off the list and detail pages so `/admin/system` stops throwing once data exists, in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php` (FR-001) — commit `08a16c5`
+- [x] T108 [US1] Structured `FlowDefinition` form types with lenient stage-name selects — `backend/src/Rulesets/Infrastructure/Admin/Form/FlowDefinitionType.php`, `FlowStageType.php`, `FlowTransitionType.php`, `LenientStageNameLoader.php`, `StageNameChoiceType.php` — plus kernel-less unit specs in `backend/tests/Unit/Rulesets/Infrastructure/Form/FlowDefinitionTypeTest.php` (FR-002, FR-003, FR-004) — commit `95ae477`
+- [x] T109 [US1] Dedicated **Campaign flows** admin section over the same system entity: `backend/src/Rulesets/Infrastructure/Admin/GameFlowCrudController.php`, `UpdatesFlowDefinition.php`, `JsonDocumentType.php`, `DashboardController.php`, the collection glue in `backend/public/assets/admin-flow-editor.js`, covered by `backend/tests/Integration/Rulesets/AdminGameFlowPagesTest.php` (FR-002, FR-003, FR-004, FR-005) — commit `5459d2b`
+- [x] T110 [US1] Document the campaign-flows section and the systems/flows split in `README.md` and `docs/architecture.md` (FR-031, Constitution VI) — commit `1511584`
+
+### Regressions the untracked increment introduced (US1)
+
+- [x] T111 [US1] **A1 (critical)** — `GET /admin` 301'd to `http://localhost/admin/`, dropping the published port, because `public/admin/` shadowed the route. Failing test first: "the documented admin URL reaches the dashboard on its published port" in `frontend/tests/e2e/admin.spec.ts`; fixed by `absolute_redirect off` in `docker/nginx/default.conf` and by serving the editor from `backend/public/assets/admin-flow-editor.js` via `backend/src/Rulesets/Infrastructure/Admin/DashboardController.php` (FR-030, FR-031; `docs/audit/spec-compliance.md` A1; `docs/prompts/02-fix-admin-url.md`) — commits `ca9ea97`, `e2dff09`, `73e488a`, `228cbf9`
+- [x] T112 [US1] **A2 (critical)** — the starting-stage/from/to selects rendered a single empty option because init called `syncSelects(document.body)` and `document.body.closest('form')` is always null. Failing test first: "the flow editor offers every stage and pre-selects the stored ones on load" in `frontend/tests/e2e/admin.spec.ts`; fixed in `backend/public/assets/admin-flow-editor.js` with the stored-value hint rendered by `backend/src/Rulesets/Infrastructure/Admin/GameFlowCrudController.php` and `backend/templates/admin/flow_form_theme.html.twig` (FR-003, FR-004; `docs/audit/spec-compliance.md` A2; `docs/prompts/03-fix-flow-editor.md`) — commits `668baa7`, `8cb58b9`, `044b9ee`, `9512540`
+- [x] T113 [US1] **A3 (high)** — once populated the selects offered the game system's own name as a stage, because `stageNames()` matched every `input[name$="[name]"]`. Failing test first: "the flow editor never offers the game system itself as a stage" in `frontend/tests/e2e/admin.spec.ts`; fixed by scoping the selector to `input[name*="[stages]"][name$="[name]"]` in `backend/public/assets/admin-flow-editor.js` (FR-003, FR-004; `docs/audit/spec-compliance.md` A3; `docs/prompts/03-fix-flow-editor.md`) — commit `281d5bd`
+
+### Acceptance coverage the increment never shipped (US1)
+
+- [ ] T114 [US1] Behat acceptance feature for authoring a campaign flow through the backoffice, in ubiquitous language (Constitution IV): save a reshaped flow, refuse removing a stage a campaign occupies naming that stage, refuse a transition pointing at a stage that does not exist — `backend/features/rulesets/author_campaign_flow.feature` plus the steps it needs in `backend/tests/Acceptance/Context/RulesetsContext.php` (FR-003, FR-004, FR-005; quickstart "Increment Validation" steps 4–6, currently manual)
+- [ ] T115 [US1] Extend the admin browser suite in `frontend/tests/e2e/admin.spec.ts` to cover the rest of the quickstart increment walkthrough as automation rather than a checklist: the systems index rendering rows that carry jsonb payloads (step 2), a full flow save round-trip ending on the success flash (step 4), and the systems detail and oracles pages still rendering (step 7) (FR-001, FR-003, FR-004; quickstart "Increment Validation" steps 2, 4, 7)
 
 ---
 
