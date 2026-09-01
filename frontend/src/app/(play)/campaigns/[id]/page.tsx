@@ -4,7 +4,7 @@
  * GM console (T051, FR-014–FR-018): exact-resume state fetch, stage guidance,
  * advance controls with refusal feedback, and destructive settings.
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -38,6 +38,10 @@ interface JournalPage {
     nextCursor?: string | null;
 }
 
+/** The cursor of the page to fetch; `null` asks for the newest one. */
+type JournalCursor = string | null;
+type JournalPages = InfiniteData<JournalPage, JournalCursor>;
+
 /**
  * Sheet refusals name a `field`, where the generic problem parser expects a
  * `property` — read both rather than let the shape decide whether a player
@@ -64,6 +68,7 @@ function sheetViolationsOf(error: unknown): SheetViolation[] {
 
 export default function CampaignConsolePage() {
     const api = useApiClient();
+    const queryClient = useQueryClient();
     const router = useRouter();
     const params = useParams<{ id: string }>();
     const campaignId = params?.id ?? '';
@@ -111,12 +116,69 @@ export default function CampaignConsolePage() {
         },
     });
 
-    const journal = useQuery({
-        queryKey: ['campaign', campaignId, 'journal'],
+    // The API's `?stageId=` filter has no UI yet (B3 follow-up); it sits in
+    // the key from the start so a filtered view can never be served from the
+    // unfiltered cache once one is built.
+    const journalKey = ['campaign', campaignId, 'journal', { stageId: null }];
+
+    const journal = useInfiniteQuery({
+        queryKey: journalKey,
         enabled: campaignId !== '',
-        queryFn: async (): Promise<JournalPage> =>
-            (await api.json(apiPath(`/api/campaigns/${campaignId}/journal`))) as JournalPage,
+        initialPageParam: null as JournalCursor,
+        queryFn: async ({ pageParam }): Promise<JournalPage> => {
+            const query = pageParam === null ? '' : `?cursor=${encodeURIComponent(pageParam)}`;
+
+            return (await api.json(apiPath(`/api/campaigns/${campaignId}/journal${query}`))) as JournalPage;
+        },
+        // A terminal page carries no cursor — that is how the reader learns
+        // there is no more history behind it (FR-017).
+        getNextPageParam: (lastPage): JournalCursor => lastPage.nextCursor ?? null,
     });
+
+    // JournalTimeline groups a flat list, so the pages are flattened here and
+    // its contract — and its tests — stay as they were.
+    const journalEntries = journal.data?.pages.flatMap((page) => page.entries) ?? [];
+
+    /**
+     * Shows freshly written entries at the top of the newest page.
+     *
+     * Deliberately not `refetch()`/`invalidateQueries()`: those re-request
+     * every loaded page against its stored keyset cursor, so a new entry
+     * pushes one entry out of the newest page while the next page's cursor
+     * stays where it was — the entry at the seam disappears from the view —
+     * and it costs one request per page the reader has opened. Writing into
+     * the cache leaves the loaded pages and their cursors untouched.
+     */
+    function showNewEntries(entries: JournalEntry[]): void {
+        if (entries.length === 0) {
+            return;
+        }
+
+        queryClient.setQueryData<JournalPages>(journalKey, (current) => {
+            if (!current || current.pages.length === 0) {
+                return current;
+            }
+
+            const [newest, ...older] = current.pages;
+            const known = new Set(newest.entries.map((entry) => entry.id));
+            const added = entries.filter((entry) => !known.has(entry.id));
+
+            return {
+                ...current,
+                pages: [{ ...newest, entries: [...added, ...newest.entries] }, ...older],
+            };
+        });
+    }
+
+    /**
+     * Re-reads the newest page only, for writes that answer with the entry's
+     * id rather than the entry itself. The pages already paged back through
+     * are never re-requested.
+     */
+    async function showLatestWrites(): Promise<void> {
+        const head = (await api.json(apiPath(`/api/campaigns/${campaignId}/journal`))) as JournalPage;
+        showNewEntries(head.entries);
+    }
 
     const append = useMutation({
         mutationFn: async (narrative: string): Promise<JournalEntry> =>
@@ -124,7 +186,7 @@ export default function CampaignConsolePage() {
                 method: 'POST',
                 body: { narrative },
             })) as JournalEntry,
-        onSuccess: () => void journal.refetch(),
+        onSuccess: (created) => showNewEntries([created]),
     });
 
     const remove = useMutation({
@@ -264,22 +326,29 @@ export default function CampaignConsolePage() {
             });
         },
         onSuccess: (logged) => {
-            const rolled = (logged as { roll?: unknown } | null)?.roll;
+            const payload = logged as { roll?: unknown; journalEntry?: JournalEntry } | null;
+
+            // The logged entry travels with the roll, so the timeline gains it
+            // without re-reading anything; an off-contract body still journals
+            // server-side, so fall back to re-reading the newest page.
+            if (payload?.journalEntry) {
+                showNewEntries([payload.journalEntry]);
+            } else {
+                void showLatestWrites();
+            }
 
             // Nothing off-contract may reach the render (audit A5): the roll
             // is journalled server-side either way, so an unreadable body
             // degrades to the dice error notice, never to a blank page.
-            if (!isDiceRollResultView(rolled)) {
+            if (!isDiceRollResultView(payload?.roll)) {
                 setDiceProblem({ reason: 'unreadable_result' });
                 setRollLogged(false);
-                void journal.refetch();
 
                 return;
             }
 
-            setDiceResult(rolled);
+            setDiceResult(payload.roll);
             setRollLogged(true);
-            void journal.refetch();
         },
     });
 
@@ -335,7 +404,13 @@ export default function CampaignConsolePage() {
                 }}
             />
 
-            <JournalTimeline entries={journal.data?.entries ?? []} loading={journal.isLoading} />
+            <JournalTimeline
+                entries={journalEntries}
+                loading={journal.isLoading}
+                hasMore={journal.hasNextPage}
+                loadingMore={journal.isFetchingNextPage}
+                onLoadMore={() => void journal.fetchNextPage()}
+            />
 
             <CharacterPanel
                 characters={characters.data ?? []}

@@ -10,6 +10,10 @@ type JournalEntry = ApiSchemas['JournalEntry'];
 export interface JournalTimelineProps {
     entries: JournalEntry[];
     loading?: boolean;
+    /** Older history remains behind the newest page (the API's nextCursor). */
+    hasMore?: boolean;
+    loadingMore?: boolean;
+    onLoadMore?: () => void;
 }
 
 interface EntryGroup {
@@ -33,7 +37,13 @@ function groupByStage(entries: JournalEntry[]): EntryGroup[] {
     }));
 }
 
-export default function JournalTimeline({ entries, loading = false }: JournalTimelineProps) {
+export default function JournalTimeline({
+    entries,
+    loading = false,
+    hasMore = false,
+    loadingMore = false,
+    onLoadMore,
+}: JournalTimelineProps) {
     if (loading) {
         return (
             <section aria-busy="true" data-testid="journal-loading">
@@ -71,6 +81,17 @@ export default function JournalTimeline({ entries, loading = false }: JournalTim
                     </ol>
                 </div>
             ))}
+
+            {/*
+              * Explicit control, and absent rather than disabled once the
+              * cursor runs out: "you have reached the beginning" must not be
+              * mistakable for "this button is broken" (B3).
+              */}
+            {hasMore && onLoadMore && (
+                <button type="button" onClick={onLoadMore} disabled={loadingMore}>
+                    {loadingMore ? 'Loading earlier entries…' : 'Load earlier entries'}
+                </button>
+            )}
         </section>
     );
 }
