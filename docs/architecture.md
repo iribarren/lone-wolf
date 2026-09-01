@@ -59,7 +59,9 @@ backend/src/
 │                 weighted random selection via injected RandomSource
 ├── Characters/   PC/NPC sheets validated against the owning system's structure
 │                 (jsonb attributes); drift is flagged, never silently altered
-└── Dice/         strict NdM±K notation parser + RandomSource-injected roller
+├── Dice/         strict NdM±K notation parser + RandomSource-injected roller
+└── Identity/     accounts, credentials and roles; issues the player JWT and backs
+                  the separate admin session firewall (Principle V)
 ```
 
 Cross-context collaboration happens only through context-owned ports or shared
