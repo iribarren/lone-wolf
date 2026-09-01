@@ -9,6 +9,8 @@ use App\Oracles\Application\Command\UpdateOracleCommand;
 use App\Oracles\Application\CreateOracleHandler;
 use App\Oracles\Application\UpdateOracleHandler;
 use App\Oracles\Domain\OracleScopeType;
+use App\Oracles\Infrastructure\Admin\Form\OracleEntriesCollectionType;
+use App\Oracles\Infrastructure\Admin\Form\OracleEntryType;
 use App\Oracles\Infrastructure\Persistence\PersistenceOracle;
 use App\Shared\Domain\Identifier\GameSystemId;
 use App\Shared\Domain\Identifier\OracleId;
@@ -19,9 +21,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
@@ -63,6 +65,21 @@ final class OracleCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp('Required for system-scoped tables. Each system owns at most one scoped table.')
             ->hideOnIndex();
+
+        // jsonb payloads are not stringable: EasyAdmin's TextConfigurator
+        // throws on list/detail pages before any formatting could run, which
+        // is the index crash 08a16c5 fixed for the flow and sheet fields.
+        // ArrayField is the array-tolerant concrete type, and the editor is
+        // kept off the read pages for the same reason.
+        //
+        // entry_type is repeated here because ArrayConfigurator injects
+        // TextType into any ArrayField that has not set it at field level,
+        // which would override the collection type's own default.
+        yield ArrayField::new('entries', 'Result entries')
+            ->setFormType(OracleEntriesCollectionType::class)
+            ->setFormTypeOption('entry_type', OracleEntryType::class)
+            ->setHelp('One row per result. Weights are relative likelihoods and must be 1 or more. An empty table is legal — players are told it is empty.')
+            ->onlyOnForms();
 
         yield TextField::new('scopeType', 'Visibility')
             ->formatValue(static fn (mixed $value): string => $value === 'system' ? 'System' : 'Global')

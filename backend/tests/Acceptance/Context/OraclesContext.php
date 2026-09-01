@@ -10,6 +10,7 @@ use App\Campaigns\Application\Query\CampaignState;
 use App\Campaigns\Application\StartCampaignHandler;
 use App\Identity\Application\UserRepositoryInterface;
 use App\Identity\Domain\User;
+use App\Identity\Infrastructure\Security\HashingSubject;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Journal\Application\ListJournalEntriesHandler;
 use App\Journal\Application\Query\ListJournalEntriesQuery;
@@ -24,19 +25,29 @@ use App\Oracles\Domain\SystemScope;
 use App\Rulesets\Application\Command\CreateGameSystemCommand;
 use App\Rulesets\Application\CreateGameSystemHandler;
 use App\Rulesets\Application\Port\RulesetRepositoryInterface;
+use App\Shared\Domain\Identifier\GameSystemId;
 use Behat\Behat\Context\Context;
+use Doctrine\DBAL\Connection;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * US4 acceptance suite (quickstart V4). Oracle authoring runs in-process;
- * the player-facing surface (scoped listing, single-result consultation,
- * save-to-journal) drives the real HTTP kernel through BrowserKit with a
- * minted JWT so contract paths are exercised verbatim.
+ * US3 + US4 acceptance suite (quickstart V4). Authoring is driven through the
+ * real EasyAdmin backoffice form — that surface is the story (US3, FR-007) and
+ * the one a handler-level shortcut would not have covered; the player-facing
+ * surface (scoped listing, single-result consultation, save-to-journal) drives
+ * the real HTTP kernel through BrowserKit with a minted JWT so contract paths
+ * are exercised verbatim.
  */
 final class OraclesContext implements Context
 {
+    /** EasyAdmin names the CRUD form after the bound entity class. */
+    private const ADMIN_FORM = 'PersistenceOracle';
+
+    private const ADMIN_PASSWORD = 'correct horse battery';
+
     private ?User $player = null;
 
     private ?CampaignState $state = null;
@@ -58,6 +69,9 @@ final class OraclesContext implements Context
 
     private ?string $lastConsultedTitle = null;
 
+    /** @var array<string, list<array{text: string, weight: int}>> oracle name => entries as authored */
+    private array $authoredEntries = [];
+
     public function __construct(
         private readonly KernelBrowser $client,
         private readonly JWTTokenManagerInterface $jwtManager,
@@ -67,7 +81,37 @@ final class OraclesContext implements Context
         private readonly OracleRepositoryInterface $oracles,
         private readonly SaveConsultationToJournalHandler $saveToJournal,
         private readonly ListJournalEntriesHandler $listJournal,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly Connection $connection,
     ) {
+    }
+
+    /**
+     * @Given an authenticated backoffice admin
+     *
+     * Signs in through the admin session firewall (Principle V) so the
+     * authoring steps below drive the backoffice exactly as an admin does.
+     */
+    public function authenticatedBackofficeAdmin(): void
+    {
+        $email = sprintf('oracle-admin-%s@example.com', bin2hex(random_bytes(5)));
+        $hashed = $this->passwordHasher->hashPassword(
+            new HashingSubject($email, [User::ROLE_ADMIN]),
+            self::ADMIN_PASSWORD,
+        );
+        $this->users->save(User::register(
+            \App\Shared\Domain\Identifier\UserId::generate(),
+            $email,
+            $hashed,
+            [User::ROLE_ADMIN],
+        ));
+
+        $crawler = $this->client->request('GET', '/admin/login');
+        $this->client->submit($crawler->selectButton('Sign in')->form([
+            '_username' => $email,
+            '_password' => self::ADMIN_PASSWORD,
+        ]));
+        $this->client->followRedirect();
     }
 
     /**
@@ -148,6 +192,225 @@ final class OraclesContext implements Context
         $this->oracles->save($oracle);
         $this->oracleIds[$name] = $oracle->id()->toString();
         $this->oracleTitles[$name] = $title;
+    }
+
+    /**
+     * @When the admin authors a global oracle :name with entries :entries
+     */
+    public function authorGlobalOracleInBackoffice(string $name, string $entries): void
+    {
+        $this->authorInBackoffice($name, 'global', null, $entries);
+    }
+
+    /**
+     * @When the admin authors an oracle :name scoped to the system named like :prefix with entries :entries
+     */
+    public function authorScopedOracleInBackoffice(string $name, string $prefix, string $entries): void
+    {
+        $systemId = $this->findLatestSystemId($prefix);
+
+        if ($systemId === null) {
+            throw new AssertionFailedError(sprintf('No system named like "%s" exists.', $prefix));
+        }
+
+        $this->authorInBackoffice($name, 'system', $systemId, $entries);
+    }
+
+    /**
+     * Posts the backoffice NEW form the way a browser does. The entries
+     * collection is written straight into the form's own payload — DomCrawler
+     * cannot add rows to a prototype-driven collection, and this is the same
+     * technique AdminGameFlowPagesTest uses for the flow editor.
+     */
+    private function authorInBackoffice(string $name, string $scopeType, ?GameSystemId $systemId, string $entries): void
+    {
+        // Titles get a unique suffix because integration storage persists
+        // across runs and a system-scoped table is unique per system (FR-008).
+        $title = sprintf('%s %s', $name, bin2hex(random_bytes(3)));
+
+        $crawler = $this->client->request('GET', '/admin/oracle/new');
+        $form = $crawler->filter(sprintf('#new-%s-form', self::ADMIN_FORM))->form();
+
+        $values = $form->getPhpValues();
+        $payload = is_array($values[self::ADMIN_FORM] ?? null) ? $values[self::ADMIN_FORM] : [];
+        $payload['title'] = $title;
+        $payload['scopeType'] = $scopeType;
+        $payload['scopeSystemId'] = $systemId?->toString() ?? '';
+        $payload['entries'] = array_map(
+            static fn (array $entry): array => ['text' => $entry[0], 'weight' => (string) $entry[1]],
+            $this->parseEntries($entries),
+        );
+        $values[self::ADMIN_FORM] = $payload;
+
+        $this->client->request($form->getMethod(), $form->getUri(), $values);
+
+        $this->oracleTitles[$name] = $title;
+        $this->authoredEntries[$name] = array_map(
+            static fn (array $entry): array => ['text' => $entry[0], 'weight' => $entry[1]],
+            $this->parseEntries($entries),
+        );
+
+        $id = $this->connection->fetchOne('SELECT id FROM oracles WHERE title = ?', [$title]);
+
+        if (is_string($id)) {
+            $this->oracleIds[$name] = $id;
+        }
+    }
+
+    /**
+     * @Then the oracle :name is stored with entries :entries
+     */
+    public function assertStoredEntries(string $name, string $entries): void
+    {
+        $expected = array_map(
+            static fn (array $entry): array => ['text' => $entry[0], 'weight' => $entry[1]],
+            $this->parseEntries($entries),
+        );
+
+        if ($expected !== $this->storedEntries($name)) {
+            throw new AssertionFailedError(sprintf(
+                'Expected oracle "%s" to store %s, got %s.',
+                $name,
+                json_encode($expected),
+                json_encode($this->storedEntries($name)),
+            ));
+        }
+    }
+
+    /**
+     * @Then the oracle :name is marked as globally visible
+     */
+    public function assertGloballyVisible(string $name): void
+    {
+        $row = $this->storedRow($name);
+
+        if (($row['scope_type'] ?? null) !== 'global' || ($row['scope_system_id'] ?? null) !== null) {
+            throw new AssertionFailedError(sprintf('Oracle "%s" is not globally scoped: %s.', $name, json_encode($row)));
+        }
+    }
+
+    /**
+     * @Then the oracle :name is marked as scoped to the system named like :prefix
+     */
+    public function assertScopedToSystem(string $name, string $prefix): void
+    {
+        $systemId = $this->findLatestSystemId($prefix);
+        $row = $this->storedRow($name);
+
+        if (($row['scope_type'] ?? null) !== 'system' || ($row['scope_system_id'] ?? null) !== $systemId?->toString()) {
+            throw new AssertionFailedError(sprintf(
+                'Oracle "%s" is not scoped to the system named like "%s": %s.',
+                $name,
+                $prefix,
+                json_encode($row),
+            ));
+        }
+    }
+
+    /**
+     * @Then the consultation carries exactly one entry authored in the backoffice
+     */
+    public function assertConsultedEntryWasAuthored(): void
+    {
+        $this->assertSingleEntry();
+
+        $title = $this->lastConsultedTitle;
+
+        if ($title === null) {
+            throw new AssertionFailedError('No consultation happened.');
+        }
+
+        $entry = is_array($this->outcome['entry'] ?? null) ? $this->outcome['entry'] : [];
+        $texts = array_column($this->authoredEntries[$title] ?? [], 'text');
+
+        if (!in_array($entry['text'] ?? null, $texts, true)) {
+            throw new AssertionFailedError(sprintf(
+                'The consulted result %s is not one of the authored entries [%s].',
+                var_export($entry['text'] ?? null, true),
+                implode(', ', $texts),
+            ));
+        }
+    }
+
+    /**
+     * @Then the backoffice refuses because the system already owns a scoped table
+     */
+    public function assertScopeRefusal(): void
+    {
+        $content = $this->client->getResponse()->getContent();
+        $body = $content === false ? '' : $content;
+
+        if (!str_contains($body, 'only one scoped table')) {
+            $body = $this->client->followRedirect()->text();
+        }
+
+        if (!str_contains($body, 'only one scoped table')) {
+            throw new AssertionFailedError('The backoffice did not name the one-scoped-table-per-system rule.');
+        }
+    }
+
+    /**
+     * @Then exactly one oracle is scoped to the system named like :prefix
+     */
+    public function assertSingleScopedTable(string $prefix): void
+    {
+        $systemId = $this->findLatestSystemId($prefix);
+        $count = $this->connection->fetchOne(
+            'SELECT count(*) FROM oracles WHERE scope_system_id = ?',
+            [$systemId?->toString() ?? ''],
+        );
+
+        // DBAL answers count(*) as an int or a numeric string depending on
+        // the driver; both spellings of "one" are the same assertion.
+        if ($count !== 1 && $count !== '1') {
+            throw new AssertionFailedError(sprintf(
+                'Expected exactly one oracle scoped to the system named like "%s", found %s.',
+                $prefix,
+                var_export($count, true),
+            ));
+        }
+    }
+
+    /**
+     * @return list<array{text: string, weight: int}>
+     */
+    private function storedEntries(string $name): array
+    {
+        $raw = $this->storedRow($name)['entries'];
+        $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
+
+        $stored = [];
+        foreach (is_array($decoded) ? $decoded : [] as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $text = $entry['text'] ?? null;
+            $weight = $entry['weight'] ?? null;
+            $stored[] = [
+                'text' => is_string($text) ? $text : '',
+                'weight' => is_int($weight) ? $weight : 0,
+            ];
+        }
+
+        return $stored;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function storedRow(string $name): array
+    {
+        $row = $this->connection->fetchAssociative(
+            'SELECT scope_type, scope_system_id, entries::text AS entries FROM oracles WHERE title = ?',
+            [$this->persistedTitle($name)],
+        );
+
+        if ($row === false) {
+            throw new AssertionFailedError(sprintf('No oracle titled "%s" was persisted.', $this->persistedTitle($name)));
+        }
+
+        return $row;
     }
 
     /**

@@ -146,7 +146,7 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 - [X] X060 [US3] Define `OracleRepositoryInterface` port + handlers `CreateOracle`, `UpdateOracle` (reweight/edit entries), `ListOraclesVisibleToSystem` in `backend/src/Oracles/Application/`
 - [X] X061 [US3] Doctrine mapping: `scope_type` discriminator column + `scope_system_id` with partial unique index `WHERE scope_type='system'`; migration in `backend/migrations/`
 - [X] X062 [US3] EasyAdmin Oracle CRUD with scoping picker and weighted-entries grid in `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`
-- [X] X063 [US3] Behat authoring feature: global table visible to both demo systems, scoped table only to its own (US3 scenarios 1–3) in `backend/features/oracles/authoring.feature`
+- [X] T063 [US3] Behat authoring feature: entries authored through the backoffice, a global table visible to every system, a scoped table only to its own, and a system refused a second scoped table (US3 scenarios 1–3 + FR-008) in `backend/features/oracles/authoring.feature`
 
 **Checkpoint**: US1–US3 deliver the complete admin authoring surface.
 

@@ -176,18 +176,28 @@ position would not.)
 | Table title | Shown to players in the oracle drawer. |
 | Visibility | *Global — visible to every system*, or *One game system*. |
 | Scoped system | Required when visibility is system-scoped. Each system owns at most one scoped table — enforced by a database constraint, and a friendly message explains the refusal. |
+| Result entries | The table's contents: one row per result, each with its text and its weight. |
 
-Editing any of those three and pressing *Save changes* persists the change; the table's entries
-are left exactly as they were.
+**Authoring the results.** The *Result entries* editor is a list of rows. **Add a new item**
+appends a blank row, and each row has its own delete button. A row is a **Result** — the text a
+player sees when the table is consulted, up to 500 characters — and a **Weight**.
 
-> **Known defect — this is the big one.** The oracle form exposes **no field for the table's
-> entries**. You can create a titled, scoped oracle, but you cannot add, edit, weight or remove
-> any of its results through the backoffice. An entry-less table is legal (players get a
-> friendly "this table is empty" notice), so nothing warns you.
->
-> Until it is fixed, oracle content can only be created by the `app:seed:demo` command or by
-> writing to the `oracles.entries` JSONB column directly. See
-> [audit finding A4](audit/README.md).
+Weights are relative likelihoods, not percentages. Three rows weighted 3, 2 and 1 come up half,
+a third and a sixth of the time; weighting them 30, 20 and 10 means exactly the same thing. A
+weight must be a whole number of 1 or more. Leave it blank and the row counts as 1.
+
+Press *Save changes* to persist the whole table at once. If any row is refused — a weight of 0
+or less, an empty result, text beyond 500 characters — nothing is saved and a red banner quotes
+the reason, for example *"Oracle entry weights must be positive integers (got 0)."* Fix the row
+and save again.
+
+An oracle with no rows at all is legal: players consulting it get a friendly *"this table is
+empty"* notice rather than an error, so a table can be created first and filled in later. That
+also means an unfinished table gives no warning of its own — if players report an empty oracle,
+check its rows here.
+
+The editor appears only on the *New* and *Edit* forms; the list and detail pages show the table's
+title and visibility, not its rows.
 
 ---
 
@@ -390,7 +400,6 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| A4 | Oracle entries cannot be authored in the backoffice at all |
 | B2 | No character create/edit UI — API only |
 | B3 | Journal shows only the 50 newest entries, with no way to page back |
 | B4 | No sign-out, no password reset, no handling of an expired token |
@@ -409,7 +418,7 @@ folders or tagging, search across the journal, mobile-specific layout, offline p
 | `app:create-admin` says *"Provide a valid email"* | `ADMIN_EMAIL`/`ADMIN_PASSWORD` are commented out in `.env.dist`. Pass `--email` / `--password`. |
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
 | API returns `{"@context": …, "member": […]}` | You did not send `Accept: application/json`; you got JSON-LD. |
-| Consulting an oracle says the table is empty | It genuinely has no entries — see finding A4. |
+| Consulting an oracle says the table is empty | It genuinely has no rows. Open it at `/admin/oracle`, add result entries and save (§4.4). |
 | A campaign 404s | Either it does not exist or it is not yours; the two are deliberately indistinguishable. |
 | Everything 401s after about an hour | The JWT expired (1 h TTL) and nothing refreshes it. Clear local storage and sign in again (finding B4). |
 
