@@ -448,7 +448,7 @@ components:
 
     SuggestedAction:
       type: object
-      required: [kind, label]
+      required: [kind, prompt]
       properties:
         kind:
           type: string
