@@ -249,9 +249,10 @@ tells you exactly what was allowed:
 keep their original stage stamp forever — advancing to Sequel does not retroactively move
 yesterday's Scene notes. Oracle results are tagged *· oracle roll*.
 
-> The journal view loads the **50 most recent entries** and offers no "load more" control, so
-> older history is currently only reachable through the API's `?cursor=` parameter. See
-> [audit finding B3](audit/README.md).
+The view opens on the **50 most recent entries**. *Load earlier entries* appends the next 50 to
+what is already on screen, as many times as it takes; when it disappears you are looking at the
+beginning of the campaign. Writing while older pages are open adds the new entry at the top and
+leaves everything you paged back through in place.
 
 **Record what happened at "&lt;stage&gt;".** The composer. Type, press *Add journal entry*; it is
 stamped and appended immediately.
@@ -356,7 +357,7 @@ Base URL `http://localhost:8080/api`. All endpoints except registration, login, 
 ### Journal
 | | |
 |---|---|
-| `GET /campaigns/{id}/journal` | `{entries[], nextCursor}`; 50 per page, newest first. `?cursor=` walks back, `?stageId=` filters. |
+| `GET /campaigns/{id}/journal` | `{entries[], nextCursor}`; 50 per page, newest first. `?cursor=` walks back (the *Load earlier entries* control), `?stageId=` filters (no UI yet). |
 | `POST /campaigns/{id}/journal` | `{narrative}` → the created entry |
 
 ### Oracles
@@ -416,13 +417,13 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| B3 | Journal shows only the 50 newest entries, with no way to page back |
 | B4 | No sign-out, no password reset, no handling of an expired token |
 
 **Not built**
 
 Character import/export, campaign export, images or maps, multiple flows per system, oracle
-folders or tagging, search across the journal, mobile-specific layout, offline play.
+folders or tagging, search across the journal, filtering the journal to one stage (the API's
+`?stageId=` has no control yet), mobile-specific layout, offline play.
 
 ---
 
