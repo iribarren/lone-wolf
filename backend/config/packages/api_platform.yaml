@@ -7,6 +7,14 @@ api_platform:
     defaults:
         stateless: true
         # Plain JSON is a first-class format for the Next.js client.
+        #
+        # The order matters and is deliberate: `jsonld` first makes JSON-LD the
+        # format a client gets when it sends no `Accept` header, while the
+        # contract documents `application/json` only. Do NOT reorder these to
+        # close that gap — it would change the default response type for every
+        # existing consumer. Clients must send `Accept: application/json`;
+        # openapi.yaml and functional-guide §7 both say so, and ApiClient.request
+        # always sets it (audit C11).
         formats:
             jsonld: ['application/ld+json']
             json: ['application/json']
