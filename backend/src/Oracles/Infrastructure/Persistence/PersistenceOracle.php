@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Oracles\Infrastructure\Persistence;
 
+use App\Shared\Domain\Identifier\OracleEntryId;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -97,13 +98,58 @@ class PersistenceOracle
 
     /*
      * Field mutators for the ORM/form adapter boundary only — see the same
-     * note on PersistenceGameSystem (A6). `entries` deliberately has none:
-     * the admin form does not map it yet (A4).
+     * note on PersistenceGameSystem (A6): every field the admin form maps
+     * needs a real setter or Symfony's DataMapper dies on the getter.
      */
 
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * Form-mapper mutator for the entries editor, which submits rows as
+     * {text, weight} — entry identity belongs to the domain, not to the
+     * author.
+     *
+     * Ids are still filled in here because this instance is read again before
+     * it is written: UpdateOracleHandler re-reads the oracle through the
+     * repository, which reconstitutes entries and would reject an id-less row.
+     * They are matched by position, so an untouched row carries the id it
+     * already had and an appended row gets a fresh one.
+     *
+     * Those ids are not what ends up stored: the update path re-places every
+     * entry (see UpdateOracleHandler) and the repository then rewrites this
+     * column from the domain snapshot.
+     *
+     * @param array<int, mixed> $entries submitted editor rows
+     */
+    public function setEntries(array $entries): void
+    {
+        $existingIds = array_map(static fn (array $row): string => $row['id'], $this->entries);
+
+        $rows = [];
+        $position = 0;
+
+        foreach ($entries as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $id = $entry['id'] ?? ($existingIds[$position] ?? null);
+            $text = $entry['text'] ?? null;
+            $weight = $entry['weight'] ?? null;
+
+            $rows[] = [
+                'id' => is_string($id) && $id !== '' ? $id : OracleEntryId::generate()->toString(),
+                'text' => is_string($text) ? $text : '',
+                'weight' => is_int($weight) ? $weight : (is_numeric($weight) ? (int) $weight : 0),
+            ];
+
+            ++$position;
+        }
+
+        $this->entries = $rows;
     }
 
     public function setScopeType(string $scopeType): void
