@@ -158,7 +158,7 @@ paths:
               properties:
                 toStageId: { type: string, format: uuid }
       responses:
-        '200':
+        '201':
           description: Advanced; new state + guidance returned
           content:
             application/json:
@@ -448,7 +448,7 @@ components:
 
     SuggestedAction:
       type: object
-      required: [kind, label]
+      required: [kind, prompt]
       properties:
         kind:
           type: string

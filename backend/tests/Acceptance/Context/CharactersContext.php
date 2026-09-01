@@ -180,6 +180,41 @@ final class CharactersContext implements Context
     }
 
     /**
+     * The contract types `attributes` as an object (openapi.yaml CharacterWrite),
+     * and a sheet that requires nothing of an NPC lets a character through with
+     * an empty map. PHP encodes an empty array as `[]`, so this has to read the
+     * RAW body: json_decode(..., true) renders `{}` and `[]` identically and
+     * would pass against the defect.
+     *
+     * @Then the character answers its attributes as a JSON object
+     */
+    public function assertAttributesSerialiseAsObject(): void
+    {
+        $raw = $this->client->getResponse()->getContent();
+
+        if ($raw === false) {
+            throw new AssertionFailedError('The response body could not be read.');
+        }
+
+        $decoded = json_decode($raw, false, 512, JSON_THROW_ON_ERROR);
+
+        if (!$decoded instanceof \stdClass || !property_exists($decoded, 'attributes')) {
+            throw new AssertionFailedError(sprintf(
+                'Expected a character object carrying attributes, got %s.',
+                $raw,
+            ));
+        }
+
+        if (!$decoded->attributes instanceof \stdClass) {
+            throw new AssertionFailedError(sprintf(
+                'The contract types attributes as an object; the API answered %s in %s.',
+                get_debug_type($decoded->attributes),
+                $raw,
+            ));
+        }
+    }
+
+    /**
      * @Then that character is named :name
      */
     public function assertStoredName(string $name): void

@@ -24,6 +24,13 @@ Feature: Track characters with system-shaped sheets
     When I create a/an "npc" named "Mira" with attributes '{"bond":"Owes the wolf a debt."}' over HTTP
     Then the character is accepted
 
+  Scenario: An NPC with no attributes still answers an attributes object (FR-022)
+    Given a game system named like "Sheet Home" exists with sheet "hp:number:pc"
+    And I am running a campaign on the system named like "Sheet Home"
+    When I create a/an "npc" named "Quiet" with attributes '{}' over HTTP
+    Then the character is accepted
+    And the character answers its attributes as a JSON object
+
   Scenario: Unknown keys are refused outright
     Given a game system named like "Sheet Home" exists with sheet "hp:number:pc"
     And I am running a campaign on the system named like "Sheet Home"

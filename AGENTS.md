@@ -46,8 +46,8 @@ Work is specified in `specs/<feature-folder>/` (`spec.md` → `plan.md` →
 2. PHPUnit `integration` suite green
 3. Behat features for touched stories green (ubiquitous-language specs)
 4. PHPStan level-max + deptrac layer rules clean (`composer lint`)
-5. API matches the feature's contract in `specs/<feature>/contracts/`
-   (`scripts/check-contract.sh`)
+5. API matches the feature's contract in `specs/<feature>/contracts/` —
+   paths, schemas **and response payloads** (`scripts/check-contract.sh`)
 6. Documentation updated in the same change set (Constitution VI)
 7. `specs/*/tasks.md` intact (`scripts/check-task-integrity.sh`)
 8. Every ratified requirement traced (`scripts/check-traceability.sh`)
@@ -69,6 +69,20 @@ depends on, and deleted the feature file `T063` claimed. The script needs
 nothing but bash, so run it as often as you like. Intentional exceptions live
 in its header with a rationale each; add one only when an artifact was
 superseded by a later task, never to quiet a task that was not delivered.
+
+Gate 5 checks what the API sends, not only what it declares. Gate C of
+`scripts/check-contract.sh` logs a fixture player in, plays a campaign through
+the whole loop against the live stack and validates every response body against
+the contract's schema for that operation — status code, media type, required
+properties, JSON types, enums, and a `$ref` to an object that comes back as an
+IRI string. It exists because gates A and B never fetched a body: `POST
+/campaigns/{id}/rolls` answered `{"roll":"/api/.well-known/genid/…"}` where the
+contract requires an embedded `DiceRollResult`, the player app crashed on it,
+and the gate still printed *Contract OK* (audit A5). The gate needs a booted,
+`app:seed:demo`-ed stack; it reuses one fixture account and deletes the campaign
+it creates, so it is safe to run as often as you like. Its intentional
+exceptions live in the script header with a rationale each; add one only when a
+response genuinely cannot be checked, never to quiet a payload that drifted.
 
 Gate 8 keeps the requirements honest. `specs/<feature>/traceability.md` carries
 one row per functional requirement — story, citing task, proving test,

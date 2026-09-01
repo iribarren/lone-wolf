@@ -188,6 +188,13 @@ error schemas (`SheetStructure`, `DiceNotationProblem`, `IllegalTransitionProble
 matches schemas by *property-subset against any runtime schema*, and neither gate inspects
 response **bodies**. That is why **A5** — a live response returning IRI strings where the contract
 requires objects — passes the Constitution V gate cleanly.
+*Resolved 2026-09-02: `check-contract.sh` gained **Gate C**, which drives the live API with a
+fixture player and validates every response body against the contract's schema for that operation.
+Gate B now anchors on schema name through an explicit rename map, and the three RFC 7807 schemas
+are asserted against live 422 payloads rather than skipped — only `SheetStructure` remains
+exempt. Reverting the A5 fix now fails the gate by name. Gate C found three further drifts on its
+first run — two contract declarations that no response could satisfy and an empty attributes map
+serialised as an array — all three fixed in the same change set; see `02-specs.md` §2.2.6.*
 
 **Constitution tension, unamended.** Principle V prohibits "session sharing"; the `/admin/login`
 firewall added in `32e18b7` is session-based. `docs/architecture.md` and

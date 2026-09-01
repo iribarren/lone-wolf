@@ -52,7 +52,7 @@ final readonly class CharactersProvider implements ProviderInterface
             $data->id,
             $data->kind,
             $data->name,
-            $data->attributes,
+            new \ArrayObject($data->attributes),
             $data->validatedStructureVersion,
             $data->reviewStatus,
             $data->driftIssues,

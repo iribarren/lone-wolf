@@ -402,7 +402,7 @@ export interface components {
             kind?: string;
             name?: string;
             attributes?: {
-                [key: string]: string | null;
+                [key: string]: unknown;
             };
             validatedStructureVersion?: number;
             reviewStatus?: string;
@@ -447,7 +447,7 @@ export interface components {
             kind?: string;
             name?: string;
             attributes?: {
-                [key: string]: string | null;
+                [key: string]: unknown;
             };
             validatedStructureVersion?: number;
             reviewStatus?: string;
@@ -531,16 +531,8 @@ export interface components {
          *     entry (FR-029) and answers 201 with {roll, journalEntry}.
          */
         "DiceRoll.LoggedRollResource": {
-            /**
-             * Format: iri-reference
-             * @example https://example.com/
-             */
-            roll?: string;
-            /**
-             * Format: iri-reference
-             * @example https://example.com/
-             */
-            journalEntry?: string;
+            roll?: components["schemas"]["DiceRoll"];
+            journalEntry?: components["schemas"]["JournalEntry"];
         };
         /**
          * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).
@@ -550,16 +542,8 @@ export interface components {
          *     entry (FR-029) and answers 201 with {roll, journalEntry}.
          */
         "DiceRoll.LoggedRollResource.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
-            /**
-             * Format: iri-reference
-             * @example https://example.com/
-             */
-            roll?: string;
-            /**
-             * Format: iri-reference
-             * @example https://example.com/
-             */
-            journalEntry?: string;
+            roll?: components["schemas"]["DiceRoll.jsonld"];
+            journalEntry?: components["schemas"]["JournalEntry.jsonld"];
         };
         /**
          * @description US6 player-facing dice surface (contract /dice/roll + /campaigns/{campaignId}/rolls).

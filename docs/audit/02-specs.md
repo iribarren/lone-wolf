@@ -123,6 +123,49 @@ Related: `/auth/login` never reaches the OpenAPI document at all (it is firewall
 the login request and response are the one part of the integration surface with **no contract and
 no types** — `AuthGate` reaches it through an `apiPath()` cast.
 
+**Resolved 2026-09-02** — `scripts/check-contract.sh` gained **Gate C: response-payload
+conformance**. It registers (or logs in) a stable fixture player, plays a campaign through the
+whole loop against the live stack, and validates each response body against the contract's schema
+for that operation: declared status code, declared media type, required properties, JSON types,
+enums, and a `$ref` to an object that comes back as an IRI string — the A5 shape. Gate B was
+tightened at the same time to anchor on schema *name* through an explicit contract→runtime rename
+map, so an unrelated schema sharing field names can no longer satisfy a contract schema; and the
+three controller-emitted RFC 7807 schemas moved out of the skip list into Gate C, which asserts
+them against live 422 payloads and fails if it never reached them. `SheetStructure` is the only
+component still exempt. `/auth/login` remains invisible to Gate A — the json_login listener never
+reaches API Platform's metadata — but Gate C now validates its *response* against `AuthToken`, so
+only the declaration, not the payload, is unverified.
+
+Gate C found three drifts on its first run, all pre-existing. All three were closed in the same
+change set, and the gate is green:
+
+- **`SuggestedAction` required a property the contract never defined.** `required: [kind, label]`
+  listed a `label` the schema had no property for, while the runtime carries the text in `prompt` —
+  so no response could satisfy it. Gate B never saw this because property-set coverage ignores
+  `required`. *Fixed:* the requirement now names `prompt`, which
+  `StageActionResource::$prompt` always emits as a non-nullable string. Not breaking under
+  Principle V — nothing could ever have produced `label`, and the generated client is built from
+  `docs.json`, which never declared it.
+- **`POST /campaigns/{campaignId}/advance` answered `201 Created` where the contract declared
+  `200`.** The runtime `docs.json` declares `201` too, so gate A missed it: gate A compares paths
+  and methods, never status codes. *Fixed by moving the contract to `201`*, matching the shipped
+  behaviour. Not breaking: the frontend client reads success through `response.ok` and was
+  generated from a document that has always said 201. Reservation on the record — advancing a stage
+  creates no resource, so `200` is the semantically better answer and changing the backend was the
+  alternative considered; the contract was moved deliberately.
+- **A character created with no attributes answered `"attributes": []`.** PHP's empty array
+  serialised as a JSON array where `CharacterWrite.attributes` types an object; reproduced with
+  `POST /campaigns/{id}/characters {"kind":"npc","name":"X","attributes":{}}`, whose sheet requires
+  nothing of an NPC. *Fixed:* `CharacterResource::$attributes` is an `\ArrayObject` wrapped at the
+  single construction point, with `PRESERVE_EMPTY_OBJECTS` on the resource. Gate C now makes that
+  call on every run, and `backend/features/characters/sheets.feature` asserts the shape against the
+  raw body — `json_decode(..., true)` renders `{}` and `[]` identically and would have passed
+  against the defect.
+
+Regenerating the client for the attributes fix also surfaced staleness nobody had caught:
+`frontend/src/lib/api/schema.gen.ts` still typed the logged roll's `roll` and `journalEntry` as IRI
+strings, from before `9e55af3` embedded them (A5).
+
 ### 2.2.7 A constitutional tension nobody resolved
 
 Principle V prohibits "session sharing" between frontend and backend. The `/admin/login` firewall

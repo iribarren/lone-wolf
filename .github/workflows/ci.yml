@@ -103,7 +103,9 @@ jobs:
       - name: Gate 3 · Behat acceptance features
         run: docker compose exec -T php vendor/bin/behat
 
-      - name: Gate 5 · OpenAPI contract drift
+      # Gate C of this script drives the live API with a fixture player, so it
+      # needs the seeded demo content and the API answering — both above.
+      - name: Gate 5 · OpenAPI contract drift (paths, schemas and payloads)
         run: scripts/check-contract.sh
 
       - name: Dump service logs on failure
