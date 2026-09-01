@@ -42,6 +42,11 @@ use App\Characters\Infrastructure\Api\Provider\CharactersProvider;
         new Patch(
             uriTemplate: '/characters/{characterId}',
             uriVariables: ['characterId'],
+            // The character is loaded by the processor through its own
+            // ownership-checked handler; without this API Platform reads the
+            // item first, finds no item provider and answers 404 before the
+            // processor ever runs.
+            read: false,
             input: Input\SaveCharacterInput::class,
             processor: Processor\UpdateCharacterProcessor::class,
             security: "is_granted('IS_AUTHENTICATED_FULLY')",
