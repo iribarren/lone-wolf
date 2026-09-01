@@ -133,6 +133,11 @@ migration plan, ratification) exists for exactly this, and was not used. The doc
 absolutely while the code does something else, which quietly teaches everyone that the
 constitution is negotiable in practice.
 
+**Resolved 2026-09-01** — Constitution 1.1.0 amends Principle V with a written rationale, a
+principle diff and a migration plan ("none required"): the decoupling clause is scoped to the
+player frontend, and the backoffice is ratified as a server-rendered surface internal to the
+backend. No code changed.
+
 ---
 
 ## 2.3 Recommendations

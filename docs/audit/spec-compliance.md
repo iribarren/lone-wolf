@@ -193,6 +193,8 @@ requires objects — passes the Constitution V gate cleanly.
 firewall added in `32e18b7` is session-based. `docs/architecture.md` and
 `contracts/admin-backoffice.md` scope it as an admin surface internal to the backend — a
 defensible reading, but no amendment was filed and the constitution still reads absolutely.
+*Resolved 2026-09-01: Constitution 1.1.0 ratifies that reading — Principle V now scopes the
+decoupling clause to the player frontend and exempts the backoffice explicitly. No code changed.*
 
 ---
 
