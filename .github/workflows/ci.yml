@@ -192,6 +192,10 @@ jobs:
           docker compose exec -T php bin/console app:create-admin \
             --email=ci-admin@example.test --password=ci-admin-passphrase --no-interaction
           docker compose exec -T php bin/console app:seed:demo --no-interaction
+          # The journal-pagination E2E walks the SC-008 fixture back to its
+          # oldest entry, so the fixture has to exist before Playwright runs.
+          docker compose exec -T php bin/console app:seed:large-journal --no-interaction \
+            --email=perf@example.com --password=perf-player-password --entries=500
 
       - name: Wait for the API and the Next.js dev server
         run: |
