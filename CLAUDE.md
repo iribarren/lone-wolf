@@ -11,7 +11,7 @@ contract.
 - `.specify/memory/constitution.md` — six principles that **supersede every other convention**
   here, including this file. Reviewers cite the violated principle number when rejecting work.
 - `AGENTS.md` — the delivery rules: task = commit, checkpoint = PR, tests fail before their
-  implementation is committed, and the seven merge gates CI enforces on every PR.
+  implementation is committed, and the eight merge gates CI enforces on every PR.
 
 Work is specified in `specs/<feature>/` (`spec.md` → `plan.md` → `tasks.md`).
 
@@ -45,6 +45,8 @@ permission prompt and one call usually replaces a whole search loop.
 - `make test` and `make lint` — before any PR (both PHPUnit suites, Behat, Vitest; PHPStan
   level-max + deptrac).
 - `scripts/check-contract.sh` — after touching any API resource.
+- `scripts/check-traceability.sh` — after touching a requirement, or a test or file that
+  `specs/<feature>/traceability.md` cites.
 - `make up` / `make down` — boot the stack (backend :8080, frontend :3000).
 
 ## Hard rules
