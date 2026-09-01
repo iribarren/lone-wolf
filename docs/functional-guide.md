@@ -97,17 +97,21 @@ Then:
 
 `app:seed:demo` is idempotent and creates three systems with deliberately different shapes:
 
-| System | Stages | Transitions | Starts on |
-|---|---|---|---|
-| **Scene-Sequel Demo** | Setup, Scene, Sequel | Setup→Scene, Scene→Sequel, Sequel→Setup (a loop) | **Scene** |
-| **Act Ladder** | Act I, Beat, Act II | Act I→Beat, Beat→Act II (a ladder ending in a dead end) | Act I |
-| **Freeform Sandbox** | Free Play, Reflection | Free Play→Reflection | Free Play |
+| System | Stages | Transitions | Starts on | Character sheet |
+|---|---|---|---|---|
+| **Scene-Sequel Demo** | Setup, Scene, Sequel | Setup→Scene, Scene→Sequel, Sequel→Setup (a loop) | **Scene** | *Hit points* (number), required of PCs only |
+| **Act Ladder** | Act I, Beat, Act II | Act I→Beat, Beat→Act II (a ladder ending in a dead end) | Act I | *Willpower* (number, PCs only), *Discipline* (text, PCs and NPCs) |
+| **Freeform Sandbox** | Free Play, Reflection | Free Play→Reflection | Free Play | none — deliberately sheetless |
 
 plus two oracles: **Generic Weather** (global, 4 weighted entries) and **Ladder Encounters**
 (scoped to Act Ladder, 3 entries).
 
 Note that Scene-Sequel starts on *Scene*, not *Setup* — the starting stage is a free choice, not
 "the first stage in the list".
+
+The three sheets are deliberately different shapes, because the character sheet is rendered from
+whatever the system declares (§5.4). Re-running `app:seed:demo` on a stack seeded before the
+sheets existed adds them; a system whose sheet an admin has since edited is never overwritten.
 
 ---
 
@@ -252,14 +256,26 @@ yesterday's Scene notes. Oracle results are tagged *· oracle roll*.
 **Record what happened at "&lt;stage&gt;".** The composer. Type, press *Add journal entry*; it is
 stamped and appended immediately.
 
-**Characters.** A read-only panel rendering each PC/NPC from the system's sheet structure — no
-field names are hardcoded, so a Vampire sheet and a D&D sheet both render correctly. Characters
-whose stored data no longer matches an updated structure carry a **⚑ flagged for review** badge
-listing what drifted; their data is never altered for them.
+**Characters.** A panel rendering each PC/NPC from the system's sheet structure — no field names
+are hardcoded, so a Vampire sheet and a D&D sheet both render correctly. Characters whose stored
+data no longer matches an updated structure carry a **⚑ flagged for review** badge listing what
+drifted; their data is never altered for them.
 
-> The player app has **no form for creating or editing characters** — the panel only displays
-> them. Characters can currently only be created through the API. See
-> [audit finding B2](audit/README.md).
+*Add a character* opens a form built from the same structure: one control per declared field,
+typed as the system declared it, and marked *(required)* only for the kind you are creating — on
+Scene-Sequel Demo, *Hit points* is required of a PC and optional on an NPC. Nothing is validated
+in the browser: a breach is refused by the game itself and the reason appears **under the field
+it belongs to** (*"Hit points must be a number."*), with what you typed left in place.
+
+*Edit &lt;name&gt;* reopens the same form on an existing character. The name and the sheet values are
+editable; **kind is not** — a PC stays a PC. A save that conforms to the *current* structure also
+clears a **⚑** badge, on the spot and with no reload.
+
+> **Sheet shapes are discovered, not assumed.** The API ships a system's sheet shape alongside
+> its characters, so a campaign with none yet does not know its own shape: the first save is
+> answered with the fields the system requires, the form grows those inputs, and from the second
+> character on the full sheet is drawn straight away. On a system with no sheet structure at all
+> (the seeded *Freeform Sandbox*), the form says so instead of showing empty boxes.
 
 **Oracles** (bottom-right toggle). Lists the tables visible to this campaign — every global
 table plus this system's own. Consulting draws exactly one entry, weighted: in *Generic
@@ -353,7 +369,7 @@ Base URL `http://localhost:8080/api`. All endpoints except registration, login, 
 ### Characters
 | | |
 |---|---|
-| `GET /campaigns/{id}/characters` | Cast plus the sheet-structure metadata needed to render it |
+| `GET /campaigns/{id}/characters` | Cast plus the sheet-structure metadata needed to render it — the metadata travels *per character*, so an empty cast carries none |
 | `POST /campaigns/{id}/characters` | `{kind, name, attributes}` → `201` |
 | `PATCH /characters/{characterId}` | Revalidated against the *current* structure; a conforming save clears the drift flag. `kind` is immutable. |
 
@@ -400,7 +416,6 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| B2 | No character create/edit UI — API only |
 | B3 | Journal shows only the 50 newest entries, with no way to page back |
 | B4 | No sign-out, no password reset, no handling of an expired token |
 
@@ -419,6 +434,7 @@ folders or tagging, search across the journal, mobile-specific layout, offline p
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
 | API returns `{"@context": …, "member": […]}` | You did not send `Accept: application/json`; you got JSON-LD. |
 | Consulting an oracle says the table is empty | It genuinely has no rows. Open it at `/admin/oracle`, add result entries and save (§4.4). |
+| Adding a character says the system *"defines no sheet structure yet"* | The system has no character sheet. Author one at `/admin/system` under *Character sheet structure* (§4.2). |
 | A campaign 404s | Either it does not exist or it is not yours; the two are deliberately indistinguishable. |
 | Everything 401s after about an hour | The JWT expired (1 h TTL) and nothing refreshes it. Clear local storage and sign in again (finding B4). |
 
