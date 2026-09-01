@@ -107,6 +107,32 @@ describe('AuthGate', () => {
         expect(window.localStorage.getItem('lone-wolf.token')).toBe('fresh-token');
     });
 
+    it('returns the form to a first-time visitor state, keeping no credentials, when the session ends', async () => {
+        render(
+            <AuthGate>
+                <p>campaign list</p>
+            </AuthGate>,
+        );
+
+        // Register a new account, which leaves the gate in "register" mode.
+        fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+        json.mockResolvedValue({ token: 'fresh-token', roles: [] });
+        fireEvent.change(screen.getByLabelText('Email'), {
+            target: { value: 'first@example.test' },
+        });
+        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'passphrase-1' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+        expect(await screen.findByText('campaign list')).toBeInTheDocument();
+
+        act(() => {
+            clearSession();
+        });
+
+        expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+        expect(screen.getByLabelText('Email')).toHaveValue('');
+        expect(screen.getByLabelText('Password')).toHaveValue('');
+    });
+
     it('clears the expiry message once the user signs in again', async () => {
         saveSession({ token: 'stale-token', roles: [] });
         render(
