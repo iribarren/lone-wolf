@@ -213,8 +213,17 @@ Everything under `/campaigns` is behind a sign-in gate. Register with an email a
 at least 8 characters; you are signed in immediately and granted `ROLE_PLAYER`. The token is
 kept in your browser's local storage.
 
-> There is currently **no sign-out control** in the player app, and no password reset. To switch
-> accounts, clear the site's local storage.
+**Sign out** sits at the top of every page behind the gate. It discards the token and the roles
+from local storage and empties the cached API responses, so the next person to sign in on this
+browser sees none of your data.
+
+Tokens last one hour and there is no refresh token — a deliberate choice for a single-player app
+(research R3). When the hour is up, the next request the app makes is rejected, the session ends
+and you land back on the sign-in form with *"Your session expired. Sign in to continue."* Signing
+in again picks up exactly where you left off; nothing is lost, because nothing is held in the
+browser but the token.
+
+> There is still **no password reset**. An account whose password is lost cannot be recovered.
 
 ### 5.2 `/campaigns` — your campaigns
 
@@ -417,7 +426,7 @@ Every refusal carries a machine-readable reason, not just a message.
 
 | | |
 |---|---|
-| B4 | No sign-out, no password reset, no handling of an expired token |
+| B4 | No password reset. (Sign-out and expired-token handling: fixed.) |
 
 **Not built**
 
@@ -437,7 +446,7 @@ folders or tagging, search across the journal, filtering the journal to one stag
 | Consulting an oracle says the table is empty | It genuinely has no rows. Open it at `/admin/oracle`, add result entries and save (§4.4). |
 | Adding a character says the system *"defines no sheet structure yet"* | The system has no character sheet. Author one at `/admin/system` under *Character sheet structure* (§4.2). |
 | A campaign 404s | Either it does not exist or it is not yours; the two are deliberately indistinguishable. |
-| Everything 401s after about an hour | The JWT expired (1 h TTL) and nothing refreshes it. Clear local storage and sign in again (finding B4). |
+| Sent back to the sign-in form with *"Your session expired"* | The JWT reached its 1 h TTL; there is no refresh token by design. Sign in again — the app now ends the session cleanly instead of letting every request fail. |
 
 ---
 
