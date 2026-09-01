@@ -4,8 +4,10 @@ import { expect, test, type APIRequestContext, type Page } from '@playwright/tes
  * Journal pagination (B3 — FR-017): the reader can walk the whole history,
  * not just the 50 newest entries.
  *
- * The first case runs against the SC-008 performance fixture, so the stack
- * must carry it:
+ * The first case runs against the SC-008 performance fixture and asserts the
+ * entry count after every click, so the fixture must be freshly seeded — the
+ * seeder replaces that campaign's entries, and `check-journal-performance.sh`
+ * runs it too:
  *
  *     docker compose exec php bin/console app:seed:large-journal \
  *       --email=perf@example.com --password=perf-player-password --entries=500
