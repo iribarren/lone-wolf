@@ -49,14 +49,25 @@ Work is specified in `specs/<feature-folder>/` (`spec.md` → `plan.md` →
 5. API matches the feature's contract in `specs/<feature>/contracts/`
    (`scripts/check-contract.sh`)
 6. Documentation updated in the same change set (Constitution VI)
+7. `specs/*/tasks.md` intact (`scripts/check-task-integrity.sh`)
 
-**CI enforces all six.** `.github/workflows/ci.yml` runs them on every pull
+**CI enforces all seven.** `.github/workflows/ci.yml` runs them on every pull
 request and on every push to `master`, each gate as its own named step, none
 of them `continue-on-error`. It boots the stack from this repository's
 `docker-compose.yml` and runs the same commands the `Makefile` runs locally,
 plus the frontend checks (`npm run typecheck`/`lint`/`test`) and the Playwright
 quickstart happy path. Run `make lint && make test` before pushing to get the
 same answer sooner.
+
+Gate 7 keeps the task ledger usable as evidence. It rejects a task id that is
+not `T000`-shaped, the same id issued twice, and — the one that matters — a
+task marked `[x]` citing a file that is not on disk. All three have happened:
+`211c3e1` renamed `T056`-`T063` to `X056`-`X063` while flipping them complete,
+hiding a whole user story from the id greps this document's commit rule
+depends on, and deleted the feature file `T063` claimed. The script needs
+nothing but bash, so run it as often as you like. Intentional exceptions live
+in its header with a rationale each; add one only when an artifact was
+superseded by a later task, never to quiet a task that was not delivered.
 
 Gate 6 is checked by path: a PR touching application code must also touch a
 document. That proves the question was asked, not that the answer was any

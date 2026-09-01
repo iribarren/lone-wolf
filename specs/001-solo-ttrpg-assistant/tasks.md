@@ -14,6 +14,22 @@
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2)
 - Exact file paths included in every task
 
+## Task-id gaps (do not re-audit)
+
+Ids run T001-T102 but only 89 tasks exist. Thirteen numbers were never issued — a
+generation artifact present since the initial `tasks.md`, not lost or deleted work:
+
+> T008, T009, T038, T042, T055, T058, T064, T067, T074, T077, T085, T088, T095
+
+So task completeness cannot be checked by walking the id sequence. Check it with
+`scripts/check-task-integrity.sh`, which verifies id shape, id uniqueness, and that every
+completed task's cited files exist on disk.
+
+Ids T056-T063 briefly appeared as `X056`-`X063`: commit `211c3e1` renamed them while
+flipping them to `[X]` in the same diff, hiding user story US3 from every id-based grep.
+The same commit deleted `backend/features/oracles/author_oracle_visibility.feature`, the
+deliverable T063 claimed. Both are repaired; the commits stay in the log as evidence.
+
 ## Path Conventions
 
 Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure}`, `backend/tests/{Unit,Integration}`, `backend/features/` (Behat), `frontend/src/{app,components,lib}`.
@@ -47,7 +63,7 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 - [x] T010 Install Symfony 7.4 LTS skeleton into `backend/` (composer.json, bin/console, public/index.php, .env) wired to compose PostgreSQL
 - [x] T011 [P] Create hexagonal bounded-context skeletons `backend/src/{Shared,Rulesets,Campaigns,Journal,Oracles,Characters,Dice,Identity}/{Domain,Application,Infrastructure}` each with a `README.md` stating its ubiquitous language and inward-only dependency rule
 - [x] T012 Configure PHPStan level-max + phpstan/phpstan-strict-rules (enforces declare(strict_types=1), full typing) in `backend/phpstan.neon`; add `composer analyze` script
-- [x] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
+- [x] T013 Configure PHPUnit 11 multi-suite setup (`backend/phpunit.dist.xml`): `unit` suite boots NO kernel, `integration` suite boots kernel; create `backend/tests/Unit/`, `backend/tests/Integration/`; add `composer test:unit`, `test:integration`
 - [x] T014 [P] Install Behat + FriendsOfBehat/SymfonyExtension with API HTTP-client contexts; `backend/behat.yml`; empty smoke feature `backend/features/smoke.feature`
 - [x] T015 [P] Install deptrac with layer rules per context (Domain ← Application ← Infrastructure; Domain may import nothing outward) in `backend/deptrac.yaml`; wire into `composer lint` chain
 - [x] T016 Implement shared-kernel ports + prod adapters `ClockInterface`/`SystemClock`, `RandomSourceInterface`/`ProductionRandomSource` in `backend/src/Shared/Domain/` and `backend/src/Shared/Infrastructure/Time|Rng/` (Constitution IV: injectable time/randomness)
@@ -137,15 +153,15 @@ Web app (per plan.md): `backend/src/<Context>/{Domain,Application,Infrastructure
 
 ### Tests for User Story 3 (write FIRST, ensure they FAIL)
 
-- [X] X056 [P] [US3] Unit tests for `OracleScope` strategy (GlobalScope/SystemScope) visibility predicate matrix + `Oracle` aggregate weight>0 invariants (FR-007) in `backend/tests/Unit/Oracles/OracleScopeTest.php` + `backend/tests/Unit/Oracles/OracleAggregateTest.php`
-- [X] X057 [P] [US3] Integration test: partial unique index enforces system-scope integrity and scoped listing query returns global ∪ own-system rows (FR-009 predicate) in `backend/tests/Integration/Oracles/PersistenceScopingTest.php`
+- [X] T056 [P] [US3] Unit tests for `OracleScope` strategy (GlobalScope/SystemScope) visibility predicate matrix + `Oracle` aggregate weight>0 invariants (FR-007) in `backend/tests/Unit/Oracles/OracleScopeTest.php` + `backend/tests/Unit/Oracles/OracleAggregateTest.php`
+- [X] T057 [P] [US3] Integration test: partial unique index enforces system-scope integrity and scoped listing query returns global ∪ own-system rows (FR-009 predicate) in `backend/tests/Integration/Oracles/PersistenceScopingTest.php`
 
 ### Implementation for User Story 3
 
-- [X] X059 [US3] Implement Oracles Domain: `OracleScope` VO (`GlobalScope` | `SystemScope(GameSystemId)`), `OracleEntry` (text, weight int>0), `Oracle` aggregate with entry management + `isAvailableTo(GameSystemId)` in `backend/src/Oracles/Domain/`
-- [X] X060 [US3] Define `OracleRepositoryInterface` port + handlers `CreateOracle`, `UpdateOracle` (reweight/edit entries), `ListOraclesVisibleToSystem` in `backend/src/Oracles/Application/`
-- [X] X061 [US3] Doctrine mapping: `scope_type` discriminator column + `scope_system_id` with partial unique index `WHERE scope_type='system'`; migration in `backend/migrations/`
-- [X] X062 [US3] EasyAdmin Oracle CRUD with scoping picker and weighted-entries grid in `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`
+- [X] T059 [US3] Implement Oracles Domain: `OracleScope` VO (`GlobalScope` | `SystemScope(GameSystemId)`), `OracleEntry` (text, weight int>0), `Oracle` aggregate with entry management + `isAvailableTo(GameSystemId)` in `backend/src/Oracles/Domain/`
+- [X] T060 [US3] Define `OracleRepositoryInterface` port + handlers `CreateOracle`, `UpdateOracle` (reweight/edit entries), `ListOraclesVisibleToSystem` in `backend/src/Oracles/Application/`
+- [X] T061 [US3] Doctrine mapping: `scope_type` discriminator column + `scope_system_id` with partial unique index `WHERE scope_type='system'`; migration in `backend/migrations/`
+- [X] T062 [US3] EasyAdmin Oracle CRUD with scoping picker and weighted-entries grid in `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`
 - [X] T063 [US3] Behat authoring feature: entries authored through the backoffice, a global table visible to every system, a scoped table only to its own, and a system refused a second scoped table (US3 scenarios 1–3 + FR-008) in `backend/features/oracles/authoring.feature`
 
 **Checkpoint**: US1–US3 deliver the complete admin authoring surface.

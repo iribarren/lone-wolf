@@ -11,7 +11,7 @@ contract.
 - `.specify/memory/constitution.md` — six principles that **supersede every other convention**
   here, including this file. Reviewers cite the violated principle number when rejecting work.
 - `AGENTS.md` — the delivery rules: task = commit, checkpoint = PR, tests fail before their
-  implementation is committed, and the six merge gates CI enforces on every PR.
+  implementation is committed, and the seven merge gates CI enforces on every PR.
 
 Work is specified in `specs/<feature>/` (`spec.md` → `plan.md` → `tasks.md`).
 

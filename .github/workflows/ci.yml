@@ -4,17 +4,19 @@
 # stack is booted with the repository's own docker-compose.yml so CI and local
 # development cannot drift apart. No step is allowed continue-on-error: a gate
 # that cannot fail the build is not a gate.
+#
+# Markdown is deliberately NOT in paths-ignore: specs/*/tasks.md is a merge
+# gate's subject (gate 7), and a gate that cannot run on the file it gates
+# is not a gate either. Only docs/** — prose with no gate over it — is skipped.
 name: CI
 
 on:
   push:
     branches: [master]
     paths-ignore:
-      - '**.md'
       - 'docs/**'
   pull_request:
     paths-ignore:
-      - '**.md'
       - 'docs/**'
 
 permissions:
@@ -222,6 +224,17 @@ jobs:
       - name: Dump service logs on failure
         if: failure()
         run: docker compose logs --tail=200
+
+  task-ledger:
+    name: Gate 7 · Task-ledger integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Gate 7 · specs/*/tasks.md ids, uniqueness and cited files
+        run: scripts/check-task-integrity.sh
 
   documentation:
     name: Gate 6 · Documentation parity
