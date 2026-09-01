@@ -101,7 +101,7 @@ describe('OracleDrawer', () => {
         expect(onSave).toHaveBeenCalledWith('Cold rain sets in.', 'An omen of the crossing ahead.');
     });
 
-    it('stays collapsed while closed', () => {
+    it('renders nothing while closed', () => {
         render(
             <OracleDrawer
                 open={false}
@@ -112,7 +112,9 @@ describe('OracleDrawer', () => {
             />,
         );
 
-        expect(screen.getByTestId('oracles-drawer-closed')).toBeInTheDocument();
+        expect(screen.queryByTestId('oracles-drawer-closed')).not.toBeInTheDocument();
+        expect(screen.queryByText(/closed\./i)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('oracles-drawer')).not.toBeInTheDocument();
         expect(screen.queryByTestId('oracles-list')).not.toBeInTheDocument();
     });
 });

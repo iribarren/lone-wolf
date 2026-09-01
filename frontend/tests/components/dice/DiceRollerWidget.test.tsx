@@ -151,7 +151,7 @@ describe('DiceRollerWidget', () => {
         expect(screen.queryByTestId('dice-chip')).not.toBeInTheDocument();
     });
 
-    it('stays collapsed while closed', () => {
+    it('renders nothing while closed', () => {
         render(
             <DiceRollerWidget
                 open={false}
@@ -161,7 +161,9 @@ describe('DiceRollerWidget', () => {
             />,
         );
 
-        expect(screen.getByTestId('dice-widget-closed')).toBeInTheDocument();
+        expect(screen.queryByTestId('dice-widget-closed')).not.toBeInTheDocument();
+        expect(screen.queryByText(/closed\./i)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('dice-widget')).not.toBeInTheDocument();
         expect(screen.queryByTestId('dice-result')).not.toBeInTheDocument();
     });
 });
