@@ -54,8 +54,6 @@ playwright/.cache/
 
 # === AI tooling: shared config stays, local state goes ===
 .codegraph/
-.opencode/state/
-.opencode/.bin/
 .claude/settings.local.json
 
 # === deptrac cache ===

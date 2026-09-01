@@ -85,3 +85,24 @@ Constitution principle number when rejecting work.
 Remote/repository setup is handled manually by the maintainer before the first
 implementation PR; agents must never create or push remotes unless explicitly
 asked.
+
+## Agent integration
+
+**Claude Code is the canonical — and only — agent integration.** Spec Kit records this in
+`.specify/init-options.json` (`"ai": "claude"`) and `.specify/integration.json`
+(`installed_integrations: ["claude"]`, invoke separator `-`).
+
+- The spec commands live in `.claude/skills/speckit-*/` — ten skills, invoked as
+  `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, plus `analyze`,
+  `checklist`, `clarify`, `constitution`, `converge` and `taskstoissues`. They are tracked, so
+  the command set that actually runs is the one reviewers can read.
+- `.specify/integrations/*.manifest.json` are SHA-256 integrity records of the files Spec Kit
+  installed. A file that drifts from its recorded hash is either reverted or re-recorded with a
+  one-line reason — an unexplained mismatch is a review failure.
+
+**Changing the integration means re-running Spec Kit's init, never hand-editing.** Adding or
+switching a front-end regenerates the command set and its manifest together; editing the
+installed commands or the manifest by hand desynchronises them silently. The opencode
+integration was removed this way (it had been superseded by claude but left tracked, giving two
+command sets that would drift independently); if it or another agent is ever added back, install
+it through Spec Kit and note here that both sets are maintained deliberately.
