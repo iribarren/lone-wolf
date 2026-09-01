@@ -8,6 +8,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -50,10 +52,24 @@ final class OracleEntriesCollectionType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // CollectionType's ResizeFormListener reads PRE_SET_DATA and
+        // PRE_SUBMIT, both of which carry the data before any model
+        // transformer has run. A payload that is not a list of rows — a
+        // hand-edited jsonb column, a scalar — therefore has to be coerced
+        // here, or it reaches that listener raw and throws
+        // UnexpectedTypeException instead of rendering an empty editor.
+        // The priority keeps this ahead of the resize listener's own 0.
+        $coerce = static function (FormEvent $event): void {
+            $event->setData(self::rowsOf($event->getData()));
+        };
+
+        foreach ([FormEvents::PRE_SET_DATA, FormEvents::PRE_SUBMIT] as $eventName) {
+            $builder->addEventListener($eventName, $coerce, 1);
+        }
+
         // Model-level normalization keeps the jsonb contract exact in both
-        // directions: a stored payload — or a malformed one — is coerced into
-        // a plain list of rows, and submissions are re-indexed to a plain list
-        // so deleting a row leaves no gap in the stored array.
+        // directions, and re-indexes submissions to a plain list so deleting
+        // a row leaves no gap in the stored array.
         $builder->addModelTransformer(new CallbackTransformer(
             static fn ($data): array => self::rowsOf($data),
             static fn ($data): array => self::rowsOf($data),
