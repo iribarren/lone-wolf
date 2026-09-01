@@ -65,11 +65,11 @@ Architecture details: [docs/architecture.md](docs/architecture.md).
 ## Quick start
 
 ```bash
-cp .env.dist .env            # adjust local secrets; never commit .env
+cp .env.dist .env            # placeholder secrets; adjust them, never commit .env
 docker compose up --build    # boots php-fpm + nginx, postgres, next dev
 docker compose exec php composer install
 docker compose exec php bin/console doctrine:migrations:migrate -n
-docker compose exec php bin/console app:create-admin   # backoffice account (ADMIN_EMAIL / ADMIN_PASSWORD)
+docker compose exec php bin/console app:create-admin   # backoffice account from ADMIN_EMAIL / ADMIN_PASSWORD
 docker compose exec php bin/console app:seed:demo      # optional: quickstart demo systems + oracles
 ```
 
