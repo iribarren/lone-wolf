@@ -236,6 +236,17 @@ jobs:
       - name: Gate 7 · specs/*/tasks.md ids, uniqueness and cited files
         run: scripts/check-task-integrity.sh
 
+  traceability:
+    name: Gate 8 · Requirements traceability
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Gate 8 · every ratified FR traced, every citation on disk
+        run: scripts/check-traceability.sh
+
   documentation:
     name: Gate 6 · Documentation parity
     if: github.event_name == 'pull_request'

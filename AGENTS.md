@@ -50,8 +50,9 @@ Work is specified in `specs/<feature-folder>/` (`spec.md` → `plan.md` →
    (`scripts/check-contract.sh`)
 6. Documentation updated in the same change set (Constitution VI)
 7. `specs/*/tasks.md` intact (`scripts/check-task-integrity.sh`)
+8. Every ratified requirement traced (`scripts/check-traceability.sh`)
 
-**CI enforces all seven.** `.github/workflows/ci.yml` runs them on every pull
+**CI enforces all eight.** `.github/workflows/ci.yml` runs them on every pull
 request and on every push to `master`, each gate as its own named step, none
 of them `continue-on-error`. It boots the stack from this repository's
 `docker-compose.yml` and runs the same commands the `Makefile` runs locally,
@@ -68,6 +69,18 @@ depends on, and deleted the feature file `T063` claimed. The script needs
 nothing but bash, so run it as often as you like. Intentional exceptions live
 in its header with a rationale each; add one only when an artifact was
 superseded by a later task, never to quiet a task that was not delivered.
+
+Gate 8 keeps the requirements honest. `specs/<feature>/traceability.md` carries
+one row per functional requirement — story, citing task, proving test,
+implementing file, status — and the gate rejects a ratified requirement with no
+row, a `NOT-IMPLEMENTED` row with no open task behind it, and a cited test or
+implementation path that is not on disk. It exists because only 19 of this
+feature's 31 requirements were cited by any task, and five of the seven the
+compliance audit found undelivered sat in the untraced set: untraced and
+undelivered correlate almost exactly. Like gate 7 it needs nothing but bash.
+Statuses are `COVERED`, `NO-TEST`, `NO-TASK` and `NOT-IMPLEMENTED`; record the
+one you verified, never the one you would prefer — a matrix that lies is worse
+than no matrix.
 
 Gate 6 is checked by path: a PR touching application code must also touch a
 document. That proves the question was asked, not that the answer was any
