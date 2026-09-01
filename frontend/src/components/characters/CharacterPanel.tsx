@@ -33,6 +33,8 @@ export interface CharacterPanelProps {
     characters: CharacterPanelCharacter[];
     loading?: boolean;
     violations?: SheetViolation[];
+    /** Opens the sheet form on this character; the panel stays presentational. */
+    onEdit?: (character: CharacterPanelCharacter) => void;
 }
 
 function formatValue(value: unknown): string {
@@ -43,7 +45,7 @@ function formatValue(value: unknown): string {
     return String(value);
 }
 
-export default function CharacterPanel({ characters, loading = false, violations = [] }: CharacterPanelProps) {
+export default function CharacterPanel({ characters, loading = false, violations = [], onEdit }: CharacterPanelProps) {
     if (loading) {
         return (
             <section aria-busy="true" data-testid="characters-loading">
@@ -82,7 +84,12 @@ export default function CharacterPanel({ characters, loading = false, violations
                                 <span role="status" title={character.driftIssues.join('; ')} data-testid={`drift-badge-${character.name}`}>
                                     ⚑ flagged for review
                                 </span>
-                            ) : null}
+                            ) : null}{' '}
+                            {onEdit && (
+                                <button type="button" onClick={() => onEdit(character)}>
+                                    Edit {character.name}
+                                </button>
+                            )}
                         </header>
 
                         <dl>
