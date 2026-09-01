@@ -10,10 +10,12 @@ use App\Oracles\Domain\Oracle;
 use App\Oracles\Domain\OracleEntry;
 use App\Oracles\Domain\SystemScope;
 use App\Rulesets\Application\Port\RulesetRepositoryInterface;
+use App\Rulesets\Domain\FieldDefinition;
 use App\Rulesets\Domain\FlowDefinition;
 use App\Rulesets\Domain\FlowStage;
 use App\Rulesets\Domain\FlowTransition;
 use App\Rulesets\Domain\GameSystem;
+use App\Rulesets\Domain\SheetStructure;
 use App\Shared\Domain\Identifier\GameSystemId;
 use App\Shared\Domain\Identifier\OracleId;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,9 +34,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * so the sandbox ships as Free Play → Reflection with Reflection terminal —
  * the same dead-end-guidance path, expressed within the invariant.
  *
+ * Sheet note: two of the three systems ship a character-sheet structure of a
+ * deliberately different shape, so the character sheet renders from metadata
+ * against something real; Freeform Sandbox ships none, which is the case the
+ * player app must explain rather than offer an empty form.
+ *
  * Fixture composition reaches into Rulesets and Oracles through their
  * application-layer ports only (see deptrac.yaml fixture edges). The command
- * is idempotent: existing systems/oracle titles are reported and skipped.
+ * is idempotent: existing systems/oracle titles are reported and skipped, and
+ * a sheet structure is only ever added to a system that has none — an
+ * admin's authoring is never overwritten.
  */
 #[AsCommand(
     name: 'app:seed:demo',
@@ -70,19 +79,30 @@ final class SeedDemoContentCommand extends Command
         /** @var array<string, GameSystemId> $ids */
         $ids = [];
 
-        foreach ($this->demoSystems() as $name => [$description, $flow]) {
+        foreach ($this->demoSystems() as $name => [$description, $flow, $sheet]) {
             $existing = $this->rulesets->findByName($name);
 
             if ($existing instanceof GameSystem) {
                 $io->text(sprintf('system  skip   "%s" already exists', $name));
                 $ids[$name] = $existing->id();
+                $this->backfillSheet($io, $existing, $sheet);
 
                 continue;
             }
 
             $system = GameSystem::start(GameSystemId::generate(), $name, $description, $flow);
+
+            if ($sheet !== null) {
+                $system = $system->withSheetStructure(SheetStructure::create($sheet));
+            }
+
             $this->rulesets->save($system);
-            $io->text(sprintf('system  create "%s" (%d stages)', $name, count($flow->stages())));
+            $io->text(sprintf(
+                'system  create "%s" (%d stages, %d sheet fields)',
+                $name,
+                count($flow->stages()),
+                count($sheet ?? []),
+            ));
             $ids[$name] = $system->id();
         }
 
@@ -90,7 +110,24 @@ final class SeedDemoContentCommand extends Command
     }
 
     /**
-     * @return array<string, array{string, FlowDefinition}>
+     * Gives a pre-existing demo system the sheet it was seeded without —
+     * older stacks were seeded before the shapes existed. A system that
+     * already carries a structure is left exactly as its admin authored it.
+     *
+     * @param list<FieldDefinition>|null $sheet
+     */
+    private function backfillSheet(SymfonyStyle $io, GameSystem $system, ?array $sheet): void
+    {
+        if ($sheet === null || $system->sheetStructure() instanceof SheetStructure) {
+            return;
+        }
+
+        $this->rulesets->save($system->withSheetStructure(SheetStructure::create($sheet)));
+        $io->text(sprintf('sheet   create "%s" (%d fields)', $system->name(), count($sheet)));
+    }
+
+    /**
+     * @return array<string, array{string, FlowDefinition, list<FieldDefinition>|null}>
      */
     private function demoSystems(): array
     {
@@ -110,6 +147,7 @@ final class SeedDemoContentCommand extends Command
                         new FlowTransition('Sequel', 'Setup'),
                     ],
                 ),
+                [FieldDefinition::number('hp', 'Hit points', requiredForPc: true, requiredForNpc: false)],
             ],
             'Act Ladder' => [
                 'Three-rung escalation: climb from the first act through beats into resolution.',
@@ -125,6 +163,10 @@ final class SeedDemoContentCommand extends Command
                         new FlowTransition('Beat', 'Act II'),
                     ],
                 ),
+                [
+                    FieldDefinition::number('willpower', 'Willpower', requiredForPc: true, requiredForNpc: false),
+                    FieldDefinition::text('discipline', 'Discipline', requiredForPc: true, requiredForNpc: true),
+                ],
             ],
             'Freeform Sandbox' => [
                 'No prescribed loop: wander freely until you choose to wrap the session.',
@@ -136,6 +178,8 @@ final class SeedDemoContentCommand extends Command
                     'Free Play',
                     [new FlowTransition('Free Play', 'Reflection')],
                 ),
+                // Deliberately sheetless: the app must explain the absence.
+                null,
             ],
         ];
     }
