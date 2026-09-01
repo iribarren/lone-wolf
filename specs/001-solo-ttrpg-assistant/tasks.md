@@ -310,6 +310,27 @@ works" came apart.
 
 ---
 
+## Phase 11: Convergence — Contract Payload Conformance
+
+**Purpose**: Bring the payload gate and the drifts it found into the ledger they were built outside of
+
+The audit's §2.2.6 recommendation was worked from `docs/prompts/15-contract-gate-payloads.md`
+rather than from a task, so it is converged here. `scripts/check-contract.sh` compared only what
+the API *declared*: gate A diffed paths and methods, gate B compared schema property sets, and
+neither ever fetched a response body — which is why audit A5 shipped a `roll` IRI string where the
+contract requires an embedded object while the gate printed *Contract OK*. Gate C closes that, and
+on its first run it found three further drifts (`docs/audit/02-specs.md` §2.2.6); T117–T119 are
+those, each fixed rather than exempted.
+
+### Delivered work converged from commits (US2, US5)
+
+- [x] T116 Gate C of the contract gate: register a fixture player, play a campaign through the whole loop against the live stack and validate every response body against the contract's schema for that operation — status code, media type, required properties, JSON types, enums, and a `$ref` to an object returned as an IRI string — plus gate B anchored on schema name and the three RFC 7807 schemas moved out of the skip list into live 422 assertions, in `scripts/check-contract.sh`, wired as merge gate 5 in `.github/workflows/ci.yml` and `AGENTS.md` (FR-016, FR-023, FR-027, FR-029, Constitution V; `docs/audit/02-specs.md` §2.2.6; `docs/prompts/15-contract-gate-payloads.md`) — commits `4961753`, `ba4d376`, `b5e9a02`
+- [x] T117 [US2] `SuggestedAction` required a `label` the schema never defined, so no response could satisfy it — gate B could not see it because property-set coverage ignores `required`. Corrected to require `prompt`, the property `StageActionResource::$prompt` always emits, in `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml` (FR-014, FR-016; `docs/audit/02-specs.md` §2.2.6) — commit `7619e0d`
+- [x] T118 [US2] `POST /campaigns/{campaignId}/advance` answered `201` where the contract declared `200`; gate A compares paths and methods, never status codes. Contract moved to `201` to match the shipped behaviour, in `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml` (FR-016; `docs/audit/02-specs.md` §2.2.6) — commit `3962d51`
+- [x] T119 [US5] A character whose sheet requires nothing of it answered `"attributes": []`, a JSON array where the contract types an object. Failing test first: "An NPC with no attributes still answers an attributes object" in `backend/features/characters/sheets.feature` with the raw-body step in `backend/tests/Acceptance/Context/CharactersContext.php`; fixed by wrapping the map in an `\ArrayObject` at the single construction point in `backend/src/Characters/Infrastructure/Api/Provider/CharactersProvider.php` and opting `backend/src/Characters/Infrastructure/Api/CharacterResource.php` into `PRESERVE_EMPTY_OBJECTS`, regenerating `frontend/src/lib/api/schema.gen.ts` (FR-021, FR-022; `docs/audit/02-specs.md` §2.2.6) — commits `12532e5`, `2d0dc0d`
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
