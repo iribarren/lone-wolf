@@ -13,6 +13,7 @@ use App\Characters\Infrastructure\Api\Input\SaveCharacterInput;
 use App\Characters\Infrastructure\Api\Processor\CreateCharacterProcessor;
 use App\Characters\Infrastructure\Api\Processor\UpdateCharacterProcessor;
 use App\Characters\Infrastructure\Api\Provider\CharactersProvider;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 
 /**
  * US5 player-facing character surface (contract paths /campaigns/{id}/characters,
@@ -23,6 +24,10 @@ use App\Characters\Infrastructure\Api\Provider\CharactersProvider;
 #[ApiResource(
     shortName: 'Character',
     formats: ['json' => 'application/json'],
+    // Keeps an empty `attributes` map an object: the serializer flattens the
+    // \ArrayObject to its contents, and without this an empty one would come
+    // back as `[]` (see the property docblock below).
+    normalizationContext: [AbstractObjectNormalizer::PRESERVE_EMPTY_OBJECTS => true],
     operations: [
         new Get(
             uriTemplate: '/campaigns/{campaignId}/characters',
@@ -58,7 +63,13 @@ use App\Characters\Infrastructure\Api\Provider\CharactersProvider;
 final readonly class CharacterResource
 {
     /**
-     * @param array<string, mixed> $attributes
+     * `attributes` is an \ArrayObject rather than an array so that a character
+     * whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+     * empty array as `[]`, which contradicts the contract's
+     * `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+     * is the single place that wraps it.
+     *
+     * @param \ArrayObject<string, mixed> $attributes
      * @param list<string>         $driftIssues
      * @param list<SheetFieldEntryResource>|null $structureFields
      */
@@ -67,7 +78,8 @@ final readonly class CharacterResource
         public string $id = '',
         public string $kind = 'pc',
         public string $name = '',
-        public array $attributes = [],
+        #[ApiProperty(schema: ['type' => 'object', 'additionalProperties' => true])]
+        public \ArrayObject $attributes = new \ArrayObject(),
         public int $validatedStructureVersion = 0,
         public string $reviewStatus = 'clean',
         public array $driftIssues = [],
