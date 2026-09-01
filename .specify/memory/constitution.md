@@ -1,19 +1,47 @@
 <!--
 === SYNC IMPACT REPORT ===
-Version change: (unratified scaffold) → 1.0.0
-Modified principles: N/A (initial ratification)
-Added sections:
-  - Core Principles I–VI:
-      I. Hexagonal Architecture (Ports and Adapters)
-      II. Domain-Driven Design Bounded Contexts
-      III. Strict Typing and SOLID Code Quality
-      IV. Testing Discipline (NON-NEGOTIABLE)
-      V. Contract-First Decoupled API
-      VI. Documentation Parity
-  - Technology Stack and Platform Constraints
-  - Development Workflow and Quality Gates
-  - Governance
-Removed sections: None (template placeholder comments replaced)
+Version change: 1.0.0 → 1.1.0 (MINOR — materially expanded guidance in Principle V)
+Modified principles:
+  - V. Contract-First Decoupled API — scoped the decoupling clause to the
+    player-facing frontend, and added an explicit carve-out for the EasyAdmin
+    backoffice as a server-rendered administrative surface internal to the
+    backend, permitted to authenticate by browser session under its own
+    contract (`specs/<feature>/contracts/admin-backoffice.md`).
+Added sections: None
+Removed sections: None
+Rationale: The `admin` firewall introduced in `32e18b7` authenticates the
+  backoffice with a `form_login` browser session and renders its pages with
+  Twig. Principle V as ratified in 1.0.0 prohibited "session sharing" and
+  "server-side templating between frontend and backend" without qualification,
+  so the document read as forbidding behaviour this repository has always
+  intended and shipped. Those prohibitions exist to prevent hidden coupling
+  between two independently deployed stacks. The backoffice is not a second
+  stack: it runs inside the backend process, is never consumed by the Next.js
+  player app, and is governed by its own contract. Leaving the mismatch
+  unamended taught every future reader that the constitution is negotiable in
+  practice, which is corrosive in a repository whose quality story rests on six
+  non-negotiable principles. The behaviour is correct; the document was wrong.
+Principle diff (V):
+  - "The React/Next.js frontend and the Symfony backend MUST remain entirely
+    decoupled" → "The React/Next.js **player** frontend and the Symfony
+    backend MUST remain entirely decoupled".
+  - "Direct database access, session sharing, or server-side templating between
+    frontend and backend is prohibited." → the same three prohibitions, stated
+    explicitly as governing the player frontend ↔ backend boundary.
+  - ADDED: a paragraph exempting the EasyAdmin backoffice, limited to the
+    backoffice and explicitly not extendable to any player-facing surface.
+  - UNCHANGED: the RESTful + OpenAPI/Swagger requirement, the versioned
+    migration path for breaking contract changes, and every prohibition as it
+    applies to the player frontend.
+Migration plan: NONE REQUIRED. This amendment ratifies the status quo. No code,
+  configuration or security setting changes; no existing behaviour becomes
+  non-compliant and none needs to be brought into compliance. Dependent
+  artifacts updated in the same change set (Principle VI): README.md,
+  docs/architecture.md, specs/001-solo-ttrpg-assistant/plan.md (Constitution
+  Check gate row V), specs/001-solo-ttrpg-assistant/research.md (R3), and
+  docs/audit/02-specs.md 2.2.7 (finding marked resolved).
+Ratification: Lands before any further work depends on it. Supersedes no other
+  principle. Ratified date unchanged (2026-08-21); Last Amended 2026-09-01.
 Follow-up TODOs: None
 === END SYNC IMPACT REPORT ===
 -->
@@ -84,15 +112,30 @@ executable specifications.
 
 ### V. Contract-First Decoupled API
 
-The React/Next.js frontend and the Symfony backend MUST remain entirely
-decoupled, communicating exclusively through the defined API contract. The API
-MUST be RESTful (implemented with API Platform or equivalent) and MUST be
-documented via OpenAPI/Swagger. Direct database access, session sharing, or
-server-side templating between frontend and backend is prohibited. Breaking
-contract changes MUST introduce an explicit versioned migration path.
+The React/Next.js **player** frontend and the Symfony backend MUST remain
+entirely decoupled, communicating exclusively through the defined API contract.
+The API MUST be RESTful (implemented with API Platform or equivalent) and MUST
+be documented via OpenAPI/Swagger. Between the player frontend and the backend,
+direct database access, session sharing, and server-side templating are
+prohibited. Breaking contract changes MUST introduce an explicit versioned
+migration path.
+
+**Backoffice exemption**: the EasyAdmin backoffice is a server-rendered
+administrative surface internal to the backend, not a second stack. It MAY be
+rendered server-side with Twig and MAY authenticate by browser session, and it
+is governed by its own contract in
+`specs/<feature>/contracts/admin-backoffice.md`. This exemption is limited to
+the backoffice: no player-facing surface may rely on it, and the player
+frontend MUST NOT consume, share a session with, or otherwise depend on the
+backoffice.
 
 *Rationale*: A stable, machine-readable contract lets both stacks evolve and
 deploy independently and serves as the single source of truth for integration.
+The prohibitions exist to prevent hidden coupling between two independently
+deployed stacks; an administrative surface that ships inside the backend, runs
+in its process, and is never consumed by the player frontend introduces no such
+coupling, so holding it to a rule written for a stack boundary it does not
+cross would be cargo cult rather than governance.
 
 ### VI. Documentation Parity
 
@@ -155,4 +198,4 @@ in review.
 - Runtime development guidance lives outside this document; this file holds
   only stable, ratified rules.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-21 | **Last Amended**: 2026-08-21
+**Version**: 1.1.0 | **Ratified**: 2026-08-21 | **Last Amended**: 2026-09-01

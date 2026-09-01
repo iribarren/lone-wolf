@@ -138,7 +138,11 @@ and schemas against the canonical contract and fails loudly.
 - JWT bearer auth (`lexik/jwtAuthenticationBundle`): one-hour tokens with a
   60 s clock-skew allowance (`token_ttl`/`clock_skew`, pinned in config);
   `/api` is stateless JWT, registration always yields `ROLE_PLAYER`.
-- Backoffice: the `admin` firewall is a browser session — `/admin/login`
+- Backoffice: the `admin` firewall is a browser session — permitted by the
+  Principle V backoffice exemption (Constitution 1.1.0), which scopes the
+  no-session-sharing rule to the player frontend ↔ backend boundary and
+  ratifies the backoffice as a server-rendered surface internal to the
+  backend. `/admin/login`
   renders the EasyAdmin sign-in form (CSRF-protected), successful logins
   land on `/admin`, and `/admin/logout` invalidates the session. The
   backoffice account is provisioned by `app:create-admin`.

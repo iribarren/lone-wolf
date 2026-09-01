@@ -17,10 +17,14 @@ lone-wolf/
 ```
 
 The two stacks are **entirely decoupled** (Constitution Principle V): the
-frontend communicates with the backend **exclusively through the OpenAPI
+player frontend communicates with the backend **exclusively through the OpenAPI
 contract** (`specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`), consumed
 via a generated typed client — no direct database access, no session sharing,
-no server-side templating. Errors use RFC 7807 `application/problem+json`.
+no server-side templating across that boundary. Errors use RFC 7807
+`application/problem+json`. The EasyAdmin backoffice is the ratified exception
+(Principle V, backoffice exemption): a server-rendered admin surface internal
+to the backend, signed into by browser session and governed by
+`specs/001-solo-ttrpg-assistant/contracts/admin-backoffice.md`.
 
 ## What's implemented (US1–US6)
 

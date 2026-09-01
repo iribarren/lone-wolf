@@ -42,7 +42,8 @@ two roles — `ROLE_ADMIN` (backoffice) and `ROLE_PLAYER`. Player registration/l
 of the OpenAPI contract; EasyAdmin backoffice uses the same firewall.
 
 **Rationale**: Session cookies across a Next.js↔Symfony split violate the "no session sharing" clause of
-Principle V. JWT keeps the frontend stateless and the contract explicit. Spec assumptions only demand
+Principle V, which governs the player frontend ↔ backend boundary (the backoffice exemption ratified in
+Constitution 1.1.0 does not extend to any player-facing surface). JWT keeps the frontend stateless and the contract explicit. Spec assumptions only demand
 standard accounts/ownership privacy (FR-019, FR-030), which roles + per-user query scoping satisfy.
 
 **Alternatives considered**:

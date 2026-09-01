@@ -79,7 +79,7 @@ With no CI, nothing had to agree.
 | **B3** | The journal UI loads 50 entries and never sends `?cursor=` — older history is unreachable in the app |
 | **B4** | No sign-out, no password reset, no 401 handling; after the 1-hour JWT expiry the app still believes you are signed in |
 | **§2.2.6** | The contract gate never inspects response bodies, which is why A5 passes it cleanly |
-| **§2.2.7** | Principle V's "no session sharing" vs the `/admin/login` session firewall — defensible, but no amendment was filed |
+| **§2.2.7** | Principle V's "no session sharing" vs the `/admin/login` session firewall — defensible, but no amendment was filed *(resolved: Constitution 1.1.0)* |
 | **§3.1** | `"Dice roller closed."` / `"Oracles drawer closed."` test scaffolding renders to real users; both "floating" drawers are static elements in document flow and are not real dialogs |
 
 Twelve lower-severity items (C1–C12) are listed in [spec-compliance.md §6](spec-compliance.md).
