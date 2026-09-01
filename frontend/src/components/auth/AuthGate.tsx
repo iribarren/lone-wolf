@@ -35,6 +35,22 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     );
     const expired = useSyncExternalStore(subscribeToSession, sessionExpired, () => false);
 
+    // The gate outlives the sessions it guards, so when one ends the form has
+    // to go back to what a first-time visitor sees rather than keep the last
+    // player's mode and typed credentials. Adjusting state during render (the
+    // React-documented pattern) avoids showing that stale form for a frame.
+    const [wasAuthenticated, setWasAuthenticated] = useState(authenticated);
+    if (wasAuthenticated !== authenticated) {
+        setWasAuthenticated(authenticated);
+
+        if (!authenticated) {
+            setMode('login');
+            setEmail('');
+            setPassword('');
+            setError(null);
+        }
+    }
+
     if (authenticated) {
         return <>{children}</>;
     }
