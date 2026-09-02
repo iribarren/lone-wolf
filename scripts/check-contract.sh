@@ -28,14 +28,16 @@
 # Paths (Gate A):
 #   - Runtime path keys carry the `/api` server prefix; the contract is written
 #     relative to `servers: - url: /api`. The prefix is stripped before diffing.
-#   - API Platform leaks the json_login check route under a non-path key
-#     (`api_auth_login`); keys that do not start with "/" are ignored.
-#   - SKIP_PATHS = {/auth/login}: served by the lexik json_login firewall
-#     listener rather than an API Platform operation, so docs.json cannot carry
-#     it as a path at all. This is a standing gap in Gate A that cannot be
-#     closed without moving the endpoint. Gate C now narrows it: the login
-#     *response* is exercised and validated against the contract's AuthToken on
-#     every run, so only the declaration — not the payload — is unverified.
+#   - Non-path runtime keys (keys not starting with "/") are ignored. The Lexik
+#     bundle used to leak the json_login check route under one — the route NAME
+#     `api_auth_login` — but LoginPathFactory now documents that endpoint at its
+#     real path, so nothing is expected to land here any more.
+#   - /auth/login used to sit in SKIP_PATHS: it is served by the json_login
+#     firewall listener rather than an API Platform operation, so docs.json
+#     carried no path for it and Gate A could not check its declaration. That
+#     exception is gone (audit C2). LoginPathFactory brings the endpoint into
+#     the generated document without touching the firewall, so Gate A now
+#     verifies the declaration and Gate C the payload, like every other path.
 #
 # Schemas (Gate B):
 #   - RUNTIME_SCHEMA_NAMES maps each contract schema to the runtime schema that
@@ -130,11 +132,8 @@ except OSError as error:
 
 docs_url = f"{base_url}/api/docs.json"
 
-SKIP_PATHS = {
-    # json_login firewall endpoint — implemented outside API Platform metadata.
-    # Gate C still validates its response payload.
-    "/auth/login",
-}
+# No path-level exceptions: every contract path is expected in docs.json.
+SKIP_PATHS: set[str] = set()
 
 try:
     with urllib.request.urlopen(docs_url, timeout=15) as response:

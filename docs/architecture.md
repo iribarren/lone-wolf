@@ -122,6 +122,16 @@ Hand-written code may only call the generated client (`frontend/src/lib/api/`);
 raw URLs elsewhere are prohibited. The drift check script diffs runtime paths
 and schemas against the canonical contract and fails loudly.
 
+`POST /api/auth/login` is the one endpoint API Platform cannot see for itself:
+the Lexik `json_login` firewall listener answers it before routing resolves a
+controller, so there is no resource metadata to generate from, and the bundle
+documented it under the route *name* `api_auth_login` rather than a path.
+`Identity\Infrastructure\Api\OpenApi\LoginPathFactory` decorates the OpenAPI
+factory — from further out than Lexik's own decorator — and rewrites that entry
+to the real path with the contract's `AuthToken` response. It is documentation
+only: the firewall is untouched, and the endpoint now flows into
+`schema.gen.ts` and through `check-contract.sh` like every other path.
+
 ## Persistence highlights
 
 - PostgreSQL via Doctrine; `jsonb` columns carry flow definitions, sheet
