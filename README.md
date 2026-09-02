@@ -112,6 +112,12 @@ The contract-drift check requires the backend to be up (`docker compose up -d`)
 and `python3` with PyYAML; it exits non-zero when the served `/api/docs.json`
 diverges from `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml`.
 
+`npm run test:e2e` also compares twelve screenshot baselines and scans six
+screens with `axe-core`, in both colour schemes. The baselines are rendered
+inside a pinned Playwright container, so that part needs Docker and the stack
+seeded (`app:seed:demo`). Updating a baseline is a deliberate act with its own
+review rules — see [`docs/testing-visual-regression.md`](docs/testing-visual-regression.md).
+
 ## Documentation
 
 - Governance: `.specify/memory/constitution.md`
