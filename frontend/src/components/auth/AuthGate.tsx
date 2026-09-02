@@ -6,16 +6,18 @@
  */
 import { useState, useSyncExternalStore, type FormEvent, type ReactNode } from 'react';
 
-import { ApiError, apiPath } from '@/lib/api/client';
+import { ApiError, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 import { loadSession, saveSession, sessionExpired, subscribeToSession } from '@/lib/auth';
 
 const EXPIRED_MESSAGE = 'Your session expired. Sign in to continue.';
 
-interface AuthResponse {
-    token?: string;
-    roles?: string[];
-}
+/**
+ * Both auth endpoints answer with the contract's AuthToken. The login path is
+ * generated like every other one now that the OpenAPI document carries it
+ * (C2) — no `apiPath()` cast stands between this form and the contract.
+ */
+type AuthResponse = Partial<ApiSchemas['AuthToken']>;
 
 export default function AuthGate({ children }: { children: ReactNode }) {
     const api = useApiClient();
@@ -67,7 +69,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
         try {
             const payload =
                 mode === 'login'
-                    ? ((await api.json(apiPath('/api/auth/login'), {
+                    ? ((await api.json('/api/auth/login', {
                           method: 'POST',
                           body: { email, password },
                       })) as AuthResponse | null)

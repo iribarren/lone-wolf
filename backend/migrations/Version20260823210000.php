@@ -33,6 +33,9 @@ final class Version20260823210000 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        // Reverse order of up(), one DROP per CREATE (audit C5).
+        $this->addSql('DROP INDEX uniq_oracles_scope_system');
+        $this->addSql('DROP INDEX idx_oracles_scope');
         $this->addSql('DROP TABLE oracles');
     }
 }

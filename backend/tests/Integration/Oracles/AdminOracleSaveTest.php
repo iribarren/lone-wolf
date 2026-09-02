@@ -19,6 +19,28 @@ final class AdminOracleSaveTest extends WebTestCase
 {
     use SignsInAsAdmin;
 
+    /**
+     * C3: EasyAdmin titles a page from the bound entity class unless the CRUD
+     * sets an entity label, so the backoffice read "Create PersistenceOracle".
+     */
+    public function testOraclePagesAreTitledInTheDomainLanguage(): void
+    {
+        $client = $this->adminClient();
+        $oracle = $this->createOracle();
+
+        foreach ([
+            $this->route('admin_dashboard_oracle_new'),
+            $this->route('admin_dashboard_oracle_edit', ['entityId' => $oracle]),
+        ] as $url) {
+            $crawler = $client->request('GET', $url);
+            self::assertResponseIsSuccessful();
+
+            $heading = $crawler->filter('h1')->text();
+            self::assertStringNotContainsString('Persistence', $heading, $url);
+            self::assertStringContainsString('Oracle table', $heading, $url);
+        }
+    }
+
     public function testEditingTheTitlePersistsIt(): void
     {
         $client = $this->adminClient();

@@ -331,6 +331,37 @@ those, each fixed rather than exempted.
 
 ---
 
+## Phase 12: Convergence — Lower-Severity Cleanup Sweep
+
+**Purpose**: Bring the audit's eleven lower-severity fixes into the ledger they were worked outside of
+
+The "Lower severity" table of `docs/audit/spec-compliance.md` §6 was worked from
+`docs/prompts/16-cleanup-sweep.md` rather than from tasks, so it is converged here. Ten of the
+eleven items landed; C1 and C9 belong to prompts 08 and 11 and were left alone by design. Two
+items turned out to be larger than their one-line description and are recorded as such: C7's dead
+handler was wired in rather than deleted, and C2's untyped login was closed by documenting the
+firewall endpoint instead of moving it.
+
+### Delivered work converged from commits (US1, US2, US3, US5, Polish)
+
+- [x] T120 [US4/US6] C4 Closed dice and oracle panels rendered test scaffolding — "Dice roller closed." and "Oracles drawer closed." — to real users on the game master console; both return `null` now, in `frontend/src/components/dice/DiceRollerWidget.tsx` and `frontend/src/components/oracles/OracleDrawer.tsx`, with the two Vitest cases in `frontend/tests/components/dice/DiceRollerWidget.test.tsx` and `frontend/tests/components/oracles/OracleDrawer.test.tsx` flipped to assert the placeholder's absence (FR-026, FR-028; `docs/audit/spec-compliance.md` §6) — commit `161da02`
+- [x] T121 [US1/US3] C3 EasyAdmin titled its pages after the bound persistence class ("Create PersistenceOracle", "Edit PersistenceGameSystem"); singular/plural entity labels added in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`, `backend/src/Rulesets/Infrastructure/Admin/GameFlowCrudController.php` and `backend/src/Oracles/Infrastructure/Admin/OracleCrudController.php`, with heading assertions in `backend/tests/Integration/Rulesets/AdminGameFlowPagesTest.php` and `backend/tests/Integration/Oracles/AdminOracleSaveTest.php` (FR-001, FR-007, FR-030; `docs/audit/spec-compliance.md` §6) — commit `c3d64b7`
+- [x] T122 C8 `.env.dist` shipped `ADMIN_EMAIL`/`ADMIN_PASSWORD` commented out, so the README's `app:create-admin` step failed for every new contributor; uncommented with placeholders in `.env.dist` and reconciled with `README.md` and `docs/functional-guide.md` §3, whose note and troubleshooting row about the failure are gone (FR-030; `docs/audit/spec-compliance.md` §6) — commit `1f86d02`
+- [x] T123 C10 `docs/architecture.md` charted seven bounded contexts and omitted `Identity`, which owns users, roles, JWT issuance and the admin login; added in the same one-line-charter style (Constitution II, VI; `docs/audit/spec-compliance.md` §6) — commit `d264ebf`
+- [x] T124 [US5] C12 `PATCH /api/characters/{characterId}` is the only campaign-scoped write with no operation-level `CAMPAIGN_OWNER` expression, and its ownership path had no test. Covered in `backend/tests/Integration/Characters/ForeignCharacterUpdateTest.php`, which asserts the stored character is unchanged and not merely that the status is 404 — removing the `OwnedCampaignFetcher` call from `backend/src/Characters/Application/UpdateCharacterHandler.php` leaves the 404 intact while the foreign write lands (FR-019, FR-023; `docs/audit/spec-compliance.md` §6) — commit `7722998`
+- [x] T125 [US1] C7 `SetSystemStatusHandler` and `SetSystemStatusCommand` had no callers anywhere: availability was a raw `ChoiceField` write straight to the column. Wired through the Application layer per Constitution I rather than deleted, in `backend/src/Rulesets/Infrastructure/Admin/SystemCrudController.php`, covered by a form-driven toggle test in `backend/tests/Integration/Rulesets/AdminGameFlowPagesTest.php` (FR-001, FR-006; `docs/audit/spec-compliance.md` §6) — commit `a63e1a9`
+- [x] T126 C6 `users.roles` was the one document column still on Doctrine's plain `json` while every other goes through `JsonbType`; mapping corrected in `backend/src/Identity/Infrastructure/Persistence/PersistenceUser.php` with the converting migration `backend/migrations/Version20260902120000.php` (Constitution VI; `docs/audit/spec-compliance.md` §6) — commit `e555e43`
+- [x] T127 C5 `backend/migrations/Version20260822232549.php` is an empty auto-generated stub but is recorded as executed, so it was documented as an intentional no-op rather than deleted; the asymmetric `down()` methods in `backend/migrations/Version20260823075023.php`, `backend/migrations/Version20260823210000.php` and `backend/migrations/Version20260824010000.php` now mirror their `up()` in reverse (Constitution VI; `docs/audit/spec-compliance.md` §6) — commit `4f28c7b`
+- [x] T128 C11 `backend/config/packages/api_platform.yaml` lists `jsonld` before `json`, so a client sending no `Accept` header gets Hydra envelopes rather than the documented shapes. Documented rather than reordered — reordering would change the default response type for every existing consumer — in `specs/001-solo-ttrpg-assistant/contracts/openapi.yaml` and a comment in `backend/config/packages/api_platform.yaml` (Constitution V; `docs/audit/spec-compliance.md` §6) — commit `32f3bf4`
+- [x] T129 C2 `POST /api/auth/login` is served by the `json_login` firewall listener, so API Platform had no metadata for it and the Lexik bundle documented it under the route *name* `api_auth_login`; it never reached `frontend/src/lib/api/schema.gen.ts` and `AuthGate.tsx` called it through an untyped `apiPath()` cast. `backend/src/Identity/Infrastructure/Api/OpenApi/LoginPathFactory.php` documents it at its real path with the contract's `AuthToken` component, wired in `backend/config/services.yaml`, pinned by `backend/tests/Integration/Identity/LoginContractTest.php`, and the now-obsolete `/auth/login` exception is removed from `scripts/check-contract.sh` (FR-030, Constitution V; `docs/audit/spec-compliance.md` §6) — commit `ccf651a`
+
+### Deliberately not in this sweep
+
+- C1 (`Bearer undefined`) belongs to `docs/prompts/08-session-lifecycle.md`
+- C9 (the unused `openrtk` dependency) belongs to `docs/prompts/11-toolchain-hygiene.md`
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

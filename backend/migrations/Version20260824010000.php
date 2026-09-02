@@ -33,6 +33,10 @@ final class Version20260824010000 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        // Reverse order of up(): the foreign key goes first, the way
+        // Version20260823110000::down() drops the journal's (audit C5).
+        $this->addSql('ALTER TABLE characters DROP CONSTRAINT fk_characters_campaign');
+        $this->addSql('DROP INDEX idx_characters_campaign');
         $this->addSql('DROP TABLE characters');
     }
 }

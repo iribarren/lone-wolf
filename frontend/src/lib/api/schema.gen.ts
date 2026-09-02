@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Obtain a JWT bearer token
+         * @description Served by the json_login firewall listener, not by a controller. Send `Accept: application/json`.
+         */
+        post: operations["api_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -200,26 +220,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    api_auth_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Creates a user token.
-         * @description Creates a user token.
-         */
-        post: operations["login_check_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/campaigns/{campaignId}/oracles": {
         parameters: {
             query?: never;
@@ -398,15 +398,64 @@ export interface components {
          *     SheetValidationProblem with field-level violations (FR-023).
          */
         Character: {
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             id?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             kind?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             name?: string;
             attributes?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             validatedStructureVersion?: number;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             reviewStatus?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             driftIssues?: string[];
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             structureVersion?: number | null;
             structureFields?: components["schemas"]["SheetFieldEntryResource"][];
         };
@@ -443,15 +492,64 @@ export interface components {
          *     SheetValidationProblem with field-level violations (FR-023).
          */
         "Character.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             id?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             kind?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             name?: string;
             attributes?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             validatedStructureVersion?: number;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             reviewStatus?: string;
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             driftIssues?: string[];
+            /**
+             * @description `attributes` is an \ArrayObject rather than an array so that a character
+             *     whose sheet asks nothing of it still serialises `{}`: PHP encodes an
+             *     empty array as `[]`, which contradicts the contract's
+             *     `CharacterWrite.attributes` (type object). CharactersProvider::fromData()
+             *     is the single place that wraps it.
+             */
             structureVersion?: number | null;
             structureFields?: components["schemas"]["SheetFieldEntryResource.jsonld"][];
         };
@@ -836,6 +934,10 @@ export interface components {
             startingStage?: string;
             openingGuidance?: string;
         };
+        AuthToken: {
+            token: string;
+            roles?: string[];
+        };
     };
     responses: never;
     parameters: never;
@@ -845,6 +947,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    api_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The account's credentials. */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: email */
+                    email: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Authenticated: a bearer token and the account's roles. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthToken"];
+                };
+            };
+            /** @description The credentials are wrong. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     api_authregister_post: {
         parameters: {
             query?: never;
@@ -1562,36 +1702,6 @@ export interface operations {
                     "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
                     "application/problem+json": components["schemas"]["ConstraintViolation"];
                     "application/json": components["schemas"]["ConstraintViolation"];
-                };
-            };
-        };
-    };
-    login_check_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description The login data */
-        requestBody: {
-            content: {
-                "application/json": {
-                    email: string;
-                    password: string;
-                };
-            };
-        };
-        responses: {
-            /** @description User token created */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        readonly token: string;
-                    };
                 };
             };
         };

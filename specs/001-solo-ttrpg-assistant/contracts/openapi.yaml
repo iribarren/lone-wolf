@@ -11,6 +11,15 @@ info:
     - Frontend consumes only the client generated from this document.
     - Errors use RFC 7807 `application/problem+json`.
     - Breaking changes require a versioned migration path.
+
+    **Every request must send `Accept: application/json`.** This document
+    describes the plain JSON shapes only, but the backend also serves JSON-LD
+    and lists `jsonld` first in `api_platform.yaml`, so it is the default a
+    client gets when it expresses no preference. Omit the header and content
+    negotiation answers with Hydra envelopes — `{"@context": ..., "member":
+    [...]}` — instead of the shapes below. The format order is deliberate and
+    is not changed here: reordering it would silently change the default
+    response type for every existing consumer.
 servers:
   - url: /api
 tags:

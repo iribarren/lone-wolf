@@ -72,17 +72,18 @@ campaign. A campaign belonging to someone else and a campaign that does not exis
 ## 3. Getting started
 
 ```bash
-cp .env.dist .env                # then edit — see the note below
+cp .env.dist .env                # placeholder secrets — change them before sharing the stack
 docker compose up -d --build
 docker compose exec php composer install
 docker compose exec php bin/console doctrine:migrations:migrate -n
-docker compose exec php bin/console app:create-admin --email=you@example.com --password='a-long-passphrase'
+docker compose exec php bin/console app:create-admin
 docker compose exec php bin/console app:seed:demo    # optional demo content
 ```
 
-> **Note.** `.env.dist` ships `ADMIN_EMAIL` / `ADMIN_PASSWORD` commented out, so a bare
-> `app:create-admin` fails with *"Provide a valid email via --email or $ADMIN_EMAIL."* Either
-> pass the flags as above, or uncomment those two lines in your `.env` first.
+`app:create-admin` reads `ADMIN_EMAIL` / `ADMIN_PASSWORD` from your `.env`, which `.env.dist`
+ships set to `admin@example.com` / `change_me_admin`. Override either with
+`--email=you@example.com --password='a-long-passphrase'`, and change both in `.env` before the
+stack is reachable by anyone but you.
 
 Then:
 
@@ -440,7 +441,6 @@ folders or tagging, search across the journal, filtering the journal to one stag
 
 | Symptom | Cause and fix |
 |---|---|
-| `app:create-admin` says *"Provide a valid email"* | `ADMIN_EMAIL`/`ADMIN_PASSWORD` are commented out in `.env.dist`. Pass `--email` / `--password`. |
 | *"No active game systems yet"* | No active system exists. Run `app:seed:demo`, or author one and set its status to `active`. |
 | API returns `{"@context": …, "member": […]}` | You did not send `Accept: application/json`; you got JSON-LD. |
 | Consulting an oracle says the table is empty | It genuinely has no rows. Open it at `/admin/oracle`, add result entries and save (§4.4). |
@@ -467,7 +467,8 @@ scripts/check-contract.sh              # runtime OpenAPI vs the canonical contra
 scripts/check-journal-performance.sh   # 500-entry journal latency evidence
 cd frontend && npm run test:e2e        # Playwright smoke (needs the stack up + seeded)
 
-docker compose exec php bin/console app:create-admin --email=… --password=…
+docker compose exec php bin/console app:create-admin              # uses ADMIN_EMAIL / ADMIN_PASSWORD
+docker compose exec php bin/console app:create-admin --email=… --password=…   # or override them
 docker compose exec php bin/console app:seed:demo
 docker compose exec php bin/console app:seed:large-journal --entries=500
 ```

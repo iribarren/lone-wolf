@@ -77,11 +77,7 @@ export default function DiceRollerWidget({
     onLogResult,
 }: DiceRollerWidgetProps) {
     if (!open) {
-        return (
-            <section aria-label="Dice roller" data-testid="dice-widget-closed">
-                <p>Dice roller closed.</p>
-            </section>
-        );
+        return null;
     }
 
     // A result the widget cannot read is no result at all — never a render

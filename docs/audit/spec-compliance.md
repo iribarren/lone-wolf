@@ -330,6 +330,16 @@ control, no role-aware rendering. No 401 interceptor and no refresh, so after th
 | C11 | Content negotiation defaults to JSON-LD; a client following the contract literally (which documents only `application/json`) gets Hydra envelopes unless it sets `Accept`. |
 | C12 | No test covers `PATCH /characters/{id}` from a foreign player, the one campaign-scoped write without an operation-level `CAMPAIGN_OWNER` expression. |
 
+**C12 was worse than "untested".** Writing the missing test (`T124`) showed that the 404 a foreign
+player receives is not produced by the ownership check at all. `UpdateCharacterHandler` resolves
+the character's campaign through `OwnedCampaignFetcher` and refuses correctly — but if that call
+is removed, the request still answers **404**, because `UpdateCharacterProcessor` afterwards
+projects the result through `ListCharactersHandler`, which refuses the foreign player in its own
+right. The status code is therefore not evidence of the guarantee: the update is already written
+by then. A test asserting only the 404 would have passed against a build that silently accepts
+foreign writes, which is why the committed test asserts the stored character is unchanged. Any
+future refactor of that handler must keep that assertion.
+
 ---
 
 ## 7. What this adds up to

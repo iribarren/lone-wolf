@@ -46,6 +46,18 @@ services:
     # Shared-kernel current-player port, implemented by Identity's security bridge.
     App\Shared\Application\CurrentUserProviderInterface: '@App\Identity\Infrastructure\Security\CurrentPlayerProvider'
 
+    # Documents the firewall-served POST /api/auth/login in the generated
+    # OpenAPI so it reaches schema.gen.ts like every other endpoint (C2).
+    App\Identity\Infrastructure\Api\OpenApi\LoginPathFactory:
+        decorates: 'api_platform.openapi.factory'
+        # The Lexik bundle also decorates this factory, at the default priority
+        # 0, and it is what writes the bogus `api_auth_login` key. A LOWER
+        # priority wraps further out, so this runs after Lexik and replaces
+        # that entry instead of being overwritten by it.
+        decoration_priority: -10
+        arguments:
+            $decorated: '@.inner'
+
 when@test:
     imports:
         - { resource: services_test.yaml }

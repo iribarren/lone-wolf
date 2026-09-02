@@ -51,11 +51,7 @@ export default function OracleDrawer({
     onSave,
 }: OracleDrawerProps) {
     if (!open) {
-        return (
-            <section aria-label="Oracles" data-testid="oracles-drawer-closed">
-                <p>Oracles drawer closed.</p>
-            </section>
-        );
+        return null;
     }
 
     return (
