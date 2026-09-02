@@ -1,5 +1,7 @@
 'use client';
 
+import styles from './DiceRollerWidget.module.css';
+
 /**
  * Floating dice roller during play (T092, US6 — FR-026..029).
  * Pure presentational so states are directly testable (T093): strict
@@ -87,10 +89,10 @@ export default function DiceRollerWidget({
     return (
         <aside
             aria-label="Dice roller"
-            style={{ border: '1px solid #ccc', borderRadius: 8, padding: '1rem' }}
+            className={styles.card}
             data-testid="dice-widget"
         >
-            <header style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <header className={styles.head}>
                 <h2>Dice</h2>
                 <button type="button" onClick={onClose}>Close</button>
             </header>
@@ -121,15 +123,15 @@ export default function DiceRollerWidget({
                 <section
                     aria-label={`Result of ${shown.notation}`}
                     data-testid="dice-result"
-                    style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '0.5rem' }}
+                    className={styles.result}
                 >
                     <p>
                         <strong>{shown.notation}</strong>
                     </p>
 
-                    <ul data-testid="dice-chips" style={{ listStyle: 'none', display: 'flex', gap: '0.25rem', padding: 0 }}>
+                    <ul data-testid="dice-chips" className={styles.faces}>
                         {shown.diceValues.map((value, index) => (
-                            <li key={index} data-testid="dice-chip" style={{ border: '1px solid #999', borderRadius: 4, padding: '0 0.4rem' }}>
+                            <li key={index} data-testid="dice-chip" className={styles.face}>
                                 {value}
                             </li>
                         ))}

@@ -1,0 +1,9 @@
+.card {
+    border: 1px solid var(--lw-border);
+    border-radius: var(--lw-radius-lg);
+    padding: var(--lw-space-4);
+}
+
+.guidance {
+    white-space: pre-line;
+}

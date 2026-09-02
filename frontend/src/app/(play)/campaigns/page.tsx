@@ -9,6 +9,8 @@ import Link from 'next/link';
 import type { ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 
+
+import styles from './page.module.css';
 type CampaignSummary = ApiSchemas['CampaignSummary'];
 
 export default function CampaignListPage() {
@@ -26,7 +28,7 @@ export default function CampaignListPage() {
     const rows: CampaignSummary[] = campaigns.data ?? [];
 
     return (
-        <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
+        <main className={styles.shell}>
             <h1>My campaigns</h1>
 
             {campaigns.isLoading && <p>Loading…</p>}
@@ -37,13 +39,13 @@ export default function CampaignListPage() {
                 </p>
             )}
 
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+            <ul className={styles.list}>
                 {rows.map((campaign) => (
-                    <li key={campaign.id} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.75rem', marginBottom: '0.75rem' }}>
+                    <li key={campaign.id} className={styles.item}>
                         <Link href={`/campaigns/${campaign.id}`}>
                             <strong>{campaign.gameSystemName}</strong>
                             <br />
-                            <span style={{ color: '#555' }}>
+                            <span className={styles.meta}>
                                 Currently at: {campaign.currentStageName}
                             </span>
                             {campaign.updatedAt && (

@@ -1,0 +1,6 @@
+/* 640px matches the page shell exactly; see the note in page.module.css. */
+.bar {
+    max-width: 640px;
+    margin: var(--lw-space-4) auto 0;
+    text-align: right;
+}

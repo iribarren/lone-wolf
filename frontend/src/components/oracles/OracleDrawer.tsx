@@ -1,5 +1,7 @@
 'use client';
 
+import styles from './OracleDrawer.module.css';
+
 /**
  * Floating oracle drawer during play (T071, US4 — FR-009/010/011).
  * Pure presentational so states are directly testable (T072): scoped
@@ -57,10 +59,10 @@ export default function OracleDrawer({
     return (
         <aside
             aria-label="Oracles"
-            style={{ border: '1px solid #ccc', borderRadius: 8, padding: '1rem' }}
+            className={styles.card}
             data-testid="oracles-drawer"
         >
-            <header style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <header className={styles.head}>
                 <h2>Oracles</h2>
                 <button type="button" onClick={onClose}>Close</button>
             </header>
@@ -91,7 +93,7 @@ export default function OracleDrawer({
                 <section
                     aria-label={`Result of ${consultedTitle ?? 'oracle'}`}
                     data-testid="oracle-result"
-                    style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '0.5rem' }}
+                    className={styles.result}
                 >
                     <p>
                         <strong>{consultedTitle ?? 'Oracle'}:</strong> {outcome.entry.text}

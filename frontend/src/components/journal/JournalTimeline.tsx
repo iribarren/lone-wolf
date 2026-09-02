@@ -5,6 +5,8 @@
  */
 import type { ApiSchemas } from '@/lib/api/client';
 
+
+import styles from './JournalTimeline.module.css';
 type JournalEntry = ApiSchemas['JournalEntry'];
 
 export interface JournalTimelineProps {
@@ -54,7 +56,7 @@ export default function JournalTimeline({
 
     if (entries.length === 0) {
         return (
-            <section aria-label="Journal" style={{ marginTop: '2rem' }}>
+            <section aria-label="Journal" className={styles.journal}>
                 <h2>Journal</h2>
                 <p>Nothing recorded yet — your story starts below.</p>
             </section>
@@ -62,20 +64,20 @@ export default function JournalTimeline({
     }
 
     return (
-        <section aria-label="Journal" style={{ marginTop: '2rem' }}>
+        <section aria-label="Journal" className={styles.journal}>
             <h2>Journal</h2>
 
             {groupByStage(entries).map((group) => (
-                <div key={group.stageName} style={{ marginBottom: '1rem' }}>
-                    <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '0.25rem' }}>{group.stageName}</h3>
-                    <ol style={{ listStyle: 'none', padding: 0 }}>
+                <div key={group.stageName} className={styles.group}>
+                    <h3 className={styles.stage}>{group.stageName}</h3>
+                    <ol className={styles.list}>
                         {group.entries.map((entry) => (
-                            <li key={entry.id} style={{ padding: '0.5rem 0', borderBottom: '1px dashed #ddd' }}>
-                                <small style={{ color: '#555' }}>
+                            <li key={entry.id} className={styles.entry}>
+                                <small className={styles.stamp}>
                                     {entry.createdAt ? new Date(entry.createdAt).toLocaleString() : ''}
                                     {entry.kind === 'oracle_roll' ? ' · oracle roll' : ''}
                                 </small>
-                                {entry.narrative && <p style={{ margin: '0.25rem 0 0' }}>{entry.narrative}</p>}
+                                {entry.narrative && <p className={styles.narrative}>{entry.narrative}</p>}
                             </li>
                         ))}
                     </ol>

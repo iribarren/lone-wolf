@@ -6,6 +6,8 @@
  */
 import type { ApiSchemas } from '@/lib/api/client';
 
+
+import styles from './AdvanceActions.module.css';
 type StageAction = ApiSchemas['StageActionResource'];
 
 export interface RefusalFeedback {
@@ -39,12 +41,12 @@ export default function AdvanceActions({
     onConclude,
 }: AdvanceActionsProps) {
     return (
-        <div style={{ marginTop: '1rem' }}>
+        <div className={styles.actions}>
             <h3>What next?</h3>
 
             {actions.length === 0 && <p>No actions available at this stage.</p>}
 
-            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', gap: '0.5rem' }}>
+            <ul className={styles.list}>
                 {actions.map((action) => (
                     <li key={`${action.kind}:${action.toStageId ?? 'terminal'}`}>
                         <button
@@ -65,7 +67,7 @@ export default function AdvanceActions({
             </ul>
 
             {refusal && (
-                <div role="alert" data-testid="refusal-banner" style={{ color: '#b00020', marginTop: '0.75rem' }}>
+                <div role="alert" data-testid="refusal-banner" className={styles.refusal}>
                     <p>{refusal.detail}</p>
                     {refusal.legalAlternatives.length > 0 && (
                         <p>

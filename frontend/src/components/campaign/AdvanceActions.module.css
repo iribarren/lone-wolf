@@ -1,0 +1,19 @@
+.actions {
+    margin-top: var(--lw-space-4);
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--lw-space-2);
+}
+
+/* A refusal is the product working, not a failure: the canvas styles it as
+   counsel (blue, with the legal move offered as a button), never danger red.
+   Kept on --lw-danger here because this step changes no visual design.
+   PROMPT 19: this is the one rule to retint to --lw-counsel. */
+.refusal {
+    color: var(--lw-danger);
+    margin-top: var(--lw-space-3);
+}

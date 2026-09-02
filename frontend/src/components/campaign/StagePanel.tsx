@@ -1,5 +1,7 @@
 'use client';
 
+import styles from './StagePanel.module.css';
+
 /**
  * Guidance card for the campaign's current stage (T051, FR-013).
  * Pure presentational component so states are directly testable (T053).
@@ -22,10 +24,10 @@ export default function StagePanel({ stageName, guidance, loading = false }: Sta
     return (
         <section
             aria-label={`Current stage: ${stageName}`}
-            style={{ border: '1px solid #ccc', borderRadius: 8, padding: '1rem' }}
+            className={styles.card}
         >
             <h2>{stageName}</h2>
-            <p style={{ whiteSpace: 'pre-line' }}>{guidance}</p>
+            <p className={styles.guidance}>{guidance}</p>
         </section>
     );
 }

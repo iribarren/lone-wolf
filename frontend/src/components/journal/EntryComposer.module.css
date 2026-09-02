@@ -1,0 +1,13 @@
+.composer {
+    margin-top: var(--lw-space-4);
+}
+
+.field {
+    width: 100%;
+    display: block;
+    margin-top: var(--lw-space-1);
+}
+
+.error {
+    color: var(--lw-danger);
+}

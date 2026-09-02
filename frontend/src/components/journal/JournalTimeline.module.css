@@ -1,0 +1,31 @@
+.journal {
+    margin-top: var(--lw-space-6);
+}
+
+.group {
+    margin-bottom: var(--lw-space-4);
+}
+
+.stage {
+    border-bottom: 1px solid var(--lw-border);
+    padding-bottom: var(--lw-space-1);
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+}
+
+.entry {
+    padding: var(--lw-space-2) 0;
+    border-bottom: 1px dashed var(--lw-border);
+}
+
+.stamp {
+    font-family: var(--lw-font-mono);
+    color: var(--lw-ink-muted);
+}
+
+.narrative {
+    margin: var(--lw-space-1) 0 0;
+}

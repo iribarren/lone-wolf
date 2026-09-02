@@ -8,6 +8,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { clearSession } from '@/lib/auth';
 
+
+import styles from './SignOutButton.module.css';
 export default function SignOutButton() {
     const queryClient = useQueryClient();
 
@@ -19,7 +21,7 @@ export default function SignOutButton() {
     }
 
     return (
-        <div style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '1rem auto 0', textAlign: 'right' }}>
+        <div className={styles.bar}>
             <button type="button" onClick={signOut}>
                 Sign out
             </button>

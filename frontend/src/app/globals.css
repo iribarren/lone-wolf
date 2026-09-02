@@ -1,0 +1,263 @@
+/*
+ * Lone Wolf — design tokens.
+ *
+ * Source of truth: the design canvas from `docs/prompts/17-design-canvas.md`.
+ * Colour is authored in oklch() so light and dark are the SAME four hues at a
+ * different lightness, not two palettes that happen to sit near each other:
+ *
+ *   ember   65deg  the app's own voice — guidance, oracle results, primary action
+ *   counsel 248deg the app explaining a rule — refusals, notices
+ *   danger  12deg  something actually broke
+ *   affirm  152deg it worked
+ *
+ * Tiers, as lightness/chroma pairs (light / dark):
+ *   base      L .50 C .105  /  L .78 C .105
+ *   -strong   L .42 C .092  /  L .86 C .070   hover, pressed
+ *   -quiet    L .955 C .022 /  L .275 C .042  tinted fills
+ *   -line     L .78 C .075  /  L .47 C .075   borders on tinted fills
+ *
+ * Every foreground/background pair below clears WCAG AA at its intended size.
+ *
+ * Dark mode is a swap of the COLOUR tokens only — type, spacing, radii and
+ * motion are theme-independent and defined once, here. Never give a colour its
+ * only definition inside a media or attribute block: a token defined only
+ * there is undefined in the un-stamped default state.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ── colour · light ─────────────────────────────────────────────── */
+  --lw-bg: oklch(0.972 0.008 82);
+  --lw-surface: oklch(0.995 0.003 82);
+  --lw-surface-sunken: oklch(0.945 0.010 82);
+  --lw-border: oklch(0.885 0.012 82);
+  --lw-border-strong: oklch(0.800 0.016 82);
+  --lw-ink: oklch(0.255 0.018 62);
+  --lw-ink-muted: oklch(0.505 0.016 62);
+  --lw-ink-faint: oklch(0.540 0.014 62);
+
+  --lw-accent: oklch(0.50 0.105 65);
+  --lw-accent-strong: oklch(0.42 0.092 65);
+  --lw-accent-quiet: oklch(0.955 0.022 65);
+  --lw-accent-line: oklch(0.78 0.075 65);
+
+  --lw-counsel: oklch(0.50 0.105 248);
+  --lw-counsel-strong: oklch(0.42 0.092 248);
+  --lw-counsel-quiet: oklch(0.955 0.022 248);
+  --lw-counsel-line: oklch(0.78 0.075 248);
+
+  --lw-danger: oklch(0.50 0.105 12);
+  --lw-danger-strong: oklch(0.42 0.092 12);
+  --lw-danger-quiet: oklch(0.955 0.022 12);
+  --lw-danger-line: oklch(0.78 0.075 12);
+
+  --lw-affirm: oklch(0.50 0.105 152);
+  --lw-affirm-strong: oklch(0.42 0.092 152);
+  --lw-affirm-quiet: oklch(0.955 0.022 152);
+  --lw-affirm-line: oklch(0.78 0.075 152);
+
+  --lw-on-accent: oklch(0.99 0.005 85);
+
+  --lw-shadow-sm: 0 1px 2px rgb(41 33 26 / 0.06);
+  --lw-shadow-md: 0 4px 16px rgb(41 33 26 / 0.09);
+  --lw-shadow-overlay: 0 24px 64px rgb(41 33 26 / 0.20);
+  --lw-scrim: rgb(41 33 26 / 0.42);
+
+  /* ── type ───────────────────────────────────────────────────────── */
+  --lw-font-prose: var(--font-prose), 'Iowan Old Style', Georgia, serif;
+  --lw-font-ui: var(--font-ui), system-ui, -apple-system, sans-serif;
+  --lw-font-mono: var(--font-mono), ui-monospace, Menlo, monospace;
+
+  --lw-text-2xs: 0.6875rem;   /* 11px · stamps, tags, eyebrows      */
+  --lw-text-xs: 0.8125rem;    /* 13px · metadata, captions          */
+  --lw-text-sm: 0.9375rem;    /* 15px · labels, buttons             */
+  --lw-text-base: 1rem;       /* 16px · UI body, inputs             */
+  --lw-text-prose: 1.0625rem; /* 17px · journal entries             */
+  --lw-text-lg: 1.25rem;      /* 20px · card titles, section heads  */
+  --lw-text-xl: 1.625rem;     /* 26px · page titles, oracle result  */
+  --lw-text-2xl: 1.9375rem;   /* 31px · stage guidance              */
+  --lw-text-3xl: 2.5rem;      /* 40px · wordmark, dice total        */
+
+  --lw-leading-tight: 1.15;
+  --lw-leading-snug: 1.35;
+  --lw-leading-normal: 1.5;
+  --lw-leading-prose: 1.7;
+
+  --lw-measure-prose: 66ch;
+  --lw-measure-ui: 46rem;
+  --lw-measure-form: 24rem;
+
+  /* ── spacing · 4px base ─────────────────────────────────────────── */
+  --lw-space-1: 0.25rem;
+  --lw-space-2: 0.5rem;
+  --lw-space-3: 0.75rem;
+  --lw-space-4: 1rem;
+  --lw-space-5: 1.5rem;
+  --lw-space-6: 2rem;
+  --lw-space-7: 3rem;
+  --lw-space-8: 4rem;
+
+  /* ── radii ──────────────────────────────────────────────────────── */
+  --lw-radius-sm: 3px;
+  --lw-radius-md: 6px;
+  --lw-radius-lg: 10px;
+  --lw-radius-xl: 14px;
+  --lw-radius-pill: 999px;
+
+  /* ── motion ─────────────────────────────────────────────────────── */
+  --lw-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --lw-dur-fast: 120ms;
+  --lw-dur-base: 200ms;
+  --lw-dur-reveal: 520ms;
+}
+
+/*
+ * Dark is the primary case — solo play happens at night. The media query
+ * carries the system preference; `:not([data-theme="light"])` lets an explicit
+ * light choice win over it.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --lw-bg: oklch(0.185 0.012 265);
+    --lw-surface: oklch(0.225 0.014 265);
+    --lw-surface-sunken: oklch(0.155 0.012 265);
+    --lw-border: oklch(0.315 0.016 265);
+    --lw-border-strong: oklch(0.400 0.018 265);
+    --lw-ink: oklch(0.930 0.008 85);
+    --lw-ink-muted: oklch(0.720 0.010 85);
+    --lw-ink-faint: oklch(0.635 0.010 85);
+
+    --lw-accent: oklch(0.78 0.105 65);
+    --lw-accent-strong: oklch(0.86 0.070 65);
+    --lw-accent-quiet: oklch(0.275 0.042 65);
+    --lw-accent-line: oklch(0.47 0.075 65);
+
+    --lw-counsel: oklch(0.78 0.105 248);
+    --lw-counsel-strong: oklch(0.86 0.070 248);
+    --lw-counsel-quiet: oklch(0.275 0.042 248);
+    --lw-counsel-line: oklch(0.47 0.075 248);
+
+    --lw-danger: oklch(0.78 0.105 12);
+    --lw-danger-strong: oklch(0.86 0.070 12);
+    --lw-danger-quiet: oklch(0.275 0.042 12);
+    --lw-danger-line: oklch(0.47 0.075 12);
+
+    --lw-affirm: oklch(0.78 0.105 152);
+    --lw-affirm-strong: oklch(0.86 0.070 152);
+    --lw-affirm-quiet: oklch(0.275 0.042 152);
+    --lw-affirm-line: oklch(0.47 0.075 152);
+
+    --lw-on-accent: oklch(0.18 0.020 60);
+
+    --lw-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
+    --lw-shadow-md: 0 4px 16px rgb(0 0 0 / 0.50);
+    --lw-shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.62);
+    --lw-scrim: rgb(6 8 11 / 0.66);
+  }
+}
+
+/* The identical swap under an explicit choice, so a toggle wins in both
+   directions. Kept verbatim rather than factored out: a shared block would
+   have to live in a media or attribute context, which is exactly the
+   structure this file exists to avoid. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --lw-bg: oklch(0.185 0.012 265);
+  --lw-surface: oklch(0.225 0.014 265);
+  --lw-surface-sunken: oklch(0.155 0.012 265);
+  --lw-border: oklch(0.315 0.016 265);
+  --lw-border-strong: oklch(0.400 0.018 265);
+  --lw-ink: oklch(0.930 0.008 85);
+  --lw-ink-muted: oklch(0.720 0.010 85);
+  --lw-ink-faint: oklch(0.635 0.010 85);
+
+  --lw-accent: oklch(0.78 0.105 65);
+  --lw-accent-strong: oklch(0.86 0.070 65);
+  --lw-accent-quiet: oklch(0.275 0.042 65);
+  --lw-accent-line: oklch(0.47 0.075 65);
+
+  --lw-counsel: oklch(0.78 0.105 248);
+  --lw-counsel-strong: oklch(0.86 0.070 248);
+  --lw-counsel-quiet: oklch(0.275 0.042 248);
+  --lw-counsel-line: oklch(0.47 0.075 248);
+
+  --lw-danger: oklch(0.78 0.105 12);
+  --lw-danger-strong: oklch(0.86 0.070 12);
+  --lw-danger-quiet: oklch(0.275 0.042 12);
+  --lw-danger-line: oklch(0.47 0.075 12);
+
+  --lw-affirm: oklch(0.78 0.105 152);
+  --lw-affirm-strong: oklch(0.86 0.070 152);
+  --lw-affirm-quiet: oklch(0.275 0.042 152);
+  --lw-affirm-line: oklch(0.47 0.075 152);
+
+  --lw-on-accent: oklch(0.18 0.020 60);
+
+  --lw-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
+  --lw-shadow-md: 0 4px 16px rgb(0 0 0 / 0.50);
+  --lw-shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.62);
+  --lw-scrim: rgb(6 8 11 / 0.66);
+}
+
+/* ── base ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--lw-bg);
+  color: var(--lw-ink);
+  font-family: var(--lw-font-ui);
+  font-size: var(--lw-text-base);
+  line-height: var(--lw-leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Instruction 4's two faces, wired: IBM Plex Sans is the text face on body,
+ * Spectral is the display face on headings. The mono is applied only where it
+ * is functionally required -- die faces and journal stamps need tabular,
+ * fixed-width digits to line up. Where each face belongs beyond this (guidance,
+ * journal prose) is the canvas's answer and prompt 19 applies it.
+ */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--lw-font-prose);
+  line-height: var(--lw-leading-snug);
+}
+
+a {
+  color: var(--lw-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--lw-accent-strong);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lw-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

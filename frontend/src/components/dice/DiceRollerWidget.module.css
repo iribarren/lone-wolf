@@ -1,0 +1,30 @@
+.card {
+    border: 1px solid var(--lw-border);
+    border-radius: var(--lw-radius-lg);
+    padding: var(--lw-space-4);
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+}
+
+.result {
+    margin-top: var(--lw-space-4);
+    border-top: 1px solid var(--lw-border);
+    padding-top: var(--lw-space-2);
+}
+
+.faces {
+    list-style: none;
+    display: flex;
+    gap: var(--lw-space-1);
+    padding: 0;
+}
+
+.face {
+    font-family: var(--lw-font-mono);
+    border: 1px solid var(--lw-border-strong);
+    border-radius: var(--lw-radius-sm);
+    padding: 0 var(--lw-space-2);
+}
