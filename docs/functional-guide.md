@@ -255,6 +255,10 @@ tells you exactly what was allowed:
 
 > Cannot advance from "Scene" to "Nowhere": legal next stages are "Sequel".
 
+This is presented as guidance, not as a failure — the flow engine enforcing the system's graph is
+the feature working. It is visually distinct from a genuine error such as the delete confirmation
+in *Campaign settings*, which is the only place the app uses its danger styling.
+
 **Journal.** Your entries newest-first, grouped under the stage they were written on. Entries
 keep their original stage stamp forever — advancing to Sequel does not retroactively move
 yesterday's Scene notes. Oracle results are tagged *· oracle roll*.
@@ -288,13 +292,20 @@ clears a **⚑** badge, on the spot and with no reload.
 > character on the full sheet is drawn straight away. On a system with no sheet structure at all
 > (the seeded *Freeform Sandbox*), the form says so instead of showing empty boxes.
 
-**Oracles** (bottom-right toggle). Lists the tables visible to this campaign — every global
+**Oracles** and **Dice** open from the pair of buttons pinned to the bottom-right of the console.
+Both open as **panels over the page**, not as sections appended to it: the journal you were
+reading stays exactly where it was, and a half-written entry in the composer is still there when
+you close the panel. Each takes keyboard focus when it opens, keeps Tab inside itself while it is
+open, closes on **Escape** as well as its *Close* button, and hands focus back to the button you
+opened it with.
+
+**Oracles.** Lists the tables visible to this campaign — every global
 table plus this system's own. Consulting draws exactly one entry, weighted: in *Generic
 Weather*, with weights 3/2/2/1, "Clear skies" comes up three times as often as "A rolling
 storm". You can then save the result to your journal, optionally with your own interpretation of
 what it means in the fiction. An empty table produces a friendly notice, not an error.
 
-**Dice** (bottom-right toggle). Enter standard notation and roll.
+**Dice.** Enter standard notation and roll.
 
 - Accepted: `NdM`, optionally `+K` or `-K` — `1d20`, `2d6+3`, `3d8-1`.
 - Bounds: `N` ≤ 50 dice, `M` ≤ 1000 faces, `|K|` ≤ 10000.

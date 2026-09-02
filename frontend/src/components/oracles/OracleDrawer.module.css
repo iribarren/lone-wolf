@@ -1,6 +1,13 @@
 .head {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: var(--lw-space-4);
+    margin-bottom: var(--lw-space-4);
+}
+
+.head h2 {
+    margin: 0;
 }
 
 .result {

@@ -109,7 +109,19 @@ export default function Drawer({ open, label, onClose, children, ...rest }: Draw
 
     return (
         <>
+            {/* Click-outside-to-dismiss. Decorative and aria-hidden; every
+                function it offers is also on the keyboard path below. */}
             <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+            {/*
+              * jsx-a11y counts role="dialog" as non-interactive and so objects
+              * to a key handler on it. A modal dialog is precisely where Escape
+              * and the Tab trap belong: the handler is on the container so it
+              * catches those keys wherever focus sits inside, which is the
+              * behaviour the rule's own guidance for modals describes. Moving
+              * it to each child, or adding a widget role this element does not
+              * have, would be worse markup chosen to satisfy a linter.
+              */}
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
             <div
                 ref={dialog}
                 role="dialog"
