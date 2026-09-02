@@ -1,11 +1,3 @@
-/* Page shell. The 640px measure is the CURRENT value, kept exactly so this
-   conversion changes no layout; the canvas's reading measure is
-   var(--lw-measure-ui) (46rem) and prompt 19 adopts it. */
-.shell {
-    max-width: 640px;
-    margin: var(--lw-space-7) auto;
-}
-
 .dock {
     position: fixed;
     right: var(--lw-space-4);

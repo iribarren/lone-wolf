@@ -7,6 +7,7 @@ import type { ApiSchemas } from '@/lib/api/client';
 
 
 import styles from './JournalTimeline.module.css';
+import Button from '@/components/ui/Button';
 type JournalEntry = ApiSchemas['JournalEntry'];
 
 export interface JournalTimelineProps {
@@ -90,9 +91,14 @@ export default function JournalTimeline({
               * mistakable for "this button is broken" (B3).
               */}
             {hasMore && onLoadMore && (
-                <button type="button" onClick={onLoadMore} disabled={loadingMore}>
-                    {loadingMore ? 'Loading earlier entries…' : 'Load earlier entries'}
-                </button>
+                <Button
+                    variant="ghost"
+                    onClick={onLoadMore}
+                    pending={loadingMore}
+                    pendingLabel="Loading earlier entries…"
+                >
+                    Load earlier entries
+                </Button>
             )}
         </section>
     );

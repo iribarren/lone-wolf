@@ -11,6 +11,8 @@ import { useApiClient } from '@/lib/hooks/useApiClient';
 
 
 import styles from './page.module.css';
+import Card from '@/components/ui/Card';
+import PageShell from '@/components/ui/PageShell';
 type CampaignSummary = ApiSchemas['CampaignSummary'];
 
 export default function CampaignListPage() {
@@ -28,7 +30,7 @@ export default function CampaignListPage() {
     const rows: CampaignSummary[] = campaigns.data ?? [];
 
     return (
-        <main className={styles.shell}>
+        <PageShell>
             <h1>My campaigns</h1>
 
             {campaigns.isLoading && <p>Loading…</p>}
@@ -41,7 +43,7 @@ export default function CampaignListPage() {
 
             <ul className={styles.list}>
                 {rows.map((campaign) => (
-                    <li key={campaign.id} className={styles.item}>
+                    <Card as="li" key={campaign.id} className={styles.item}>
                         <Link href={`/campaigns/${campaign.id}`}>
                             <strong>{campaign.gameSystemName}</strong>
                             <br />
@@ -55,9 +57,9 @@ export default function CampaignListPage() {
                                 </>
                             )}
                         </Link>
-                    </li>
+                    </Card>
                 ))}
             </ul>
-        </main>
+        </PageShell>
     );
 }

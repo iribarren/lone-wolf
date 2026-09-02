@@ -1,0 +1,20 @@
+/*
+ * One definition of the app's measure, replacing the copy in five files.
+ * 640px is the width the app has always had; the canvas's reading measure
+ * (var(--lw-measure-ui), 46rem) is a Phase 3 change, not this one's.
+ */
+.shell {
+    max-width: 640px;
+    margin: var(--lw-space-7) auto;
+}
+
+.form {
+    max-width: 360px;
+    margin: var(--lw-space-8) auto;
+}
+
+.bar {
+    max-width: 640px;
+    margin: var(--lw-space-4) auto 0;
+    text-align: right;
+}

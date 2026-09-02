@@ -28,6 +28,8 @@ import type { SheetFieldView, SheetViolation } from '@/components/characters/Cha
 
 
 import styles from './CharacterForm.module.css';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 export type CharacterKind = 'pc' | 'npc';
 
 export interface CharacterDraft {
@@ -154,9 +156,9 @@ export default function CharacterForm({
                     {error ?? 'This game system defines no character sheet, so characters cannot be added to it.'}
                 </p>
                 {onCancel && (
-                    <button type="button" onClick={onCancel}>
+                    <Button variant="ghost" onClick={onCancel}>
                         Close
-                    </button>
+                    </Button>
                 )}
             </section>
         );
@@ -172,7 +174,7 @@ export default function CharacterForm({
 
             <div>
                 <label htmlFor="character-name">Name</label>{' '}
-                <input
+                <Input
                     id="character-name"
                     type="text"
                     value={name}
@@ -232,7 +234,7 @@ export default function CharacterForm({
                                 ))}
                             </select>
                         ) : (
-                            <input
+                            <Input
                                 id={inputId}
                                 type="text"
                                 inputMode={field.type === 'number' ? 'numeric' : undefined}
@@ -264,13 +266,19 @@ export default function CharacterForm({
                 </p>
             )}
 
-            <button type="submit" disabled={pending || name.trim() === ''}>
-                {pending ? 'Saving…' : editing ? 'Save character' : 'Add character'}
-            </button>{' '}
+            <Button
+                type="submit"
+                variant="primary"
+                disabled={name.trim() === ''}
+                pending={pending}
+                pendingLabel="Saving…"
+            >
+                {editing ? 'Save character' : 'Add character'}
+            </Button>{' '}
             {onCancel && (
-                <button type="button" disabled={pending} onClick={onCancel}>
+                <Button variant="ghost" disabled={pending} onClick={onCancel}>
                     Cancel
-                </button>
+                </Button>
             )}
         </form>
     );

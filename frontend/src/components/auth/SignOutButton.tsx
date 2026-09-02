@@ -7,9 +7,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 
 import { clearSession } from '@/lib/auth';
+import Button from '@/components/ui/Button';
+import PageShell from '@/components/ui/PageShell';
 
 
-import styles from './SignOutButton.module.css';
 export default function SignOutButton() {
     const queryClient = useQueryClient();
 
@@ -21,10 +22,10 @@ export default function SignOutButton() {
     }
 
     return (
-        <div className={styles.bar}>
-            <button type="button" onClick={signOut}>
+        <PageShell as="div" variant="bar">
+            <Button variant="ghost" onClick={signOut}>
                 Sign out
-            </button>
-        </div>
+            </Button>
+        </PageShell>
     );
 }

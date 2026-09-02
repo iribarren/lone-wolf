@@ -7,6 +7,9 @@ import { useState, type FormEvent } from 'react';
 
 
 import styles from './EntryComposer.module.css';
+import Banner from '@/components/ui/Banner';
+import Button from '@/components/ui/Button';
+import Textarea from '@/components/ui/Textarea';
 export interface EntryComposerProps {
     stageName?: string;
     disabled?: boolean;
@@ -34,7 +37,7 @@ export default function EntryComposer({ stageName, disabled = false, pending = f
         <form onSubmit={submit} aria-label="Journal entry composer" className={styles.composer}>
             <label>
                 Record what happened{stageName ? ` at “${stageName}”` : ''}
-                <textarea
+                <Textarea
                     value={narrative}
                     onChange={(e) => setNarrative(e.target.value)}
                     rows={3}
@@ -44,14 +47,20 @@ export default function EntryComposer({ stageName, disabled = false, pending = f
             </label>
 
             {error && (
-                <p role="alert" className={styles.error}>
-                    {error}
-                </p>
+                <Banner variant="danger" role="alert" className={styles.error}>
+                    <p>{error}</p>
+                </Banner>
             )}
 
-            <button type="submit" disabled={disabled || pending || narrative.trim() === ''}>
-                {pending ? 'Saving…' : 'Add journal entry'}
-            </button>
+            <Button
+                type="submit"
+                variant="primary"
+                disabled={disabled || narrative.trim() === ''}
+                pending={pending}
+                pendingLabel="Saving…"
+            >
+                Add journal entry
+            </Button>
         </form>
     );
 }

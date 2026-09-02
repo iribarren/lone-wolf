@@ -1,5 +1,8 @@
 'use client';
 
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+
 /**
  * Dynamic character panel (T082, US5 — FR-022..FR-025). Sheets render from
  * the structure metadata the API returns — no hardcoded fields anywhere.
@@ -81,14 +84,19 @@ export default function CharacterPanel({ characters, loading = false, violations
                             <h3>{character.name}</h3>{' '}
                             <small>{character.kind.toUpperCase()}</small>{' '}
                             {character.reviewStatus === 'flagged_for_review' ? (
-                                <span role="status" title={character.driftIssues.join('; ')} data-testid={`drift-badge-${character.name}`}>
+                                <Badge
+                                    variant="counsel"
+                                    role="status"
+                                    title={character.driftIssues.join('; ')}
+                                    data-testid={`drift-badge-${character.name}`}
+                                >
                                     ⚑ flagged for review
-                                </span>
+                                </Badge>
                             ) : null}{' '}
                             {onEdit && (
-                                <button type="button" onClick={() => onEdit(character)}>
+                                <Button variant="ghost" onClick={() => onEdit(character)}>
                                     Edit {character.name}
-                                </button>
+                                </Button>
                             )}
                         </header>
 

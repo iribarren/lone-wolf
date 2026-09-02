@@ -1,9 +1,3 @@
-.card {
-    border: 1px solid var(--lw-border);
-    border-radius: var(--lw-radius-lg);
-    padding: var(--lw-space-4);
-}
-
 .head {
     display: flex;
     justify-content: space-between;

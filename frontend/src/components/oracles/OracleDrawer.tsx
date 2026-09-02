@@ -1,6 +1,9 @@
 'use client';
 
 import styles from './OracleDrawer.module.css';
+import Button from '@/components/ui/Button';
+import Drawer from '@/components/ui/Drawer';
+import Textarea from '@/components/ui/Textarea';
 
 /**
  * Floating oracle drawer during play (T071, US4 — FR-009/010/011).
@@ -52,19 +55,11 @@ export default function OracleDrawer({
     onConsult,
     onSave,
 }: OracleDrawerProps) {
-    if (!open) {
-        return null;
-    }
-
     return (
-        <aside
-            aria-label="Oracles"
-            className={styles.card}
-            data-testid="oracles-drawer"
-        >
+        <Drawer open={open} label="Oracles" onClose={onClose} data-testid="oracles-drawer">
             <header className={styles.head}>
                 <h2>Oracles</h2>
-                <button type="button" onClick={onClose}>Close</button>
+                <Button variant="ghost" onClick={onClose}>Close</Button>
             </header>
 
             {loading ? (
@@ -77,13 +72,15 @@ export default function OracleDrawer({
                             <small>
                                 ({oracle.scopeType === 'global' ? 'global' : 'system'} · {oracle.entryCount} entries)
                             </small>{' '}
-                            <button
-                                type="button"
+                            <Button
+                                variant="secondary"
                                 disabled={consultingOracleId !== null}
+                                pending={consultingOracleId === oracle.oracleId}
+                                pendingLabel="Consulting…"
                                 onClick={() => onConsult(oracle.oracleId)}
                             >
-                                {consultingOracleId === oracle.oracleId ? 'Consulting…' : 'Consult'}
-                            </button>
+                                Consult
+                            </Button>
                         </li>
                     ))}
                 </ul>
@@ -111,11 +108,16 @@ export default function OracleDrawer({
                             }}
                         >
                             <label htmlFor="oracle-interpretation">Interpretation</label>
-                            <textarea id="oracle-interpretation" name="interpretation" rows={2} />
+                            <Textarea id="oracle-interpretation" name="interpretation" rows={2} />
 
-                            <button type="submit" disabled={saving}>
-                                {saving ? 'Saving…' : 'Save to journal'}
-                            </button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                pending={saving}
+                                pendingLabel="Saving…"
+                            >
+                                Save to journal
+                            </Button>
                         </form>
                     )}
                 </section>
@@ -132,6 +134,6 @@ export default function OracleDrawer({
                     This oracle is not available to this campaign.
                 </p>
             ) : null}
-        </aside>
+        </Drawer>
     );
 }

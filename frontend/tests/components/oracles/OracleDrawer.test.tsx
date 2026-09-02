@@ -117,4 +117,19 @@ describe('OracleDrawer', () => {
         expect(screen.queryByTestId('oracles-drawer')).not.toBeInTheDocument();
         expect(screen.queryByTestId('oracles-list')).not.toBeInTheDocument();
     });
+
+    it('is a dialog whose accessible name survived the move to <Drawer>', () => {
+        render(
+            <OracleDrawer
+                open
+                oracles={[]}
+                onClose={() => {}}
+                onConsult={() => {}}
+                onSave={() => {}}
+            />,
+        );
+
+        const dialog = screen.getByRole('dialog', { name: 'Oracles' });
+        expect(dialog).toHaveAttribute('aria-modal', 'true');
+    });
 });

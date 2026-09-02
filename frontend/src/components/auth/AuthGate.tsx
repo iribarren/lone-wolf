@@ -12,6 +12,10 @@ import { loadSession, saveSession, sessionExpired, subscribeToSession } from '@/
 
 
 import styles from './AuthGate.module.css';
+import Banner from '@/components/ui/Banner';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import PageShell from '@/components/ui/PageShell';
 const EXPIRED_MESSAGE = 'Your session expired. Sign in to continue.';
 
 /**
@@ -94,14 +98,14 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     }
 
     return (
-        <main className={styles.shell}>
+        <PageShell variant="form">
             <h1>Lone Wolf</h1>
             <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
 
             <form onSubmit={submit}>
                 <label>
                     Email
-                    <input
+                    <Input
                         type="email"
                         required
                         value={email}
@@ -111,7 +115,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
                 </label>
                 <label>
                     Password
-                    <input
+                    <Input
                         type="password"
                         required
                         minLength={8}
@@ -122,28 +126,34 @@ export default function AuthGate({ children }: { children: ReactNode }) {
                 </label>
 
                 {notice && (
-                    <p role="alert" className={styles.error}>
-                        {notice}
-                    </p>
+                    <Banner variant="danger" role="alert" className={styles.error}>
+                        <p>{notice}</p>
+                    </Banner>
                 )}
 
-                <button type="submit" disabled={pending} className={styles.submit}>
-                    {pending ? 'Working…' : mode === 'login' ? 'Sign in' : 'Register'}
-                </button>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    pending={pending}
+                    pendingLabel="Working…"
+                    className={styles.submit}
+                >
+                    {mode === 'login' ? 'Sign in' : 'Register'}
+                </Button>
             </form>
 
             <p className={styles.footer}>
                 {mode === 'login' ? 'No account yet?' : 'Already registered?'}{' '}
-                <button
-                    type="button"
+                <Button
+                    variant="ghost"
                     onClick={() => {
                         setMode(mode === 'login' ? 'register' : 'login');
                         setError(null);
                     }}
                 >
                     {mode === 'login' ? 'Register' : 'Sign in'}
-                </button>
+                </Button>
             </p>
-        </main>
+        </PageShell>
     );
 }

@@ -32,6 +32,8 @@ import { useApiClient } from '@/lib/hooks/useApiClient';
 
 
 import styles from './page.module.css';
+import Button from '@/components/ui/Button';
+import PageShell from '@/components/ui/PageShell';
 type CampaignState = ApiSchemas['CampaignState'];
 type JournalEntry = ApiSchemas['JournalEntry'];
 
@@ -356,21 +358,21 @@ export default function CampaignConsolePage() {
 
     if (campaign.isLoading) {
         return (
-            <main className={styles.shell}>
+            <PageShell>
                 <p>Loading campaign…</p>
-            </main>
+            </PageShell>
         );
     }
 
     if (campaign.isError || !campaign.data) {
         return (
-            <main className={styles.shell}>
+            <PageShell>
                 <p role="alert">
                     {campaign.error instanceof ApiError && campaign.error.status === 404
                         ? 'Campaign not found.'
                         : 'Could not load this campaign.'}
                 </p>
-            </main>
+            </PageShell>
         );
     }
 
@@ -384,7 +386,7 @@ export default function CampaignConsolePage() {
     const sheetViolations = sheetViolationsOf(saveCharacter.error);
 
     return (
-        <main className={styles.shell}>
+        <PageShell>
             <h1>Game master console</h1>
 
             <StagePanel
@@ -435,9 +437,9 @@ export default function CampaignConsolePage() {
                     onCancel={closeCharacterForm}
                 />
             ) : (
-                <button type="button" onClick={() => openCharacterForm(null)}>
+                <Button variant="ghost" onClick={() => openCharacterForm(null)}>
                     Add a character
-                </button>
+                </Button>
             )}
 
             <EntryComposer
@@ -456,12 +458,12 @@ export default function CampaignConsolePage() {
             />
 
             <div className={styles.dock}>
-                <button type="button" onClick={() => setDiceOpen((open) => !open)}>
+                <Button variant="secondary" onClick={() => setDiceOpen((open) => !open)}>
                     {diceOpen ? 'Hide dice' : 'Dice'}
-                </button>
-                <button type="button" onClick={() => setOraclesOpen((open) => !open)}>
+                </Button>
+                <Button variant="secondary" onClick={() => setOraclesOpen((open) => !open)}>
                     {oraclesOpen ? 'Hide oracles' : 'Oracles'}
-                </button>
+                </Button>
             </div>
 
             <DiceRollerWidget
@@ -500,6 +502,6 @@ export default function CampaignConsolePage() {
                     saveResult.mutate({ text, interpretation })
                 }
             />
-        </main>
+        </PageShell>
     );
 }
