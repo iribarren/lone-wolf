@@ -1,6 +1,9 @@
 'use client';
 
 import styles from './DiceRollerWidget.module.css';
+import Button from '@/components/ui/Button';
+import Drawer from '@/components/ui/Drawer';
+import Input from '@/components/ui/Input';
 
 /**
  * Floating dice roller during play (T092, US6 — FR-026..029).
@@ -78,23 +81,15 @@ export default function DiceRollerWidget({
     onRoll,
     onLogResult,
 }: DiceRollerWidgetProps) {
-    if (!open) {
-        return null;
-    }
-
     // A result the widget cannot read is no result at all — never a render
     // that takes the page down with it (audit A5).
     const shown = isDiceRollResultView(result) ? result : null;
 
     return (
-        <aside
-            aria-label="Dice roller"
-            className={styles.card}
-            data-testid="dice-widget"
-        >
+        <Drawer open={open} label="Dice roller" onClose={onClose} data-testid="dice-widget">
             <header className={styles.head}>
                 <h2>Dice</h2>
-                <button type="button" onClick={onClose}>Close</button>
+                <Button variant="ghost" onClick={onClose}>Close</Button>
             </header>
 
             <form
@@ -105,12 +100,12 @@ export default function DiceRollerWidget({
                 }}
             >
                 <label htmlFor="dice-notation">Dice notation</label>
-                <input id="dice-notation" name="notation" placeholder="e.g. 1d20+5" />
+                <Input id="dice-notation" name="notation" placeholder="e.g. 1d20+5" />
 
                 {' '}
-                <button type="submit" disabled={rolling}>
-                    {rolling ? 'Rolling…' : 'Roll'}
-                </button>
+                <Button type="submit" variant="primary" pending={rolling} pendingLabel="Rolling…">
+                    Roll
+                </Button>
             </form>
 
             {problem ? (
@@ -150,12 +145,17 @@ export default function DiceRollerWidget({
                     {logged ? (
                         <p role="status" data-testid="dice-logged">Logged to your journal.</p>
                     ) : (
-                        <button type="button" disabled={logging} onClick={onLogResult}>
-                            {logging ? 'Logging…' : 'Log to journal'}
-                        </button>
+                        <Button
+                            variant="secondary"
+                            pending={logging}
+                            pendingLabel="Logging…"
+                            onClick={onLogResult}
+                        >
+                            Log to journal
+                        </Button>
                     )}
                 </section>
             ) : null}
-        </aside>
+        </Drawer>
     );
 }

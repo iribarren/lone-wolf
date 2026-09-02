@@ -1,0 +1,28 @@
+.field {
+    background: var(--lw-surface-sunken);
+    color: var(--lw-ink);
+    border: 1px solid var(--lw-border);
+    border-radius: var(--lw-radius-md);
+    padding: 11px 14px;
+    font: 400 var(--lw-text-base) / var(--lw-leading-normal) var(--lw-font-ui);
+}
+
+.field::placeholder {
+    color: var(--lw-ink-faint);
+}
+
+.field:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.field[aria-invalid='true'] {
+    border-color: var(--lw-danger);
+}
+
+.prose {
+    font-family: var(--lw-font-prose);
+    font-size: var(--lw-text-prose);
+    line-height: var(--lw-leading-prose);
+    resize: vertical;
+}

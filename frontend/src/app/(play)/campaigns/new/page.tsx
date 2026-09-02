@@ -13,6 +13,10 @@ import { useApiClient } from '@/lib/hooks/useApiClient';
 
 
 import styles from './page.module.css';
+import Banner from '@/components/ui/Banner';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import PageShell from '@/components/ui/PageShell';
 type SystemSummary = ApiSchemas['System'];
 type CampaignState = ApiSchemas['CampaignState'];
 
@@ -50,7 +54,7 @@ export default function NewCampaignPage() {
     const rows: SystemSummary[] = systems.data ?? [];
 
     return (
-        <main className={styles.shell}>
+        <PageShell>
             <h1>Start a campaign</h1>
             <p>Choose the game system your story will follow — this binding is permanent.</p>
 
@@ -63,7 +67,7 @@ export default function NewCampaignPage() {
 
             <ul className={styles.list}>
                 {rows.map((system) => (
-                    <li key={system.systemId} className={styles.item}>
+                    <Card as="li" key={system.systemId} className={styles.item}>
                         <label className={styles.choice}>
                             <input
                                 type="radio"
@@ -80,23 +84,25 @@ export default function NewCampaignPage() {
                                 <small>Opens at: {system.startingStage}</small>
                             </span>
                         </label>
-                    </li>
+                    </Card>
                 ))}
             </ul>
 
             {error && (
-                <p role="alert" className={styles.error}>
-                    {error}
-                </p>
+                <Banner variant="danger" role="alert" className={styles.error}>
+                    <p>{error}</p>
+                </Banner>
             )}
 
-            <button
-                type="button"
-                disabled={!selectedId || create.isPending}
+            <Button
+                variant="primary"
+                disabled={!selectedId}
+                pending={create.isPending}
+                pendingLabel="Starting…"
                 onClick={() => selectedId && create.mutate(selectedId)}
             >
-                {create.isPending ? 'Starting…' : 'Begin campaign'}
-            </button>
-        </main>
+                Begin campaign
+            </Button>
+        </PageShell>
     );
 }

@@ -8,6 +8,8 @@ import { useState } from 'react';
 
 
 import styles from './CampaignSettings.module.css';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 export interface CampaignSettingsProps {
     campaignId: string;
     disabled?: boolean;
@@ -25,9 +27,9 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
         return (
             <details className={styles.settings}>
                 <summary>Campaign settings</summary>
-                <button type="button" onClick={() => setRevealed(true)} className={styles.reveal}>
+                <Button variant="danger" onClick={() => setRevealed(true)} className={styles.reveal}>
                     Delete this campaign…
-                </button>
+                </Button>
             </details>
         );
     }
@@ -41,7 +43,7 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
             </p>
             <label>
                 Type {CONFIRM_PHRASE} to confirm
-                <input
+                <Input
                     type="text"
                     value={confirmation}
                     onChange={(e) => setConfirmation(e.target.value)}
@@ -50,22 +52,24 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
                 />
             </label>
             <div className={styles.controls}>
-                <button
-                    type="button"
-                    disabled={disabled || pending || confirmation !== CONFIRM_PHRASE}
+                <Button
+                    variant="danger"
+                    disabled={disabled || confirmation !== CONFIRM_PHRASE}
+                    pending={pending}
+                    pendingLabel="Deleting…"
                     onClick={onDelete}
                 >
-                    {pending ? 'Deleting…' : 'Delete permanently'}
-                </button>
-                <button
-                    type="button"
+                    Delete permanently
+                </Button>
+                <Button
+                    variant="ghost"
                     onClick={() => {
                         setRevealed(false);
                         setConfirmation('');
                     }}
                 >
                     Cancel
-                </button>
+                </Button>
             </div>
         </section>
     );

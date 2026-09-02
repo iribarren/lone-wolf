@@ -166,4 +166,18 @@ describe('DiceRollerWidget', () => {
         expect(screen.queryByTestId('dice-widget')).not.toBeInTheDocument();
         expect(screen.queryByTestId('dice-result')).not.toBeInTheDocument();
     });
+
+    it('is a dialog whose accessible name survived the move to <Drawer>', () => {
+        render(
+            <DiceRollerWidget
+                open
+                onClose={() => {}}
+                onRoll={() => {}}
+                onLogResult={() => {}}
+            />,
+        );
+
+        const dialog = screen.getByRole('dialog', { name: 'Dice roller' });
+        expect(dialog).toHaveAttribute('aria-modal', 'true');
+    });
 });
