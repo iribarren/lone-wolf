@@ -57,7 +57,8 @@ request and on every push to `master`, each gate as its own named step, none
 of them `continue-on-error`. It boots the stack from this repository's
 `docker-compose.yml` and runs the same commands the `Makefile` runs locally,
 plus the frontend checks (`npm run typecheck`/`lint`/`test`) and the Playwright
-quickstart happy path. Run `make lint && make test` before pushing to get the
+suite — the quickstart happy path, the accessibility scan and the screenshot
+baselines (`npm run test:e2e`). Run `make lint && make test` before pushing to get the
 same answer sooner.
 
 Gate 7 keeps the task ledger usable as evidence. It rejects a task id that is
@@ -102,6 +103,29 @@ good — judging the answer stays with the reviewer. Tests do not count as
 code, and a change with genuinely nothing to document is waived with the
 `docs:none` label, which the job log records and the PR shows. Satisfying
 gate 6 with a cosmetic documentation edit is itself a Constitution VI breach.
+
+The E2E job carries two further checks that are not numbered gates but fail the
+pipeline exactly as hard: twelve screenshot baselines and an `axe-core` scan of
+the player app, over six screens in both colour schemes.
+[`docs/testing-visual-regression.md`](docs/testing-visual-regression.md) is the
+full workflow. Two things a reviewer needs from it:
+
+- Baselines are rendered inside a pinned `mcr.microsoft.com/playwright` image
+  by `frontend/scripts/visual-e2e.sh`, and CI compares against them in the same
+  image — it never regenerates them. Font rasterisation follows the host, not
+  the browser, so baselines taken anywhere else disagree on every glyph.
+- **`npx playwright test --update-snapshots` is a deliberate act, and an
+  unexplained baseline update in a PR is a review flag, not a routine step.** A
+  PR touching `frontend/tests/e2e/__screenshots__/` states which screens moved
+  and why; a reviewer who cannot match the new images to an intended change
+  rejects it and asks (Constitution VI). A visual baseline nobody may question
+  is not a gate.
+
+The accessibility scan fails on serious and critical violations. Lowering that
+floor to make a screen pass is the same class of act as deleting a test: if a
+violation is real it gets fixed or logged, and if it is genuinely a false
+positive the rule is disabled for that one screen with the reason written next
+to it.
 
 A PR failing any gate must not be merged; a red pipeline is not a reason to
 weaken, skip or delete the failing check. Reviewers cite the violated

@@ -206,7 +206,21 @@ jobs:
           ./.github/scripts/wait-for-http.sh http://localhost:8080/api/docs.json
           ./.github/scripts/wait-for-http.sh http://localhost:3000 180
 
-      - name: Playwright quickstart happy path (npm run test:e2e)
+      # The visual baselines are compared inside this image rather than on the
+      # runner: text rasterisation follows the machine's fontconfig, so a
+      # baseline rendered on a contributor's distro and compared here would
+      # differ along every glyph edge. Pulled as its own step so the minute it
+      # costs shows up in the log as a pull, not as a slow test.
+      - name: Pull the pinned Playwright image
+        working-directory: frontend
+        run: |
+          docker pull "mcr.microsoft.com/playwright:v$(node -p \
+            "require('./package.json').devDependencies['@playwright/test'].replace(/[^0-9.]/g, '')")-noble"
+
+      # Runs the behavioural specs on the runner and then the visual project in
+      # the pinned image: the quickstart happy path, the accessibility gate and
+      # the twelve screenshot baselines, both colour schemes throughout.
+      - name: Playwright E2E, accessibility and visual baselines (npm run test:e2e)
         working-directory: frontend
         env:
           E2E_BASE_URL: http://localhost:3000
@@ -220,6 +234,21 @@ jobs:
           path: |
             frontend/test-results/
             frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # The image diffs on their own, so reviewing a failed visual gate is
+      # opening three PNGs rather than downloading a trace bundle. Playwright
+      # writes -expected/-actual/-diff beside each failed comparison.
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: |
+            frontend/test-results/**/*-expected.png
+            frontend/test-results/**/*-actual.png
+            frontend/test-results/**/*-diff.png
           if-no-files-found: ignore
           retention-days: 7
 
