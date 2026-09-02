@@ -362,6 +362,61 @@ firewall endpoint instead of moving it.
 
 ---
 
+## Phase 13: Convergence — Visual and Accessibility Regression
+
+**Purpose**: Bring the design system's safety net into the ledger it was built outside of
+
+Phase 4 of `docs/audit/03-design.md` §3.3 was worked from
+`docs/prompts/20-visual-regression.md` rather than from a task, so it is converged here. The
+app's accessibility — an `aria-label` on every region, `role="alert"` on the error surfaces,
+`role="status"` on confirmations, a real label on every input — survived the token migration and
+the primitives work because those prompts said so and because the E2E suite selects by role and
+accessible name. That is a convention, not a gate: there was no accessibility assertion anywhere,
+no visual baseline at all, and dark mode — the app's primary use case — had no automated cover of
+any kind.
+
+The three prompts before this one (`17-design-canvas`, `18-design-tokens`, `19-ui-primitives`,
+commits `faf6529` through `dd3c9f1`) are **still unconverged**; they belong in a phase of their
+own, or in the `specs/002-design-system/` folder the audit asks for, and are deliberately not
+folded in here.
+
+### Delivered work converged from commits (Polish)
+
+- [x] T130 Visual, accessibility and dialog-behaviour suites over one shared walkthrough: twelve
+  `toHaveScreenshot` baselines in `frontend/tests/e2e/visual.spec.ts`, an `@axe-core/playwright`
+  scan failing on serious/critical in `frontend/tests/e2e/a11y.spec.ts`, and Escape / focus-trap /
+  focus-return assertions for both drawers in `frontend/tests/e2e/drawer-dialogs.spec.ts` — six
+  screens in both colour schemes throughout, driven through Playwright's `colorScheme` option —
+  with the shared driving, axe floor and determinism helpers in
+  `frontend/tests/e2e/support/journey.ts`, `axe.ts` and `deterministic.ts`, a second `visual`
+  project in `frontend/playwright.config.ts` and `@axe-core/playwright` in
+  `frontend/package.json` (FR-014, FR-018, FR-019, FR-026, FR-028; `docs/audit/03-design.md`
+  §3.3 Phase 4) — commit `6c4f699`
+- [x] T131 Pin the rendering environment so the baselines mean the same thing everywhere:
+  `frontend/scripts/visual-e2e.sh` runs the `visual` project inside
+  `mcr.microsoft.com/playwright:v<version>-noble`, the tag derived from `@playwright/test` so a
+  dependency bump cannot leave the image behind, and the twelve images in
+  `frontend/tests/e2e/__screenshots__/visual/linux/` are rendered there and reviewed one by one
+  before freezing (`docs/audit/03-design.md` §3.3 Phase 4) — commits `6c4f699`, `aeaa1c2`
+- [x] T132 Wire both gates into CI and document the workflow: the pinned-image pull and the
+  `visual-diffs` artifact in `.github/workflows/ci.yml`, the full workflow in
+  `docs/testing-visual-regression.md`, and the reviewer-facing rules beside the eight merge gates
+  in `AGENTS.md` and `README.md` — that `--update-snapshots` is a deliberate act, that an
+  unexplained baseline update is a review flag, and that lowering the axe floor to pass a screen
+  is the same class of act as deleting a test (Constitution VI) — commit `b4434f9`
+
+### Findings the new gates surfaced
+
+- [ ] T133 The dice notation field keeps an accessible name through its `placeholder` when its
+  `<label>` is removed, so `axe-core` stays green while the name silently degrades from "Dice
+  notation" to "e.g. 1d20+5" — the label-removal regression check in
+  `frontend/src/components/dice/DiceRollerWidget.tsx` passed both gates. Cover the name itself
+  with a role-and-name assertion (`getByRole('textbox', { name: 'Dice notation' })`) in
+  `frontend/tests/e2e/drawer-dialogs.spec.ts`, and do the same for every other control whose
+  label a placeholder would mask (FR-026; `docs/testing-visual-regression.md`)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
