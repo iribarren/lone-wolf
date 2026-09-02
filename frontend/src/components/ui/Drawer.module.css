@@ -1,0 +1,35 @@
+.scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--lw-scrim);
+    z-index: 40;
+}
+
+/*
+ * A real overlay. The drawers used to be static <aside> elements in document
+ * flow, so consulting an oracle pushed the journal you were reading down the
+ * page; an interruption you return from must leave the page where it was.
+ */
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 41;
+    width: min(470px, 100vw);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: var(--lw-space-5);
+    background: var(--lw-surface);
+    border-left: 1px solid var(--lw-border);
+    border-radius: var(--lw-radius-xl) 0 0 var(--lw-radius-xl);
+    box-shadow: var(--lw-shadow-overlay);
+}
+
+@media (max-width: 520px) {
+    .drawer {
+        border-radius: 0;
+        border-left: 0;
+    }
+}

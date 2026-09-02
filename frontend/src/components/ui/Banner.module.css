@@ -1,0 +1,56 @@
+.banner {
+    display: flex;
+    gap: var(--lw-space-3);
+    padding: var(--lw-space-4);
+    border-radius: var(--lw-radius-lg);
+    border: 1px solid;
+    font: 400 var(--lw-text-sm) / var(--lw-leading-normal) var(--lw-font-ui);
+}
+
+.icon {
+    flex: none;
+    margin-top: 1px;
+}
+
+.body > :global(p) {
+    margin: 0;
+}
+
+.body > :global(p) + :global(p) {
+    margin-top: var(--lw-space-2);
+}
+
+.info {
+    background: var(--lw-surface-sunken);
+    border-color: var(--lw-border);
+    color: var(--lw-ink);
+}
+
+.info .icon {
+    color: var(--lw-ink-muted);
+}
+
+/*
+ * A refusal is the flow engine doing its job, not a failure: counsel blue,
+ * never danger red. The distinction is the whole point -- see
+ * docs/audit/03-design.md §3.2 point 7.
+ */
+.refusal {
+    background: var(--lw-counsel-quiet);
+    border-color: var(--lw-counsel-line);
+    color: var(--lw-ink);
+}
+
+.refusal .icon {
+    color: var(--lw-counsel);
+}
+
+.danger {
+    background: var(--lw-danger-quiet);
+    border-color: var(--lw-danger-line);
+    color: var(--lw-ink);
+}
+
+.danger .icon {
+    color: var(--lw-danger);
+}
