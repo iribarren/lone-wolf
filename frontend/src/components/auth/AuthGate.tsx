@@ -10,6 +10,8 @@ import { ApiError, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 import { loadSession, saveSession, sessionExpired, subscribeToSession } from '@/lib/auth';
 
+
+import styles from './AuthGate.module.css';
 const EXPIRED_MESSAGE = 'Your session expired. Sign in to continue.';
 
 /**
@@ -92,7 +94,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     }
 
     return (
-        <main style={{ fontFamily: 'system-ui', maxWidth: 360, margin: '4rem auto' }}>
+        <main className={styles.shell}>
             <h1>Lone Wolf</h1>
             <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
 
@@ -104,7 +106,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.75rem' }}
+                        className={styles.field}
                     />
                 </label>
                 <label>
@@ -115,22 +117,22 @@ export default function AuthGate({ children }: { children: ReactNode }) {
                         minLength={8}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.75rem' }}
+                        className={styles.field}
                     />
                 </label>
 
                 {notice && (
-                    <p role="alert" style={{ color: '#b00020' }}>
+                    <p role="alert" className={styles.error}>
                         {notice}
                     </p>
                 )}
 
-                <button type="submit" disabled={pending} style={{ width: '100%' }}>
+                <button type="submit" disabled={pending} className={styles.submit}>
                     {pending ? 'Working…' : mode === 'login' ? 'Sign in' : 'Register'}
                 </button>
             </form>
 
-            <p style={{ marginTop: '1rem' }}>
+            <p className={styles.footer}>
                 {mode === 'login' ? 'No account yet?' : 'Already registered?'}{' '}
                 <button
                     type="button"

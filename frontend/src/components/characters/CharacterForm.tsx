@@ -26,6 +26,8 @@ import { useState, type FormEvent } from 'react';
 
 import type { SheetFieldView, SheetViolation } from '@/components/characters/CharacterPanel';
 
+
+import styles from './CharacterForm.module.css';
 export type CharacterKind = 'pc' | 'npc';
 
 export interface CharacterDraft {
@@ -146,9 +148,9 @@ export default function CharacterForm({
 
     if (sheetless) {
         return (
-            <section aria-label="Add a character" style={{ marginTop: '1rem' }}>
+            <section aria-label="Add a character" className={styles.form}>
                 <h3>Characters</h3>
-                <p role="alert" data-testid="character-form-error" style={{ color: '#b00020' }}>
+                <p role="alert" data-testid="character-form-error" className={styles.error}>
                     {error ?? 'This game system defines no character sheet, so characters cannot be added to it.'}
                 </p>
                 {onCancel && (
@@ -164,7 +166,7 @@ export default function CharacterForm({
         <form
             onSubmit={submit}
             aria-label={editing ? `Edit ${character.name}` : 'Add a character'}
-            style={{ marginTop: '1rem' }}
+            className={styles.form}
         >
             <h3>{editing ? `Edit ${character.name}` : 'Add a character'}</h3>
 
@@ -247,7 +249,7 @@ export default function CharacterForm({
                                 id={`field-error-${field.key}`}
                                 role="alert"
                                 data-testid={`field-error-${field.key}`}
-                                style={{ color: '#b00020' }}
+                                className={styles.error}
                             >
                                 {message}
                             </p>
@@ -257,7 +259,7 @@ export default function CharacterForm({
             })}
 
             {notice !== '' && (
-                <p role="alert" data-testid="character-form-error" style={{ color: '#b00020' }}>
+                <p role="alert" data-testid="character-form-error" className={styles.error}>
                     {notice}
                 </p>
             )}

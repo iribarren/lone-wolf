@@ -1,0 +1,7 @@
+.form {
+    margin-top: var(--lw-space-4);
+}
+
+.error {
+    color: var(--lw-danger);
+}

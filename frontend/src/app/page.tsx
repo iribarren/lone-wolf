@@ -1,8 +1,10 @@
 import Link from 'next/link';
 
+
+import styles from './page.module.css';
 export default function Home() {
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '3rem' }}>
+    <main className={styles.landing}>
       <h1>Lone Wolf</h1>
       <p>Your solo table, always ready.</p>
       <ul>

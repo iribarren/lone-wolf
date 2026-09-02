@@ -1,0 +1,29 @@
+.settings {
+    margin-top: var(--lw-space-6);
+}
+
+.reveal {
+    color: var(--lw-danger);
+}
+
+.zone {
+    margin-top: var(--lw-space-6);
+    border: 1px solid var(--lw-danger);
+    border-radius: var(--lw-radius-lg);
+    padding: var(--lw-space-4);
+}
+
+.zoneTitle {
+    color: var(--lw-danger);
+}
+
+.confirmField {
+    display: block;
+    margin-top: var(--lw-space-1);
+}
+
+.controls {
+    display: flex;
+    gap: var(--lw-space-2);
+    margin-top: var(--lw-space-3);
+}

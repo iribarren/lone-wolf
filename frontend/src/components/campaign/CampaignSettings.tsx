@@ -6,6 +6,8 @@
  */
 import { useState } from 'react';
 
+
+import styles from './CampaignSettings.module.css';
 export interface CampaignSettingsProps {
     campaignId: string;
     disabled?: boolean;
@@ -21,9 +23,9 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
 
     if (!revealed) {
         return (
-            <details style={{ marginTop: '2rem' }}>
+            <details className={styles.settings}>
                 <summary>Campaign settings</summary>
-                <button type="button" onClick={() => setRevealed(true)} style={{ color: '#b00020' }}>
+                <button type="button" onClick={() => setRevealed(true)} className={styles.reveal}>
                     Delete this campaign…
                 </button>
             </details>
@@ -31,8 +33,8 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
     }
 
     return (
-        <section aria-label="Campaign settings" style={{ marginTop: '2rem', border: '1px solid #b00020', borderRadius: 8, padding: '1rem' }}>
-            <h3 style={{ color: '#b00020' }}>Danger zone</h3>
+        <section aria-label="Campaign settings" className={styles.zone}>
+            <h3 className={styles.zoneTitle}>Danger zone</h3>
             <p>
                 Deleting campaign <code>{campaignId}</code> removes its stage history{' '}
                 <strong>and its entire journal, permanently. This cannot be undone.</strong>
@@ -44,10 +46,10 @@ export default function CampaignSettings({ campaignId, disabled = false, pending
                     value={confirmation}
                     onChange={(e) => setConfirmation(e.target.value)}
                     placeholder={CONFIRM_PHRASE}
-                    style={{ display: 'block', marginTop: '0.25rem' }}
+                    className={styles.confirmField}
                 />
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+            <div className={styles.controls}>
                 <button
                     type="button"
                     disabled={disabled || pending || confirmation !== CONFIRM_PHRASE}

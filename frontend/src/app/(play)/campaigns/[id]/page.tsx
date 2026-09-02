@@ -30,6 +30,8 @@ import OracleDrawer, {
 import { ApiError, apiPath, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 
+
+import styles from './page.module.css';
 type CampaignState = ApiSchemas['CampaignState'];
 type JournalEntry = ApiSchemas['JournalEntry'];
 
@@ -354,7 +356,7 @@ export default function CampaignConsolePage() {
 
     if (campaign.isLoading) {
         return (
-            <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
+            <main className={styles.shell}>
                 <p>Loading campaign…</p>
             </main>
         );
@@ -362,7 +364,7 @@ export default function CampaignConsolePage() {
 
     if (campaign.isError || !campaign.data) {
         return (
-            <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
+            <main className={styles.shell}>
                 <p role="alert">
                     {campaign.error instanceof ApiError && campaign.error.status === 404
                         ? 'Campaign not found.'
@@ -382,7 +384,7 @@ export default function CampaignConsolePage() {
     const sheetViolations = sheetViolationsOf(saveCharacter.error);
 
     return (
-        <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
+        <main className={styles.shell}>
             <h1>Game master console</h1>
 
             <StagePanel
@@ -453,7 +455,7 @@ export default function CampaignConsolePage() {
                 onDelete={() => remove.mutate()}
             />
 
-            <div style={{ position: 'fixed', right: '1rem', bottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <div className={styles.dock}>
                 <button type="button" onClick={() => setDiceOpen((open) => !open)}>
                     {diceOpen ? 'Hide dice' : 'Dice'}
                 </button>

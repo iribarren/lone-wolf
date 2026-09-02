@@ -221,6 +221,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * Instruction 4's two faces, wired: IBM Plex Sans is the text face on body,
+ * Spectral is the display face on headings. The mono is applied only where it
+ * is functionally required -- die faces and journal stamps need tabular,
+ * fixed-width digits to line up. Where each face belongs beyond this (guidance,
+ * journal prose) is the canvas's answer and prompt 19 applies it.
+ */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--lw-font-prose);
+  line-height: var(--lw-leading-snug);
+}
+
 a {
   color: var(--lw-accent);
   text-decoration-thickness: 1px;

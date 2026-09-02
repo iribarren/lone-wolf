@@ -5,6 +5,8 @@
  */
 import { useState, type FormEvent } from 'react';
 
+
+import styles from './EntryComposer.module.css';
 export interface EntryComposerProps {
     stageName?: string;
     disabled?: boolean;
@@ -29,7 +31,7 @@ export default function EntryComposer({ stageName, disabled = false, pending = f
     }
 
     return (
-        <form onSubmit={submit} aria-label="Journal entry composer" style={{ marginTop: '1rem' }}>
+        <form onSubmit={submit} aria-label="Journal entry composer" className={styles.composer}>
             <label>
                 Record what happened{stageName ? ` at “${stageName}”` : ''}
                 <textarea
@@ -37,12 +39,12 @@ export default function EntryComposer({ stageName, disabled = false, pending = f
                     onChange={(e) => setNarrative(e.target.value)}
                     rows={3}
                     disabled={disabled || pending}
-                    style={{ width: '100%', display: 'block', marginTop: '0.25rem' }}
+                    className={styles.field}
                 />
             </label>
 
             {error && (
-                <p role="alert" style={{ color: '#b00020' }}>
+                <p role="alert" className={styles.error}>
                     {error}
                 </p>
             )}

@@ -11,6 +11,8 @@ import { useState } from 'react';
 import { ApiError, type ApiSchemas } from '@/lib/api/client';
 import { useApiClient } from '@/lib/hooks/useApiClient';
 
+
+import styles from './page.module.css';
 type SystemSummary = ApiSchemas['System'];
 type CampaignState = ApiSchemas['CampaignState'];
 
@@ -48,7 +50,7 @@ export default function NewCampaignPage() {
     const rows: SystemSummary[] = systems.data ?? [];
 
     return (
-        <main style={{ fontFamily: 'system-ui', maxWidth: 640, margin: '3rem auto' }}>
+        <main className={styles.shell}>
             <h1>Start a campaign</h1>
             <p>Choose the game system your story will follow — this binding is permanent.</p>
 
@@ -59,10 +61,10 @@ export default function NewCampaignPage() {
                 <p>No active game systems yet. Ask an admin to author one first.</p>
             )}
 
-            <ul style={{ listStyle: 'none', padding: 0 }}>
+            <ul className={styles.list}>
                 {rows.map((system) => (
-                    <li key={system.systemId} style={{ border: '1px solid #ccc', borderRadius: 8, padding: '0.75rem', marginBottom: '0.75rem' }}>
-                        <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                    <li key={system.systemId} className={styles.item}>
+                        <label className={styles.choice}>
                             <input
                                 type="radio"
                                 name="game-system"
@@ -73,7 +75,7 @@ export default function NewCampaignPage() {
                             <span>
                                 <strong>{system.name}</strong>
                                 <br />
-                                <span style={{ color: '#555' }}>{system.description}</span>
+                                <span className={styles.description}>{system.description}</span>
                                 <br />
                                 <small>Opens at: {system.startingStage}</small>
                             </span>
@@ -83,7 +85,7 @@ export default function NewCampaignPage() {
             </ul>
 
             {error && (
-                <p role="alert" style={{ color: '#b00020' }}>
+                <p role="alert" className={styles.error}>
                     {error}
                 </p>
             )}
